@@ -1,0 +1,112 @@
+/* Design tokens (DESIGN.md §3–§4, §7). The only file allowed to hold hex values. */
+:root {
+  /* Base */
+  --paper: #f4f6f9;
+  --surface: #ffffff;
+  --stage: #eef1f6;
+  --stage-dot: #d9dfe8;
+  --line: #d9dfe8;
+  --ink: #16202e;
+  --ink-2: #4b5769;
+  --ink-3: #6e7a8d;
+  --signal: #2f4bdb;
+  --signal-wash: #e8ecfc;
+
+  /* Status (reserved) */
+  --alert: #d93a3f;
+  --alert-wash: #fdecec;
+  --ok: #138a5a;
+  --ok-wash: #e4f4ec;
+  --caution: #b87300;
+  --caution-wash: #fff3dc;
+
+  /* Agent hues: rings, packets, chips, stream markers (not body text) */
+  --agent-sentinel: #0a8ba8;
+  --agent-orchestrator: #2f4bdb;
+  --agent-log: #7a4fd6;
+  --agent-code: #b0306e;
+  --agent-fixer: #5f7f12;
+  --agent-guardian: #3f5a80;
+  --agent-scribe: #8a5a2b;
+  --agent-sentinel-wash: #e6f3f6;
+  --agent-orchestrator-wash: #eaedfb;
+  --agent-log-wash: #f2edfb;
+  --agent-code-wash: #f7eaf0;
+  --agent-fixer-wash: #eff2e7;
+  --agent-guardian-wash: #eceef2;
+  --agent-scribe-wash: #f3eeea;
+  --ink-wash: #e8e9ea;
+
+  --on-hue: #ffffff;
+  --scrim: rgba(22, 32, 46, 0.18);
+  --dim: rgba(244, 246, 249, 0.72);
+
+  /* Elevation: two levels only */
+  --shadow-1: 0 1px 2px rgba(22, 32, 46, 0.06), 0 2px 8px rgba(22, 32, 46, 0.04);
+  --shadow-2: 0 8px 24px rgba(22, 32, 46, 0.1), 0 2px 6px rgba(22, 32, 46, 0.06);
+
+  /* Type */
+  --font-ui: 'Instrument Sans', system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+  /* 16 px at 1920 wide, down to 14 px at 1366 */
+  --base: clamp(14px, calc(0.361vw + 9.07px), 16px);
+  --t-xs: 13px;
+  --t-sm: max(13px, calc(var(--base) * 0.875));
+  --t-md: var(--base);
+  --t-lg: calc(var(--base) * 1.25);
+  --t-xl: calc(var(--base) * 1.5625);
+  --t-2xl: calc(var(--base) * 1.9375);
+  --t-3xl: calc(var(--base) * 3.0625);
+  --t-4xl: calc(var(--base) * 3.8125);
+  --lh-body: 1.45;
+  --lh-display: 1.15;
+
+  /* Radii by role */
+  --r-code: 6px;
+  --r-card: 10px;
+  --r-sheet: 20px;
+  --r-pill: 999px;
+
+  /* Motion */
+  --ease-move: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --d-micro: 160ms;
+  --d-state: 280ms;
+  --d-packet: 700ms;
+  --d-merge: 500ms;
+  --d-sheet: 320ms;
+
+  /* Layout */
+  --topbar-h: 64px;
+  --transport-h: 72px;
+  --panel-w: 440px;
+  --node: 88px;
+  --node-lg: 112px;
+  --heartbeat-h: 140px;
+  --focus: 0 0 0 2px var(--surface), 0 0 0 5px var(--signal);
+}
+
+@media (max-width: 1599px) {
+  :root {
+    --panel-w: 380px;
+    --node: 76px;
+    --node-lg: 96px;
+    --heartbeat-h: 120px;
+  }
+}
+
+/* Short screens (1366×768 class): compact stage */
+@media (max-height: 860px) {
+  :root {
+    --node: 64px;
+    --node-lg: 80px;
+    --heartbeat-h: 100px;
+    --t-lg: calc(var(--base) * 1.125);
+  }
+}
+
+/* Presenter mode: type one step larger (DESIGN §11) */
+:root[data-presenter='true'] {
+  --t-sm: calc(var(--base) * 1);
+  --t-md: calc(var(--base) * 1.125);
+  --t-lg: calc(var(--base) * 1.375);
+}

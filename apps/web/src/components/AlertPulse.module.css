@@ -1,0 +1,7 @@
+.pulse {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 6;
+  box-shadow: inset 0 0 0 4px var(--alert), inset 0 0 48px color-mix(in srgb, var(--alert) 35%, transparent);
+}

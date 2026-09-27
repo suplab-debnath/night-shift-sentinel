@@ -1,0 +1,104 @@
+.sheet {
+  position: absolute;
+  z-index: 7;
+  left: 50%;
+  bottom: 16px;
+  translate: -50% 0;
+  width: min(900px, calc(100% - 48px));
+  padding: 18px 22px 14px;
+  background: var(--surface);
+  border-radius: var(--r-card);
+  box-shadow: var(--shadow-2);
+}
+
+.inline {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.title {
+  margin: 0;
+  font-size: var(--t-xl);
+  font-weight: 600;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th,
+.table td {
+  text-align: left;
+  padding: 4px 12px 4px 0;
+  vertical-align: bottom;
+  border-bottom: 1px solid var(--line);
+}
+
+.table thead th {
+  font-size: var(--t-xs);
+  color: var(--ink-3);
+  font-weight: 500;
+}
+
+.table tbody th {
+  font-size: var(--t-sm);
+  font-weight: 500;
+  color: var(--ink-2);
+  width: 26%;
+}
+
+.table td {
+  width: 37%;
+}
+
+.value {
+  display: block;
+  font-size: var(--t-2xl);
+  font-weight: 600;
+  line-height: 1.15;
+  color: var(--ink-2);
+}
+
+.squadValue {
+  color: var(--signal);
+}
+
+.bar {
+  display: block;
+  height: 2px;
+  margin-top: 4px;
+  border-radius: var(--r-pill);
+}
+
+.manual {
+  background: var(--ink-3);
+}
+
+.squad {
+  background: var(--signal);
+}
+
+.foot {
+  margin: 8px 0 0;
+  font-size: var(--t-xs);
+  color: var(--ink-3);
+}
+
+@media (max-height: 860px) {
+  .value {
+    font-size: var(--t-lg);
+  }
+  .table th,
+  .table td {
+    padding: 2px 12px 2px 0;
+  }
+}

@@ -1,0 +1,66 @@
+{
+  "now": "02:07:40",
+  "deploys": [
+    {
+      "service": "checkout-api",
+      "version": "v2.14.0",
+      "previous": "v2.13.2",
+      "at": "01:55",
+      "by": "pipeline",
+      "pipelineRun": 8841,
+      "checks": "passed",
+      "schemaMigration": false,
+      "changes": [
+        "Helm values refactor",
+        "Upgrade Spring Boot 3.3.4 → 3.3.5",
+        "Checkout copy tweaks"
+      ]
+    },
+    {
+      "service": "search-indexer",
+      "version": "v5.2.1",
+      "previous": "v5.2.0",
+      "at": "16:20 (yesterday)",
+      "by": "pipeline",
+      "checks": "passed",
+      "schemaMigration": false,
+      "changes": [
+        "Index batch size tuning"
+      ]
+    },
+    {
+      "service": "loyalty-svc",
+      "version": "v1.9.0",
+      "previous": "v1.8.4",
+      "at": "11:05 (yesterday)",
+      "by": "pipeline",
+      "checks": "passed",
+      "schemaMigration": false,
+      "changes": [
+        "New tier rules"
+      ]
+    }
+  ],
+  "history": {
+    "checkout-api": [
+      {
+        "version": "v2.14.0",
+        "at": "01:55",
+        "status": "current",
+        "checks": "passed"
+      },
+      {
+        "version": "v2.13.2",
+        "ranDays": 9,
+        "status": "previous",
+        "checks": "passed"
+      },
+      {
+        "version": "v2.13.1",
+        "ranDays": 6,
+        "status": "retired",
+        "checks": "passed"
+      }
+    ]
+  }
+}

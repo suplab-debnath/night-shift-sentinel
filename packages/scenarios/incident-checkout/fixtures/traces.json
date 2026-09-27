@@ -1,0 +1,65 @@
+{
+  "service": "checkout-api",
+  "sampledAt": "02:07:42",
+  "trace": {
+    "traceId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "root": {
+      "name": "POST /checkout",
+      "service": "checkout-api",
+      "durationMs": 4730,
+      "status": "error"
+    },
+    "spans": [
+      {
+        "name": "HikariPool.getConnection",
+        "service": "checkout-api",
+        "depth": 1,
+        "durationMs": 3000,
+        "status": "error",
+        "note": "timed out waiting for a connection"
+      },
+      {
+        "name": "GET /stock",
+        "service": "inventory-svc",
+        "depth": 1,
+        "durationMs": 31,
+        "status": "ok"
+      },
+      {
+        "name": "POST /authorize",
+        "service": "payments-gateway",
+        "depth": 1,
+        "durationMs": 128,
+        "status": "ok"
+      },
+      {
+        "name": "SELECT orders",
+        "service": "orders-db",
+        "depth": 2,
+        "durationMs": 8,
+        "status": "ok"
+      }
+    ]
+  },
+  "dependencies": [
+    {
+      "service": "payments-gateway",
+      "status": "healthy",
+      "p99Ms": 142,
+      "errorRatePct": 0.1
+    },
+    {
+      "service": "inventory-svc",
+      "status": "healthy",
+      "p99Ms": 38,
+      "errorRatePct": 0
+    },
+    {
+      "service": "orders-db",
+      "status": "healthy",
+      "cpuPct": 22,
+      "connections": 180,
+      "maxConnections": 500
+    }
+  ]
+}

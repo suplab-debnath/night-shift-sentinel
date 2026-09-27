@@ -1,0 +1,36 @@
+.wrap {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1;
+}
+
+.clock {
+  font-size: min(var(--t-3xl), 46px);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.awaiting {
+  position: absolute;
+  top: calc(100% + 12px);
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: var(--r-pill);
+  background: var(--caution-wash);
+  color: var(--caution);
+  font-size: var(--t-sm);
+  font-weight: 600;
+  white-space: nowrap;
+  box-shadow: var(--shadow-1);
+  z-index: 20;
+}
+
+.counter {
+  font-weight: 500;
+  color: var(--ink-2);
+}

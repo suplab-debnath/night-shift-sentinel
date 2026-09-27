@@ -1,0 +1,12 @@
+.toast {
+  position: absolute;
+  z-index: 5;
+  transform: translate(-50%, -100%);
+  padding: 8px 12px;
+  background: var(--alert-wash);
+  color: var(--alert);
+  border-radius: var(--r-card);
+  box-shadow: var(--shadow-1);
+  font-size: var(--t-sm);
+  white-space: nowrap;
+}

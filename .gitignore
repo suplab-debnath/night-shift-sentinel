@@ -1,0 +1,15 @@
+node_modules/
+dist/
+dist-offline/
+dist-aws/
+coverage/
+cdk.out/
+deck/out/
+deck/assets/screens/
+test-results/
+playwright-report/
+*.tsbuildinfo
+.env
+.env.*
+!.env.example
+.DS_Store

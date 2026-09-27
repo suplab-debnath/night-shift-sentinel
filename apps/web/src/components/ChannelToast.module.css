@@ -1,0 +1,53 @@
+.toast {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  z-index: 4;
+  width: min(340px, 45%);
+  padding: 10px 12px;
+  display: grid;
+  gap: 2px;
+  background: var(--surface);
+  border-radius: var(--r-card);
+  box-shadow: var(--shadow-2);
+  animation: arrive var(--d-sheet) var(--ease-move);
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--t-xs);
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--ink-3);
+}
+
+.where {
+  margin-left: auto;
+  font-weight: 400;
+  color: var(--ink-3);
+}
+
+.text {
+  font-size: var(--t-sm);
+  color: var(--ink-2);
+  line-height: 1.35;
+}
+
+@keyframes arrive {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+
+:global([data-reduced-motion='true']) .toast {
+  animation: none;
+}

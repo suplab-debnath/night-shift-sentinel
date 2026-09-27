@@ -1,0 +1,43 @@
+{
+  "name": "night-shift",
+  "private": true,
+  "type": "module",
+  "description": "Night Shift: Agent Theater. An interactive demo of an AI agent squad resolving a production incident.",
+  "engines": {
+    "node": ">=20"
+  },
+  "workspaces": [
+    "packages/engine",
+    "packages/scenarios",
+    "apps/server",
+    "apps/web",
+    "infra",
+    "deck"
+  ],
+  "scripts": {
+    "dev": "npm run dev -w @night-shift/web",
+    "dev:live": "concurrently -k -n server,web -c blue,green \"npm run dev -w @night-shift/server\" \"npm run dev:live -w @night-shift/web\"",
+    "dev:live-mock": "concurrently -k -n server,web -c blue,green \"npm run dev:mock -w @night-shift/server\" \"npm run dev:live -w @night-shift/web\"",
+    "build": "npm run build --workspaces --if-present",
+    "build:offline": "npm run build:offline -w @night-shift/web",
+    "demo": "npm run demo -w @night-shift/web",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "e2e": "npm run e2e -w @night-shift/web",
+    "deck": "npm run deck -w @night-shift/deck",
+    "cdk:synth": "npm run synth -w @night-shift/infra --",
+    "cdk:deploy": "npm run deploy -w @night-shift/infra --"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^22.0.0",
+    "@vitest/coverage-v8": "^5.0.1",
+    "concurrently": "^10.0.5",
+    "eslint": "^10.11.0",
+    "fast-check": "^4.10.2",
+    "typescript": "~6.0.3",
+    "typescript-eslint": "^8.70.1",
+    "vitest": "^5.0.1"
+  }
+}

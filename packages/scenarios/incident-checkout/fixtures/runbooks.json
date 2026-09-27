@@ -1,0 +1,54 @@
+{
+  "runbooks": [
+    {
+      "id": "RB-112",
+      "title": "Roll back checkout-api to the previous version",
+      "keywords": [
+        "rollback",
+        "roll back",
+        "checkout-api",
+        "revert"
+      ],
+      "action": "deploy.rollback",
+      "strategy": "rolling, one pod at a time",
+      "estimatedMinutes": 3,
+      "reversible": true,
+      "preconditions": [
+        "Previous version passed checks in the last 30 days",
+        "No schema migration in the current version"
+      ],
+      "steps": [
+        "Pin target version",
+        "Roll pods one at a time (batch 1)",
+        "Watch p99 and error rate per batch",
+        "Confirm 5 minutes stable"
+      ]
+    },
+    {
+      "id": "RB-131",
+      "title": "Runtime config override with rolling restart",
+      "keywords": [
+        "runtime",
+        "config",
+        "override",
+        "restart"
+      ],
+      "action": "config.override",
+      "strategy": "override the key at runtime, then rolling restart",
+      "estimatedMinutes": 4,
+      "reversible": true,
+      "expiryHours": 48,
+      "preconditions": [
+        "Override is recorded in the audit log",
+        "Override has an expiry of 72 h or less"
+      ],
+      "steps": [
+        "Record override with expiry",
+        "Apply key at runtime",
+        "Restart pods one at a time",
+        "Confirm 5 minutes stable",
+        "Remove override when the fix ships"
+      ]
+    }
+  ]
+}

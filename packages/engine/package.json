@@ -1,0 +1,19 @@
+{
+  "name": "@night-shift/engine",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Framework-free event engine: events, scenario schema, compiler, player, reducer.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json",
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "coverage": "vitest run --coverage"
+  },
+  "dependencies": {
+    "zod": "^4.6.5"
+  }
+}

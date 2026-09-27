@@ -1,0 +1,26 @@
+.app {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.main {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+}
+
+/* Portrait and phone: stage on top at 16:10, panel below as tabs (DESIGN §5.2). */
+@media (max-width: 1023px) {
+  .app {
+    height: auto;
+    min-height: 100vh;
+  }
+  .main {
+    flex-direction: column;
+  }
+  .main > section {
+    flex: none;
+    aspect-ratio: 16 / 10;
+  }
+}

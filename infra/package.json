@@ -1,0 +1,23 @@
+{
+  "name": "@night-shift/infra",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "AWS CDK app: S3 + CloudFront for the web app, streaming Lambda for /api. No Docker.",
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json",
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "synth": "npm run build:aws -w @night-shift/web && cdk synth --quiet",
+    "deploy": "npm run build:aws -w @night-shift/web && cdk deploy"
+  },
+  "dependencies": {
+    "aws-cdk-lib": "^2.270.0",
+    "constructs": "^10.8.1"
+  },
+  "devDependencies": {
+    "aws-cdk": "^2.1143.0",
+    "esbuild": "^0.28.2",
+    "tsx": "^4.23.15"
+  }
+}

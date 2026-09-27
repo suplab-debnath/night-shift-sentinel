@@ -1,0 +1,49 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: var(--scrim);
+}
+
+.dialog {
+  position: relative;
+  width: min(640px, 100%);
+  max-height: calc(100vh - 48px);
+  overflow: auto;
+  padding: 28px 32px;
+  background: var(--surface);
+  border-radius: var(--r-sheet);
+  box-shadow: var(--shadow-2);
+  outline: none;
+}
+
+.wide {
+  width: min(1600px, 100%);
+}
+
+.close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--ink-2);
+  cursor: pointer;
+}
+
+.close:hover {
+  background: var(--paper);
+}
+
+/* The container takes focus for screen readers; the ring belongs on controls. */
+.dialog:focus-visible {
+  box-shadow: var(--shadow-2);
+}

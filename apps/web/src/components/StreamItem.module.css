@@ -1,0 +1,53 @@
+.item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.time {
+  font-size: var(--t-xs);
+  color: var(--ink-3);
+}
+
+.thought {
+  margin: 0;
+  font-size: var(--t-md);
+  line-height: var(--lh-body);
+  color: var(--ink);
+  max-width: 70ch;
+}
+
+.caret {
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  margin-left: 1px;
+  vertical-align: text-bottom;
+  background: var(--ink-3);
+}
+
+.prompt {
+  color: var(--ink-3);
+}
+
+.message .label {
+  margin: 0;
+  font-size: var(--t-sm);
+  color: var(--ink-2);
+}
+
+.arrow {
+  color: var(--ink-3);
+}
+
+.failed {
+  color: var(--alert);
+  font-weight: 600;
+}

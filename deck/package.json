@@ -1,0 +1,21 @@
+{
+  "name": "@night-shift/deck",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Generates the executive and technical PowerPoint decks from code.",
+  "scripts": {
+    "deck": "npm run build:offline -w @night-shift/web --prefix .. && node capture-screens.mjs && node build-deck.mjs",
+    "capture": "node capture-screens.mjs",
+    "build": "node build-deck.mjs",
+    "build:font-safe": "node build-deck.mjs --font-safe --out out/font-safe"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.56.1",
+    "lucide-react": "^1.48.0",
+    "pptxgenjs": "^4.0.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "sharp": "^0.35.4"
+  }
+}

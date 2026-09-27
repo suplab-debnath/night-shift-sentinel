@@ -1,0 +1,9 @@
+{
+  "orgName": "{{ORG_NAME}}",
+  "clientName": "{{CLIENT_NAME}}",
+  "presenterName": "{{PRESENTER_NAME}}",
+  "humanSeatLabel": "You",
+  "demoDate": "",
+  "defaultSpeed": 1,
+  "showNotesStrip": true
+}

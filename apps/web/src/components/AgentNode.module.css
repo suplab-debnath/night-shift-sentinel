@@ -1,0 +1,200 @@
+.node {
+  --size: var(--node);
+  position: absolute;
+  transform: translate(-50%, calc(var(--size) / -2));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  z-index: 2;
+  border-radius: var(--r-card);
+}
+
+.disc {
+  position: relative;
+  width: var(--size);
+  height: var(--size);
+  border-radius: 50%;
+  background: var(--surface);
+  box-shadow: var(--shadow-1);
+  display: grid;
+  place-items: center;
+  color: var(--hue);
+}
+
+.node[data-size='lg'] {
+  --size: var(--node-lg);
+}
+
+.ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 4px solid var(--hue);
+  opacity: 0.4;
+  transition: opacity var(--d-state) ease-out, border-color var(--d-state) ease-out;
+}
+
+.icon {
+  width: 38%;
+  height: 38%;
+  position: relative;
+}
+
+.name {
+  font-size: var(--t-lg);
+  font-weight: 500;
+  color: var(--ink);
+  white-space: nowrap;
+  line-height: 1.2;
+}
+
+.node:focus-visible {
+  box-shadow: none;
+}
+
+.node:focus-visible .disc {
+  box-shadow: var(--focus);
+}
+
+.node[aria-pressed='true'] .disc {
+  background: var(--wash);
+}
+
+/* States (DESIGN §6 AgentNode) */
+.node[data-state='thinking'] .ring,
+.node[data-state='working'] .ring,
+.node[data-state='watching'] .ring,
+.node[data-state='done'] .ring {
+  opacity: 1;
+}
+
+.node[data-state='thinking'] .ring {
+  animation: breathe 1.6s ease-in-out infinite;
+}
+
+.node[data-state='waiting'] .ring {
+  opacity: 1;
+  border-color: var(--caution);
+  animation: breathe 1.6s ease-in-out infinite;
+}
+
+.node[data-state='blocked'] .ring {
+  opacity: 1;
+  border-color: var(--alert);
+}
+
+.node[data-state='blocked'] .disc {
+  animation: shake 240ms ease-out 1;
+}
+
+.orbit {
+  position: absolute;
+  inset: -2px;
+  border-radius: 50%;
+  animation: spin 2.4s linear infinite;
+}
+
+.orbit::after {
+  content: '';
+  position: absolute;
+  top: -3px;
+  left: 50%;
+  width: 10px;
+  height: 10px;
+  margin-left: -5px;
+  border-radius: 50%;
+  background: var(--hue);
+  box-shadow: 0 0 0 2px var(--surface);
+}
+
+.sweep {
+  position: absolute;
+  inset: 4px;
+  border-radius: 50%;
+  overflow: hidden;
+  animation: spin 3.2s linear infinite;
+}
+
+.sweep::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 50%;
+  height: 50%;
+  background: var(--wash);
+  transform-origin: 0 100%;
+  transform: skewY(-30deg);
+}
+
+.badge {
+  position: absolute;
+  right: -2px;
+  top: -2px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: var(--on-hue);
+  box-shadow: 0 0 0 2px var(--surface);
+}
+
+.done {
+  background: var(--hue);
+}
+
+.blocked {
+  background: var(--alert);
+}
+
+.node[data-human] .disc {
+  color: var(--ink);
+}
+
+@keyframes breathe {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.06);
+    opacity: 0.55;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-5px);
+  }
+  50% {
+    transform: translateX(5px);
+  }
+  75% {
+    transform: translateX(-3px);
+  }
+}
+
+:root[data-reduced-motion='true'] .ring,
+:root[data-reduced-motion='true'] .disc,
+:root[data-reduced-motion='true'] .orbit,
+:root[data-reduced-motion='true'] .sweep {
+  animation: none !important;
+}
+

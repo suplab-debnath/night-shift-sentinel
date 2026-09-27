@@ -1,0 +1,109 @@
+.band {
+  position: relative;
+  height: var(--heartbeat-h);
+  flex: none;
+  border-top: 1px solid var(--line);
+  background: color-mix(in srgb, var(--surface) 55%, transparent);
+}
+
+.svg {
+  display: block;
+}
+
+.slo {
+  stroke: var(--line);
+  stroke-width: 1.5;
+  stroke-dasharray: 6 6;
+}
+
+.path {
+  fill: none;
+  stroke-width: 2.5;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.neutral {
+  stroke: var(--ink-2);
+}
+
+.alert {
+  stroke: var(--alert);
+}
+
+.ok {
+  stroke: var(--ok);
+}
+
+.head.neutral {
+  fill: var(--ink-2);
+}
+
+.head.alert {
+  fill: var(--alert);
+}
+
+.head.ok {
+  fill: var(--ok);
+}
+
+.svg .head {
+  stroke: var(--surface);
+  stroke-width: 2;
+}
+
+.sloLabel {
+  position: absolute;
+  right: 12px;
+  transform: translateY(-120%);
+  font-size: var(--t-xs);
+  color: var(--ink-3);
+  font-family: var(--font-mono);
+}
+
+.readout {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.value {
+  font-size: var(--t-lg);
+  font-weight: 500;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+.errors {
+  font-size: var(--t-xs);
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: var(--r-pill);
+  white-space: nowrap;
+}
+
+.errorsHigh {
+  color: var(--alert);
+  background: var(--alert-wash);
+}
+
+.errorsOk {
+  color: var(--ink-2);
+  background: var(--paper);
+}
+
+.lapse {
+  position: absolute;
+  bottom: 10px;
+  transform: translateX(-50%);
+  font-family: var(--font-mono);
+  font-size: var(--t-sm);
+  font-weight: 500;
+  padding: 2px 10px;
+  border-radius: var(--r-pill);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  color: var(--ink-2);
+}

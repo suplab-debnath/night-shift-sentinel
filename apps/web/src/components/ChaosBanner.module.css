@@ -1,0 +1,13 @@
+.banner {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 6;
+  padding: 8px 24px;
+  background: var(--caution-wash);
+  color: var(--ink);
+  font-weight: 600;
+  font-size: var(--t-sm);
+  border-bottom: 1px solid var(--line);
+}

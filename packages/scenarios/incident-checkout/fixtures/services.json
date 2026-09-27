@@ -1,0 +1,98 @@
+{
+  "services": [
+    {
+      "name": "checkout-api",
+      "kind": "service",
+      "stack": "Java 21, Spring Boot 3, HikariCP",
+      "pods": 6,
+      "dependsOn": [
+        "payments-gateway",
+        "inventory-svc",
+        "orders-db"
+      ]
+    },
+    {
+      "name": "payments-gateway",
+      "kind": "service",
+      "pods": 4,
+      "dependsOn": []
+    },
+    {
+      "name": "inventory-svc",
+      "kind": "service",
+      "pods": 3,
+      "dependsOn": []
+    },
+    {
+      "name": "orders-db",
+      "kind": "database",
+      "engine": "PostgreSQL",
+      "maxConnections": 500,
+      "dependsOn": []
+    },
+    {
+      "name": "orders-api",
+      "kind": "service",
+      "pods": 2,
+      "dependsOn": [
+        "orders-db"
+      ]
+    },
+    {
+      "name": "returns-svc",
+      "kind": "service",
+      "pods": 2,
+      "dependsOn": [
+        "orders-db"
+      ]
+    },
+    {
+      "name": "invoicing",
+      "kind": "service",
+      "pods": 2,
+      "dependsOn": [
+        "orders-db"
+      ]
+    },
+    {
+      "name": "loyalty-svc",
+      "kind": "service",
+      "pods": 2,
+      "dependsOn": [
+        "orders-db"
+      ]
+    },
+    {
+      "name": "search-indexer",
+      "kind": "service",
+      "pods": 2,
+      "dependsOn": [
+        "orders-db"
+      ]
+    },
+    {
+      "name": "reporting",
+      "kind": "service",
+      "pods": 2,
+      "dependsOn": [
+        "orders-db"
+      ]
+    },
+    {
+      "name": "fulfilment-svc",
+      "kind": "service",
+      "pods": 2,
+      "dependsOn": [
+        "orders-db"
+      ]
+    },
+    {
+      "name": "admin-portal",
+      "kind": "service",
+      "pods": 2,
+      "dependsOn": [
+        "orders-db"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+.card {
+  position: absolute;
+  inset: 0;
+  z-index: 7;
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--paper) 88%, transparent);
+  pointer-events: none;
+}
+
+.title {
+  margin: 0;
+  font-size: var(--t-4xl);
+  font-weight: 600;
+  line-height: var(--lh-display);
+  letter-spacing: -0.02em;
+  max-width: 18ch;
+  text-align: center;
+}

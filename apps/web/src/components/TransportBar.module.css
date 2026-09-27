@@ -1,0 +1,205 @@
+.bar {
+  height: var(--transport-h);
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 0 20px;
+  background: var(--surface);
+  border-top: 1px solid var(--line);
+  position: relative;
+  z-index: 5;
+}
+
+.group {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.icon {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.icon:hover {
+  background: var(--paper);
+}
+
+.play {
+  width: 52px;
+  height: 52px;
+  background: var(--ink);
+  color: var(--surface);
+}
+
+.play:hover {
+  background: var(--ink-2);
+}
+
+.speeds {
+  display: flex;
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+  padding: 2px;
+}
+
+.speed {
+  min-width: 48px;
+  height: 36px;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: none;
+  font-family: var(--font-mono);
+  font-size: var(--t-sm);
+  color: var(--ink-2);
+  cursor: pointer;
+}
+
+.speed[aria-checked='true'] {
+  background: var(--signal-wash);
+  color: var(--signal);
+  font-weight: 500;
+}
+
+.scrubber {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  height: 44px;
+}
+
+.track {
+  position: absolute;
+  inset: 6px 0;
+  border-radius: var(--r-code);
+  background: var(--paper);
+  overflow: hidden;
+}
+
+.segment {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 8px;
+  border: 0;
+  border-left: 1px solid var(--line);
+  background: none;
+  color: var(--ink-2);
+  font-size: var(--t-xs);
+  white-space: nowrap;
+  overflow: hidden;
+  z-index: 1;
+  cursor: pointer;
+}
+
+.segment[data-current] {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.segNum {
+  font-family: var(--font-mono);
+}
+
+.segName {
+  display: none;
+}
+
+.segment:hover .segName,
+.segName[data-show] {
+  display: inline;
+}
+
+.progress {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  background: var(--signal-wash);
+  border-right: 2px solid var(--signal);
+}
+
+.chaosMark {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: var(--caution-wash);
+}
+
+.range {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+  z-index: 2;
+}
+
+.range:focus-visible {
+  opacity: 0.01;
+}
+
+.scrubber:has(.range:focus-visible) .track {
+  box-shadow: var(--focus);
+}
+
+.text {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+  background: var(--surface);
+  font-weight: 500;
+  font-size: var(--t-sm);
+  cursor: pointer;
+}
+
+.text:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.segment[data-narrow] > * {
+  display: none;
+}
+
+.gateMark {
+  position: absolute;
+  top: 50%;
+  translate: -50% -50%;
+  rotate: 45deg;
+  z-index: 1;
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  background: var(--caution);
+  box-shadow: 0 0 0 2px var(--surface);
+  pointer-events: none;
+}
+
+/* Condensed transport on narrow screens (DESIGN §5.2). */
+@media (max-width: 1023px) {
+  .bar {
+    gap: 8px;
+    padding: 0 8px;
+  }
+  .speeds,
+  .text {
+    display: none;
+  }
+}

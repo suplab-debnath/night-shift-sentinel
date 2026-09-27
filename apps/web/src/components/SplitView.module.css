@@ -1,0 +1,137 @@
+.head {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding-right: 56px;
+}
+
+.title {
+  margin: 0;
+  font-size: var(--t-2xl);
+  font-weight: 600;
+}
+
+.summary {
+  margin: 8px 0 20px;
+  font-size: var(--t-lg);
+  color: var(--ink-2);
+}
+
+.manualText {
+  color: var(--ink-2);
+}
+
+.squadText {
+  color: var(--signal);
+}
+
+.chart {
+  position: relative;
+  padding-bottom: 28px;
+}
+
+.lane {
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  align-items: start;
+  border-top: 1px solid var(--line);
+  padding-top: 16px;
+  margin-bottom: 8px;
+}
+
+.laneTitle {
+  margin: 0;
+  font-size: var(--t-md);
+  font-weight: 600;
+}
+
+.manual {
+  --lane: var(--ink-2);
+}
+
+.squad {
+  --lane: var(--signal);
+}
+
+.track {
+  position: relative;
+  margin-right: 220px;
+}
+
+.axisLine {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 7px;
+  height: 2px;
+  background: var(--line);
+}
+
+.entry {
+  position: absolute;
+  top: 0;
+}
+
+.dot {
+  position: absolute;
+  left: -7px;
+  top: 1px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--lane);
+  box-shadow: 0 0 0 3px var(--surface);
+}
+
+.leader {
+  position: absolute;
+  left: -0.5px;
+  top: 15px;
+  width: 1px;
+  background: var(--line);
+}
+
+.label {
+  position: absolute;
+  left: 0;
+  z-index: 1;
+  padding-right: 6px;
+  background: var(--surface);
+  display: flex;
+  flex-direction: column;
+  white-space: nowrap;
+  padding-left: 6px;
+  border-left: 2px solid var(--lane);
+  line-height: 1.2;
+}
+
+.labelText {
+  font-size: var(--t-sm);
+  color: var(--ink);
+}
+
+.labelClock {
+  font-size: var(--t-xs);
+  color: var(--lane);
+}
+
+.axis {
+  position: absolute;
+  left: 140px;
+  right: 220px;
+  bottom: 0;
+  height: 20px;
+}
+
+.tick {
+  position: absolute;
+  transform: translateX(-50%);
+  font-size: var(--t-xs);
+  color: var(--ink-3);
+}
+
+.caption {
+  margin: 12px 0 0;
+  font-size: var(--t-xs);
+  color: var(--ink-3);
+}

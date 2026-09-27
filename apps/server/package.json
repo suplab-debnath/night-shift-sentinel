@@ -1,0 +1,27 @@
+{
+  "name": "@night-shift/server",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Live mode server: segment API, director, agent turns, tools, policy engine, LLM providers.",
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json",
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "dev": "tsx watch src/dev.ts --mode=live-bedrock",
+    "dev:mock": "tsx watch src/dev.ts --mode=live-mock",
+    "start:mock": "tsx src/dev.ts --mode=live-mock"
+  },
+  "dependencies": {
+    "@aws-sdk/client-bedrock-runtime": "^3.1139.0",
+    "@aws-sdk/client-ssm": "^3.1139.0",
+    "@night-shift/engine": "*",
+    "@night-shift/scenarios": "*",
+    "fastify": "^5.12.5",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "aws-sdk-client-mock": "^4.1.0",
+    "tsx": "^4.23.15"
+  }
+}

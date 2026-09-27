@@ -1,0 +1,147 @@
+{
+  "incident": {
+    "severity": "SEV-2",
+    "open": true
+  },
+  "changeFreeze": {
+    "active": true,
+    "window": "Tue 18:00 \u2013 Thu 08:00",
+    "incidentExceptionMaxSeverity": "SEV-2"
+  },
+  "actions": {
+    "deploy.rollback": {
+      "mutates": true,
+      "targetKind": "service",
+      "outageSeconds": 0,
+      "reversible": true,
+      "strategy": "rolling",
+      "note": "Rolling, one pod at a time"
+    },
+    "config.override": {
+      "mutates": true,
+      "targetKind": "service",
+      "outageSeconds": 0,
+      "reversible": true,
+      "strategy": "rolling",
+      "requiresExpiry": true,
+      "note": "Rolling restart, one pod at a time"
+    },
+    "deploy.restart": {
+      "mutates": true,
+      "targetKind": "service",
+      "outageSeconds": 0,
+      "reversible": true,
+      "strategy": "rolling",
+      "note": "Rolling restart, one pod at a time"
+    },
+    "db.alter": {
+      "mutates": true,
+      "targetKind": "database",
+      "outageSeconds": 90,
+      "reversible": false,
+      "strategy": "restart",
+      "note": "Restart means ~90 s full outage"
+    }
+  },
+  "policies": [
+    {
+      "id": "P-01",
+      "title": "Production changes need human approval",
+      "appliesTo": [
+        "deploy.rollback",
+        "config.override",
+        "deploy.restart"
+      ],
+      "rule": {
+        "type": "human-approval",
+        "env": "prod"
+      },
+      "onMatch": "required"
+    },
+    {
+      "id": "P-02",
+      "title": "Production database changes need a DBA and change board",
+      "appliesTo": [
+        "db.alter"
+      ],
+      "rule": {
+        "type": "approvals-present",
+        "env": "prod",
+        "approvals": [
+          "dba",
+          "change-board"
+        ]
+      },
+      "onMatch": "fail"
+    },
+    {
+      "id": "P-03",
+      "title": "Change freeze window",
+      "appliesTo": [
+        "deploy.rollback",
+        "config.override",
+        "deploy.restart"
+      ],
+      "rule": {
+        "type": "freeze-window",
+        "incidentException": true
+      },
+      "onMatch": "fail"
+    },
+    {
+      "id": "P-04",
+      "title": "Blast radius limited to one service",
+      "appliesTo": [
+        "deploy.rollback",
+        "config.override",
+        "deploy.restart",
+        "db.alter"
+      ],
+      "rule": {
+        "type": "blast-radius",
+        "maxServices": 1
+      },
+      "onMatch": "fail"
+    },
+    {
+      "id": "P-05",
+      "title": "Rollback target passed checks in the last 30 days",
+      "appliesTo": [
+        "deploy.rollback"
+      ],
+      "rule": {
+        "type": "verified-target",
+        "withinDays": 30
+      },
+      "onMatch": "fail"
+    },
+    {
+      "id": "P-06",
+      "title": "No irreversible or outage-causing operations",
+      "shortTitle": "No outage-causing operations",
+      "appliesTo": [
+        "deploy.rollback",
+        "config.override",
+        "deploy.restart",
+        "db.alter"
+      ],
+      "rule": {
+        "type": "no-outage",
+        "maxOutageSeconds": 0
+      },
+      "onMatch": "fail"
+    },
+    {
+      "id": "P-08",
+      "title": "Runtime overrides must be recorded and expire",
+      "appliesTo": [
+        "config.override"
+      ],
+      "rule": {
+        "type": "override-expiry",
+        "maxHours": 72
+      },
+      "onMatch": "fail"
+    }
+  ]
+}

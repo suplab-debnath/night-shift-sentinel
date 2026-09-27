@@ -1,0 +1,27 @@
+.dim {
+  position: absolute;
+  inset: 0;
+  z-index: 8;
+  background: var(--dim);
+  pointer-events: none;
+}
+
+.sheetWrap {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 9;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.sheetWrap > * {
+  pointer-events: auto;
+}
+
+/* The human seat stays above the dim layer so authority is visible. */
+:global([data-gate-open]) [data-human] {
+  z-index: 10;
+}

@@ -1,0 +1,35 @@
+.sheet {
+  position: absolute;
+  top: 16px;
+  left: 50%;
+  translate: -50% 0;
+  z-index: 4;
+  width: min(1180px, calc(100% - 48px));
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+  padding: 16px;
+  background: var(--surface);
+  border-radius: var(--r-card);
+  box-shadow: var(--shadow-2);
+}
+
+.sheet:has(> :only-child) {
+  grid-template-columns: 1fr;
+  width: min(560px, calc(100% - 48px));
+}
+
+/* Chaos: a narrow sheet between the top-row nodes, clear of their labels. */
+.sheet.chaos {
+  width: min(460px, calc(100% - 48px));
+  top: 48px;
+}
+
+@media (max-height: 860px) {
+  .sheet {
+    top: 8px;
+    padding: 10px;
+    gap: 12px;
+  }
+}

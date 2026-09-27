@@ -1,0 +1,214 @@
+{
+  "agents": [
+    {
+      "id": "sentinel",
+      "name": "Sentinel",
+      "role": "Detects, maps blast radius, confirms recovery",
+      "hueToken": "--agent-sentinel",
+      "icon": "radar",
+      "tools": [
+        {
+          "name": "metrics.query",
+          "access": "read"
+        },
+        {
+          "name": "traces.get",
+          "access": "read"
+        }
+      ],
+      "needsApprovalFor": [],
+      "neverAllowed": [
+        "Change anything"
+      ],
+      "position": {
+        "x": 14,
+        "y": 14
+      },
+      "size": "md",
+      "persona": "You are Sentinel, a site reliability monitor. Report numbers first, then one-line judgement. Never speculate on cause."
+    },
+    {
+      "id": "orchestrator",
+      "name": "Orchestrator",
+      "role": "Plans, dispatches, synthesizes, owns the incident flow",
+      "hueToken": "--agent-orchestrator",
+      "icon": "network",
+      "tools": [
+        {
+          "name": "plan.write",
+          "access": "write"
+        }
+      ],
+      "needsApprovalFor": [],
+      "neverAllowed": [
+        "Execute fixes",
+        "Approve its own proposals"
+      ],
+      "position": {
+        "x": 43,
+        "y": 40
+      },
+      "size": "lg",
+      "persona": "You coordinate an incident squad. You plan, delegate, and synthesize evidence into a root-cause statement with a confidence score. You never execute changes."
+    },
+    {
+      "id": "log-detective",
+      "name": "Log Detective",
+      "role": "Finds the failure signature in logs and runtime metrics",
+      "hueToken": "--agent-log",
+      "icon": "scan-search",
+      "tools": [
+        {
+          "name": "logs.search",
+          "access": "read"
+        },
+        {
+          "name": "metrics.query",
+          "access": "read"
+        }
+      ],
+      "needsApprovalFor": [],
+      "neverAllowed": [
+        "Change anything"
+      ],
+      "position": {
+        "x": 43,
+        "y": 14
+      },
+      "size": "md",
+      "persona": "You analyze logs. Quantify, find the dominant signature, state what it implies. One idea per sentence."
+    },
+    {
+      "id": "code-archaeologist",
+      "name": "Code Archaeologist",
+      "role": "Correlates timing with deploys; reads diffs",
+      "hueToken": "--agent-code",
+      "icon": "git-compare",
+      "tools": [
+        {
+          "name": "deploys.list",
+          "access": "read"
+        },
+        {
+          "name": "git.diff",
+          "access": "read"
+        }
+      ],
+      "needsApprovalFor": [],
+      "neverAllowed": [
+        "Change code or config"
+      ],
+      "position": {
+        "x": 72,
+        "y": 14
+      },
+      "size": "md",
+      "persona": "You correlate incidents with changes. Cite versions, times, and exact diff lines."
+    },
+    {
+      "id": "fixer",
+      "name": "Fixer",
+      "role": "Proposes and, once approved, executes mitigations",
+      "hueToken": "--agent-fixer",
+      "icon": "wrench",
+      "tools": [
+        {
+          "name": "runbook.lookup",
+          "access": "read"
+        },
+        {
+          "name": "deploy.rollback",
+          "access": "approval"
+        },
+        {
+          "name": "config.override",
+          "access": "approval"
+        },
+        {
+          "name": "deploy.restart",
+          "access": "approval"
+        }
+      ],
+      "needsApprovalFor": [
+        "Rollback in production",
+        "Runtime config override",
+        "Rolling restart"
+      ],
+      "neverAllowed": [
+        "Act without Guardian pass and human approval",
+        "db.alter (not granted)"
+      ],
+      "position": {
+        "x": 14,
+        "y": 66
+      },
+      "size": "md",
+      "persona": "You propose mitigations as options with time, risk, and reversibility. Prefer the fastest reversible option. You act only after approval."
+    },
+    {
+      "id": "guardian",
+      "name": "Guardian",
+      "role": "Checks every proposed action against policy; can block",
+      "hueToken": "--agent-guardian",
+      "icon": "shield-check",
+      "tools": [
+        {
+          "name": "policy.check",
+          "access": "read"
+        }
+      ],
+      "needsApprovalFor": [],
+      "neverAllowed": [
+        "Approve on behalf of a human"
+      ],
+      "position": {
+        "x": 43,
+        "y": 66
+      },
+      "size": "md",
+      "persona": "You evaluate proposed actions against the provided policies. Output pass/fail per policy with a short reason. You may block."
+    },
+    {
+      "id": "scribe",
+      "name": "Scribe",
+      "role": "Writes the status update, postmortem, audit summary",
+      "hueToken": "--agent-scribe",
+      "icon": "notebook-pen",
+      "tools": [
+        {
+          "name": "doc.write",
+          "access": "write"
+        },
+        {
+          "name": "comms.draft",
+          "access": "write"
+        }
+      ],
+      "needsApprovalFor": [],
+      "neverAllowed": [
+        "Send external messages (drafts only)"
+      ],
+      "position": {
+        "x": 72,
+        "y": 66
+      },
+      "size": "md",
+      "persona": "You write clear, calm incident communications and blameless postmortems."
+    },
+    {
+      "id": "human",
+      "name": "On-call engineer",
+      "role": "Final authority on production changes",
+      "hueToken": "--ink",
+      "icon": "user-round",
+      "tools": [],
+      "needsApprovalFor": [],
+      "neverAllowed": [],
+      "position": {
+        "x": 92,
+        "y": 66
+      },
+      "size": "md"
+    }
+  ]
+}

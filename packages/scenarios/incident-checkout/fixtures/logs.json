@@ -1,0 +1,382 @@
+{
+  "service": "checkout-api",
+  "stats": {
+    "window": {
+      "from": "02:04:00",
+      "to": "02:11:10"
+    },
+    "errorCount": 1912,
+    "signature": "HikariPool-1 - Connection is not available, request timed out after 3000ms.",
+    "signatureCount": 1797,
+    "signatureShare": 0.94,
+    "otherErrors": [
+      {
+        "message": "Request processing failed: client closed connection",
+        "count": 71
+      },
+      {
+        "message": "CannotCreateTransactionException: Could not open JPA EntityManager",
+        "count": 44
+      }
+    ]
+  },
+  "lines": [
+    {
+      "t": "01:55:02",
+      "level": "INFO",
+      "pod": "deployer",
+      "logger": "argo-rollouts",
+      "message": "Rollout checkout-api v2.14.0 started (pipeline run 8841)"
+    },
+    {
+      "t": "01:55:31",
+      "level": "INFO",
+      "pod": "checkout-api-6d9f7c-a1",
+      "logger": "o.s.b.StartupInfoLogger",
+      "message": "Starting CheckoutApplication v2.14.0 using Java 21.0.4"
+    },
+    {
+      "t": "01:55:38",
+      "level": "INFO",
+      "pod": "checkout-api-6d9f7c-a1",
+      "logger": "com.zaxxer.hikari.HikariDataSource",
+      "message": "HikariPool-1 - Starting..."
+    },
+    {
+      "t": "01:55:38",
+      "level": "DEBUG",
+      "pod": "checkout-api-6d9f7c-a1",
+      "logger": "com.zaxxer.hikari.HikariConfig",
+      "message": "maximumPoolSize................10"
+    },
+    {
+      "t": "01:55:39",
+      "level": "INFO",
+      "pod": "checkout-api-6d9f7c-a1",
+      "logger": "com.zaxxer.hikari.HikariDataSource",
+      "message": "HikariPool-1 - Start completed."
+    },
+    {
+      "t": "01:55:44",
+      "level": "INFO",
+      "pod": "checkout-api-6d9f7c-a1",
+      "logger": "o.s.b.StartupInfoLogger",
+      "message": "Started CheckoutApplication in 12.6 seconds"
+    },
+    {
+      "t": "01:57:10",
+      "level": "INFO",
+      "pod": "deployer",
+      "logger": "argo-rollouts",
+      "message": "Rollout checkout-api v2.14.0 complete: 6 of 6 pods ready, all checks passed"
+    },
+    {
+      "t": "02:01:15",
+      "level": "INFO",
+      "pod": "checkout-api-6d9f7c-c3",
+      "logger": "c.p.checkout.OrderController",
+      "message": "POST /checkout 200 in 164ms"
+    },
+    {
+      "t": "02:03:05",
+      "level": "INFO",
+      "pod": "marketing",
+      "logger": "campaign-service",
+      "message": "Regional promo email batch sent (EU-West)"
+    },
+    {
+      "t": "02:03:40",
+      "level": "INFO",
+      "pod": "checkout-api-6d9f7c-b2",
+      "logger": "c.p.checkout.OrderController",
+      "message": "POST /checkout 200 in 212ms"
+    },
+    {
+      "t": "02:04:02",
+      "level": "ERROR",
+      "pod": "checkout-api-6d9f7c-a1",
+      "logger": "com.zaxxer.hikari.pool.HikariPool",
+      "message": "HikariPool-1 - Connection is not available, request timed out after 3000ms."
+    },
+    {
+      "t": "02:04:09",
+      "level": "ERROR",
+      "pod": "checkout-api-6d9f7c-b2",
+      "logger": "com.zaxxer.hikari.pool.HikariPool",
+      "message": "HikariPool-1 - Connection is not available, request timed out after 3000ms."
+    },
+    {
+      "t": "02:04:31",
+      "level": "ERROR",
+      "pod": "checkout-api-6d9f7c-c3",
+      "logger": "com.zaxxer.hikari.pool.HikariPool",
+      "message": "HikariPool-1 - Connection is not available, request timed out after 3000ms."
+    },
+    {
+      "t": "02:04:48",
+      "level": "ERROR",
+      "pod": "checkout-api-6d9f7c-d4",
+      "logger": "com.zaxxer.hikari.pool.HikariPool",
+      "message": "HikariPool-1 - Connection is not available, request timed out after 3000ms."
+    },
+    {
+      "t": "02:05:03",
+      "level": "ERROR",
+      "pod": "checkout-api-6d9f7c-e5",
+      "logger": "com.zaxxer.hikari.pool.HikariPool",
+      "message": "HikariPool-1 - Connection is not available, request timed out after 3000ms."
+    },
+    {
+      "t": "02:05:17",
+      "level": "ERROR",
+      "pod": "checkout-api-6d9f7c-f6",
+      "logger": "com.zaxxer.hikari.pool.HikariPool",
+      "message": "HikariPool-1 - Connection is not available, request timed out after 3000ms."
+    },
+    {
+      "t": "02:05:29",
+      "level": "ERROR",
+      "pod": "checkout-api-6d9f7c-a1",
+      "logger": "com.zaxxer.hikari.pool.HikariPool",
+      "message": "HikariPool-1 - Connection is not available, request timed out after 3000ms."
+    },
+    {
+      "t": "02:05:36",
+      "level": "WARN",
+      "pod": "checkout-api-6d9f7c-d4",
+      "logger": "com.zaxxer.hikari.pool.HikariPool",
+      "message": "HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=48s)."
+    },
+    {
+      "t": "02:05:44",
+      "level": "ERROR",
+      "pod": "checkout-api-6d9f7c-b2",
+      "logger": "com.zaxxer.hikari.pool.HikariPool",
+      "message": "HikariPool-1 - Connection is not available, request timed out after 3000ms."
+    },
+    {
+      "t": "02:05:58",
+      "level": "ERROR",
+      "pod": "checkout-api-6d9f7c-c3",
+      "logger": "com.zaxxer.hikari.pool.HikariPool",
+      "message": "HikariPool-1 - Connection is not available, request timed out after 3000ms."
+    },
+    {
+      "t": "02:06:06",
+      "level": "ERROR",
+      "pod": "checkout-api-6d9f7c-d4",
+      "logger": "com.zaxxer.hikari.pool.HikariPool",
+      "message": "HikariPool-1 - Connection is not available, request timed out after 3000ms."
+    },
+    {
+      "t": "02:06:10",
+      "level": "ERROR",
+      "pod": "checkout-api-6d9f7c-e5",
+      "logger": "c.p.checkout.OrderController",
+      "message": "Request processing failed: client closed connection after 30000ms"
+    },
+    {
+      "t": "02:06:19",
+      "level": "ERROR",
+      "pod": "checkout-api-6d9f7c-e5",
+      "logger": "com.zaxxer.hikari.pool.HikariPool",
+      "message": "HikariPool-1 - Connection is not available, request timed out after 3000ms."
+    },
+    {
+      "t": "02:06:27",
+      "level": "ERROR",
+      "pod": "checkout-api-6d9f7c-f6",
+      "logger": "com.zaxxer.hikari.pool.HikariPool",
+      "message": "HikariPool-1 - Connection is not available, request timed out after 3000ms."
+    },
+    {
+      "t": "02:06:41",
+      "level": "ERROR",
+      "pod": "checkout-api-6d9f7c-a1",
+      "logger": "com.zaxxer.hikari.pool.HikariPool",
+      "message": "HikariPool-1 - Connection is not available, request timed out after 3000ms."
+    },
+    {
+      "t": "02:06:52",
+      "level": "ERROR",
+      "pod": "checkout-api-6d9f7c-b2",
+      "logger": "com.zaxxer.hikari.pool.HikariPool",
+      "message": "HikariPool-1 - Connection is not available, request timed out after 3000ms."
+    },
+    {
+      "t": "02:06:55",
+      "level": "WARN",
+      "pod": "checkout-api-6d9f7c-a1",
+      "logger": "c.p.checkout.InventoryClient",
+      "message": "Retry 1/3 for GET /stock/sku-88213 after 250ms"
+    },
+    {
+      "t": "02:07:01",
+      "level": "ERROR",
+      "pod": "checkout-api-6d9f7c-c3",
+      "logger": "com.zaxxer.hikari.pool.HikariPool",
+      "message": "HikariPool-1 - Connection is not available, request timed out after 3000ms."
+    },
+    {
+      "t": "02:07:08",
+      "level": "ERROR",
+      "pod": "checkout-api-6d9f7c-d4",
+      "logger": "com.zaxxer.hikari.pool.HikariPool",
+      "message": "HikariPool-1 - Connection is not available, request timed out after 3000ms."
+    },
+    {
+      "t": "02:07:19",
+      "level": "ERROR",
+      "pod": "checkout-api-6d9f7c-e5",
+      "logger": "com.zaxxer.hikari.pool.HikariPool",
+      "message": "HikariPool-1 - Connection is not available, request timed out after 3000ms."
+    },
+    {
+      "t": "02:07:26",
+      "level": "ERROR",
+      "pod": "checkout-api-6d9f7c-f6",
+      "logger": "com.zaxxer.hikari.pool.HikariPool",
+      "message": "HikariPool-1 - Connection is not available, request timed out after 3000ms."
+    },
+    {
+      "t": "02:07:33",
+      "level": "ERROR",
+      "pod": "checkout-api-6d9f7c-a1",
+      "logger": "com.zaxxer.hikari.pool.HikariPool",
+      "message": "HikariPool-1 - Connection is not available, request timed out after 3000ms."
+    },
+    {
+      "t": "02:07:40",
+      "level": "ERROR",
+      "pod": "checkout-api-6d9f7c-c3",
+      "logger": "o.a.c.c.C.[dispatcherServlet]",
+      "message": "Servlet.service() threw CannotCreateTransactionException: Could not open JPA EntityManager"
+    },
+    {
+      "t": "02:07:47",
+      "level": "ERROR",
+      "pod": "checkout-api-6d9f7c-b2",
+      "logger": "com.zaxxer.hikari.pool.HikariPool",
+      "message": "HikariPool-1 - Connection is not available, request timed out after 3000ms."
+    },
+    {
+      "t": "02:07:58",
+      "level": "ERROR",
+      "pod": "checkout-api-6d9f7c-c3",
+      "logger": "com.zaxxer.hikari.pool.HikariPool",
+      "message": "HikariPool-1 - Connection is not available, request timed out after 3000ms."
+    },
+    {
+      "t": "02:08:04",
+      "level": "ERROR",
+      "pod": "checkout-api-6d9f7c-d4",
+      "logger": "com.zaxxer.hikari.pool.HikariPool",
+      "message": "HikariPool-1 - Connection is not available, request timed out after 3000ms."
+    },
+    {
+      "t": "02:08:15",
+      "level": "ERROR",
+      "pod": "checkout-api-6d9f7c-e5",
+      "logger": "com.zaxxer.hikari.pool.HikariPool",
+      "message": "HikariPool-1 - Connection is not available, request timed out after 3000ms."
+    },
+    {
+      "t": "02:08:22",
+      "level": "INFO",
+      "pod": "checkout-api-6d9f7c-f6",
+      "logger": "c.p.checkout.PaymentsClient",
+      "message": "POST payments-gateway /authorize 200 in 131ms"
+    },
+    {
+      "t": "02:08:29",
+      "level": "ERROR",
+      "pod": "checkout-api-6d9f7c-f6",
+      "logger": "com.zaxxer.hikari.pool.HikariPool",
+      "message": "HikariPool-1 - Connection is not available, request timed out after 3000ms."
+    },
+    {
+      "t": "02:08:41",
+      "level": "ERROR",
+      "pod": "checkout-api-6d9f7c-a1",
+      "logger": "com.zaxxer.hikari.pool.HikariPool",
+      "message": "HikariPool-1 - Connection is not available, request timed out after 3000ms."
+    },
+    {
+      "t": "02:08:50",
+      "level": "WARN",
+      "pod": "checkout-api-6d9f7c-b2",
+      "logger": "o.s.b.a.health.HealthEndpoint",
+      "message": "Readiness degraded: db pool saturated"
+    },
+    {
+      "t": "02:08:57",
+      "level": "ERROR",
+      "pod": "checkout-api-6d9f7c-b2",
+      "logger": "com.zaxxer.hikari.pool.HikariPool",
+      "message": "HikariPool-1 - Connection is not available, request timed out after 3000ms."
+    },
+    {
+      "t": "02:09:12",
+      "level": "ERROR",
+      "pod": "checkout-api-6d9f7c-c3",
+      "logger": "com.zaxxer.hikari.pool.HikariPool",
+      "message": "HikariPool-1 - Connection is not available, request timed out after 3000ms."
+    },
+    {
+      "t": "02:09:30",
+      "level": "ERROR",
+      "pod": "checkout-api-6d9f7c-d4",
+      "logger": "com.zaxxer.hikari.pool.HikariPool",
+      "message": "HikariPool-1 - Connection is not available, request timed out after 3000ms."
+    },
+    {
+      "t": "02:09:44",
+      "level": "INFO",
+      "pod": "deployer",
+      "logger": "argo-rollouts",
+      "message": "Rollback checkout-api to v2.13.2 started (runbook RB-112, approved by on-call engineer)"
+    },
+    {
+      "t": "02:09:51",
+      "level": "ERROR",
+      "pod": "checkout-api-6d9f7c-e5",
+      "logger": "com.zaxxer.hikari.pool.HikariPool",
+      "message": "HikariPool-1 - Connection is not available, request timed out after 3000ms."
+    },
+    {
+      "t": "02:09:58",
+      "level": "INFO",
+      "pod": "checkout-api-58c4b1-a1",
+      "logger": "com.zaxxer.hikari.HikariConfig",
+      "message": "maximumPoolSize................40"
+    },
+    {
+      "t": "02:10:22",
+      "level": "ERROR",
+      "pod": "checkout-api-6d9f7c-f6",
+      "logger": "com.zaxxer.hikari.pool.HikariPool",
+      "message": "HikariPool-1 - Connection is not available, request timed out after 3000ms."
+    },
+    {
+      "t": "02:10:41",
+      "level": "INFO",
+      "pod": "checkout-api-58c4b1-c3",
+      "logger": "c.p.checkout.OrderController",
+      "message": "POST /checkout 200 in 188ms"
+    },
+    {
+      "t": "02:11:10",
+      "level": "INFO",
+      "pod": "deployer",
+      "logger": "argo-rollouts",
+      "message": "Rollback checkout-api v2.13.2 complete: 6 of 6 pods ready"
+    },
+    {
+      "t": "02:12:00",
+      "level": "INFO",
+      "pod": "checkout-api-58c4b1-e5",
+      "logger": "c.p.checkout.OrderController",
+      "message": "POST /checkout 200 in 176ms"
+    }
+  ]
+}

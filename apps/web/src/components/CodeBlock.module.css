@@ -1,0 +1,51 @@
+.block {
+  margin: 0;
+  padding: 8px 10px;
+  border-radius: var(--r-code);
+  background: var(--stage);
+  font-family: var(--font-mono);
+  font-size: var(--t-sm);
+  line-height: 1.45;
+  color: var(--ink);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.log {
+  border-left: 0;
+  color: var(--ink);
+}
+
+.diff {
+  padding: 6px 0;
+  white-space: pre;
+  overflow-x: auto;
+}
+
+.line {
+  display: block;
+  padding: 0 10px;
+}
+
+.add {
+  background: var(--ok-wash);
+}
+
+.del {
+  background: var(--alert-wash);
+}
+
+.fileLine {
+  color: var(--ink-3);
+}
+
+.error {
+  background: var(--alert-wash);
+  color: var(--ink);
+}
+
+/* Tables keep their columns; a narrow panel scrolls sideways instead of wrapping rows. */
+.table {
+  white-space: pre;
+  overflow-x: auto;
+}

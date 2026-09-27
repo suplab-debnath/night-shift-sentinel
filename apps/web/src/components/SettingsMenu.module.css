@@ -1,0 +1,72 @@
+.wrap {
+  position: relative;
+}
+
+.trigger {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: var(--surface);
+  color: var(--ink-2);
+  cursor: pointer;
+}
+
+.menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  z-index: 30;
+  min-width: 240px;
+  padding: 6px;
+  background: var(--surface);
+  border-radius: var(--r-card);
+  box-shadow: var(--shadow-2);
+  display: grid;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: var(--r-code);
+  background: none;
+  text-align: left;
+  font-size: var(--t-sm);
+  cursor: pointer;
+}
+
+.item:hover {
+  background: var(--paper);
+}
+
+.box {
+  width: 18px;
+  height: 18px;
+  display: inline-grid;
+  place-items: center;
+  border: 1.5px solid var(--ink-3);
+  border-radius: 4px;
+  font-size: var(--t-xs);
+  color: var(--signal);
+}
+
+.source {
+  margin: 0;
+  padding: 8px 10px 10px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 4px;
+  font-size: var(--t-xs);
+  color: var(--ink-2);
+  display: grid;
+  gap: 2px;
+}
+
+.sourceDetail {
+  color: var(--ink-3);
+}
