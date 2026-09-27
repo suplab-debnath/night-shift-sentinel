@@ -41,6 +41,13 @@
 
 If the client clicks **Reject**: "Good. Let's see what happens." After the alternative: "If you reject again, it stops and escalates. It stops where people say stop."
 
+**Letting it run at 0.3×.** The script above assumes the presenter narrates and pauses at
+1×. To let the demo play unattended end to end (e.g. a booth loop, a recorded walkthrough,
+or opening a pitch with "watch it actually think") press `-` to drop to 0.3×: the same
+canonical timeline stretches to a ~7–8 min run-through, closer to how long real agent
+tool calls and deliberation would take (DECISIONS D-072). Speed back to 1× before
+resuming the narrated script above, since its cues are timed against 1×.
+
 ## 4. Recovery playbook
 
 | Problem | Do this |
@@ -65,7 +72,7 @@ If the client clicks **Reject**: "Good. Let's see what happens." After the alter
 | `P` | Presenter mode |
 | `N` | Toggle presenter notes strip |
 | `M` | Switch mode (scripted ↔ live, if available) |
-| `+` / `-` | Speed up / down (1×, 1.5×, 2×) |
+| `+` / `-` | Speed up / down (0.3×, 1×, 1.5×, 2×) |
 | `R` | Reset to title |
 | `?` | Show shortcuts |
 

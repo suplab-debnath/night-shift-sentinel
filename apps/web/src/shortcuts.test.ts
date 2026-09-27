@@ -27,12 +27,14 @@ describe('shortcut map (RUNBOOK §5)', () => {
     expect(SHORTCUT_HELP).toHaveLength(13);
   });
 
-  it('steps speed through 1×, 1.5×, 2× and clamps', () => {
+  it('steps speed through 0.3×, 1×, 1.5×, 2× and clamps', () => {
     expect(resolveShortcut({ key: '+' }, { speed: 1 })).toEqual({ type: 'setSpeed', speed: 1.5 });
     expect(resolveShortcut({ key: '=' }, { speed: 1.5 })).toEqual({ type: 'setSpeed', speed: 2 });
     expect(resolveShortcut({ key: '+' }, { speed: 2 })).toEqual({ type: 'setSpeed', speed: 2 });
     expect(resolveShortcut({ key: '-' }, { speed: 2 })).toEqual({ type: 'setSpeed', speed: 1.5 });
-    expect(resolveShortcut({ key: '-' }, { speed: 1 })).toEqual({ type: 'setSpeed', speed: 1 });
+    expect(resolveShortcut({ key: '-' }, { speed: 1 })).toEqual({ type: 'setSpeed', speed: 0.3 });
+    expect(resolveShortcut({ key: '-' }, { speed: 0.3 })).toEqual({ type: 'setSpeed', speed: 0.3 });
+    expect(resolveShortcut({ key: '+' }, { speed: 0.3 })).toEqual({ type: 'setSpeed', speed: 1 });
     // From a URL speed outside the list.
     expect(resolveShortcut({ key: '-' }, { speed: 8 })).toEqual({ type: 'setSpeed', speed: 2 });
     expect(resolveShortcut({ key: '+' }, { speed: 1.2 })).toEqual({ type: 'setSpeed', speed: 1.5 });

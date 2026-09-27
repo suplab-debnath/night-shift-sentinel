@@ -45,7 +45,7 @@ export const SHORTCUT_HELP: { keys: string; action: string }[] = [
   { keys: 'P', action: 'Presenter mode' },
   { keys: 'N', action: 'Presenter notes strip' },
   { keys: 'M', action: 'Switch mode (scripted or live, if available)' },
-  { keys: '+ / -', action: 'Speed up or down (1×, 1.5×, 2×)' },
+  { keys: '+ / -', action: 'Speed up or down (0.3×, 1×, 1.5×, 2×)' },
   { keys: 'R', action: 'Reset to title' },
   { keys: '?', action: 'Show shortcuts' },
 ];
