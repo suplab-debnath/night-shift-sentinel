@@ -3,6 +3,7 @@ import { SPEEDS } from './lib/speeds';
 
 export type ShortcutAction =
   | { type: 'togglePlay' }
+  | { type: 'toggleSquad' }
   | { type: 'stepForward' }
   | { type: 'stepBack' }
   | { type: 'jumpToAct'; act: number }
@@ -35,7 +36,8 @@ export interface ShortcutContext {
 
 /** The rows shown in the shortcuts overlay, in RUNBOOK order. */
 export const SHORTCUT_HELP: { keys: string; action: string }[] = [
-  { keys: 'Space', action: 'Play or pause' },
+  { keys: 'Space', action: 'Start, pause the squad, or resume' },
+  { keys: 'F', action: 'Freeze everything, clock included (presenter)' },
   { keys: '→ / ←', action: 'Next or previous beat' },
   { keys: '1–7', action: 'Jump to act' },
   { keys: 'A / X', action: 'Approve or reject at an open gate' },
@@ -45,8 +47,9 @@ export const SHORTCUT_HELP: { keys: string; action: string }[] = [
   { keys: 'P', action: 'Presenter mode' },
   { keys: 'N', action: 'Presenter notes strip' },
   { keys: 'M', action: 'Switch mode (scripted or live, if available)' },
-  { keys: '+ / -', action: 'Speed up or down (0.3×, 1×, 1.5×, 2×)' },
+  { keys: '+ / -', action: 'Speed up or down (1×, 1.5×, 2×)' },
   { keys: 'R', action: 'Reset to title' },
+  { keys: 'Esc', action: 'Close the open overlay or the end summary' },
   { keys: '?', action: 'Show shortcuts' },
 ];
 
@@ -66,7 +69,8 @@ export function resolveShortcut(e: KeyLike, ctx: ShortcutContext): ShortcutActio
   if (onText) return null;
 
   const key = e.key;
-  if (key === ' ' || key === 'Spacebar') return onButton || onRange ? null : { type: 'togglePlay' };
+  // Space is the operations control (start, pause squad, resume); F freezes everything for questions.
+  if (key === ' ' || key === 'Spacebar') return onButton || onRange ? null : { type: 'toggleSquad' };
   if (key === 'ArrowRight') return onRange ? null : { type: 'stepForward' };
   if (key === 'ArrowLeft') return onRange ? null : { type: 'stepBack' };
   if (key === 'Escape') return { type: 'close' };
@@ -76,6 +80,8 @@ export function resolveShortcut(e: KeyLike, ctx: ShortcutContext): ShortcutActio
   if (key === '?') return { type: 'toggleHelp' };
 
   switch (key.toLowerCase()) {
+    case 'f':
+      return { type: 'togglePlay' };
     case 'a':
       return { type: 'approve' };
     case 'x':

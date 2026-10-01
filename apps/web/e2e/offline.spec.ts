@@ -41,8 +41,8 @@ test('the offline build is one self-contained file', () => {
 test('plays every path from file:// with the network off, zero external requests, fonts rendered', async ({ context }) => {
   const { page, external, errors } = await offlinePage(context);
 
-  await page.goto(`${FILE}?take=0&speed=8&autoplay=1&autoDecide=g1:approved`);
-  expect(await sourceLine(page)).toBe('Scriptedcanonical take');
+  await page.goto(`${FILE}?take=0&pace=1&speed=8&autoplay=1&autoDecide=g1:approved`);
+  expect(await sourceLine(page)).toBe('Scriptedcanonical take · authored pace');
 
   // Fonts come from inlined data: URIs and actually render.
   await page.evaluate(() => document.fonts.ready);
@@ -65,7 +65,7 @@ test('plays every path from file:// with the network off, zero external requests
   await expect(page.getByTestId('end-card')).toBeVisible({ timeout: 20_000 });
 
   // Reject path to End B in the same offline session.
-  await page.goto(`${FILE}?take=0&speed=8&autoplay=1&autoDecide=g1:rejected,g2:rejected`);
+  await page.goto(`${FILE}?take=0&pace=1&speed=8&autoplay=1&autoDecide=g1:rejected,g2:rejected`);
   await expect(page.getByTestId('end-card')).toHaveAttribute('data-ending', 'B', { timeout: 90_000 });
 
   expect(external).toEqual([]);
@@ -74,7 +74,7 @@ test('plays every path from file:// with the network off, zero external requests
 
 test('the Content-Security-Policy forbids network access at runtime', async ({ context }) => {
   const { page } = await offlinePage(context);
-  await page.goto(`${FILE}?take=0`);
+  await page.goto(`${FILE}?take=0&pace=1`);
   const csp = await page.locator('meta[http-equiv="Content-Security-Policy"]').getAttribute('content');
   expect(csp).toContain("connect-src 'none'");
   expect(csp).toContain('font-src data:');
@@ -92,7 +92,7 @@ test('the Content-Security-Policy forbids network access at runtime', async ({ c
 test('reduced motion and 1366×768 work offline', async ({ context }) => {
   const { page, external } = await offlinePage(context);
   await page.setViewportSize({ width: 1366, height: 768 });
-  await page.goto(`${FILE}?take=0&speed=8&autoplay=1&pauseAt=a4.b12&reducedMotion=1`);
+  await page.goto(`${FILE}?take=0&pace=1&speed=8&autoplay=1&pauseAt=a4.b12&reducedMotion=1`);
   await expect(page.getByTestId('checklist')).toContainText('P-06', { timeout: 60_000 });
   expect(await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth)).toBe(false);
   expect(external).toEqual([]);

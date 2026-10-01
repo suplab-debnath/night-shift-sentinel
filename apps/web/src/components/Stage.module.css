@@ -24,3 +24,8 @@
   width: 0;
   border-left: 1px dashed var(--line);
 }
+
+/* Paused squad or presenter freeze: every stage animation holds where it is (D-075). */
+.stage[data-paused] :global(*) {
+  animation-play-state: paused !important;
+}

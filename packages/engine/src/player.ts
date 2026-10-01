@@ -32,6 +32,8 @@ export interface PlayerOptions {
   snapshotEveryMs?: number;
   /** Take to play (DECISIONS D-068); 0 is the canonical script. */
   take?: number;
+  /** Playback pacing factor (DECISIONS D-072); 1 is the authored timing. */
+  pace?: number;
 }
 
 export type PlayerListener = (snapshot: PlayerSnapshot, emitted: readonly EngineEvent[]) => void;
@@ -49,7 +51,10 @@ export interface Player {
   stepForward(): void;
   stepBack(): void;
   jumpToAct(n: number): boolean;
-  decide(gateId: string, decision: GateDecision, by?: string): boolean;
+  /** waitedMs: story time the person took (counted by the run clock, D-074). */
+  decide(gateId: string, decision: GateDecision, by?: string, waitedMs?: number): boolean;
+  /** The squad was paused here for `ms` of story time; the run clock counts it (D-074). */
+  holdClock(ms: number): void;
   triggerChaos(): boolean;
   reset(): void;
   /** Pause automatically once the given beat has fully played. */
@@ -75,7 +80,8 @@ export function createPlayer(scenario: Scenario, options: PlayerOptions = {}): P
 
   let decisions: Decision[] = [];
   const take = options.take ?? 0;
-  let timeline: Timeline = compile(scenario, [], { take });
+  const pace = options.pace ?? 1;
+  let timeline: Timeline = compile(scenario, [], { take, pace });
   let t = 0;
   let cursor = 0;
   let state = initial;
@@ -94,7 +100,7 @@ export function createPlayer(scenario: Scenario, options: PlayerOptions = {}): P
   }
 
   function recompile(next: Decision[]) {
-    timeline = compile(scenario, next, { overrides, take });
+    timeline = compile(scenario, next, { overrides, take, pace });
     decisions = [...timeline.decisions];
     checkpoints = [];
   }
@@ -301,13 +307,19 @@ export function createPlayer(scenario: Scenario, options: PlayerOptions = {}): P
       }
       return false;
     },
-    decide(gateId, decision, by) {
+    decide(gateId, decision, by, waitedMs) {
       if (!(t >= timeline.endT && timeline.end.kind === 'gate' && timeline.end.gateId === gateId)) return false;
-      recompile([...decisions, { type: 'gate', gateId, decision, by: by ?? defaultApprover }]);
+      const waited = waitedMs !== undefined && waitedMs > 0 ? { waitedMs: Math.round(waitedMs) } : {};
+      recompile([...decisions, { type: 'gate', gateId, decision, by: by ?? defaultApprover, ...waited }]);
       // The prefix is unchanged, so cursor and state stay valid.
       const emitted = catchUp();
       notify(emitted);
       return true;
+    },
+    holdClock(ms) {
+      if (!(ms > 0)) return;
+      recompile([...decisions, { type: 'hold', at: t, ms: Math.round(ms) }]);
+      notify();
     },
     triggerChaos() {
       if (!canChaos()) return false;

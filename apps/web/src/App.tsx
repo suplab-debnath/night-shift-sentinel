@@ -8,7 +8,7 @@ import { useShortcuts } from './hooks/useShortcuts';
 import { SidePanel } from './components/SidePanel';
 import { Stage } from './components/Stage';
 import { TopBar } from './components/TopBar';
-import { TransportBar } from './components/TransportBar';
+import { OperationsBar } from './components/OperationsBar';
 import { useApp } from './state/store';
 import styles from './App.module.css';
 
@@ -36,7 +36,7 @@ export function App() {
         <Stage />
         <SidePanel />
       </main>
-      <TransportBar />
+      <OperationsBar />
       <PresenterNotes />
       <SplitView />
       <ShortcutsHelp />

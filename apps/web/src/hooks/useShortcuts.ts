@@ -45,7 +45,10 @@ export function run(action: ShortcutAction, s: State, get: () => State = () => s
   const gateId = snap.pendingGateId;
   switch (action.type) {
     case 'togglePlay':
-      source.togglePlay();
+      source.toggleFreeze();
+      return true;
+    case 'toggleSquad':
+      source.toggleSquad();
       return true;
     case 'stepForward':
       source.stepForward();
@@ -94,6 +97,11 @@ export function run(action: ShortcutAction, s: State, get: () => State = () => s
     case 'close':
       if (ui.shortcutsOpen || ui.splitOpen || ui.inspector || ui.panelOpen) {
         setUi({ shortcutsOpen: false, splitOpen: false, inspector: null, panelOpen: false });
+        return true;
+      }
+      // Then the scorecard / end card, so the finished stage can be shown.
+      if (snap.state.scorecard !== null && !ui.summaryHidden && !snap.state.overlay.active) {
+        setUi({ summaryHidden: true });
         return true;
       }
       return false;

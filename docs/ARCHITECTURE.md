@@ -156,6 +156,8 @@ Validation tests (P2): schema-valid; every gate has both branches; every segment
 - **Step:** jump to the next beat boundary.
 - **Overlay (chaos):** pauses the main timeline, plays the chaos segment on an overlay layer, then resumes. Overlay audit rows persist; overlay visual state is discarded at `chaos.end`.
 - **Determinism:** no wall-clock reads inside the engine; property test: for random seek targets, `seek(t)` equals linear playback to `t`.
+- **Run clock (DECISIONS D-074):** event clocks are computed, not authored: real time from `clockStart`, faster during `clock.rate` fast-forwards, jumping at time-lapses, standing still during chaos, and moved forward by two kinds of decisions the UI adapter records from wall time: `gate.waitedMs` (how long the person took) and `{ type: 'hold', at, ms }` (the squad was paused). Both are ordinary decisions, so replay stays deterministic and seeking before one clears it. Text that quotes run times carries tokens (`{{clock:a6.b02}}`, `{{span:a:b}}`, `{{wait}}`) resolved in `compile`; `resolveRunText` resolves scenario-level text (headline, scorecard, split view) the same way. Live turns receive the tokenised reference and must copy tokens verbatim.
+- **Pacing (D-072):** `pace` stretches scripted durations and makes the timeline elastic (reading time per line, a thinking pause before each).
 
 ## 7. Server and live mode
 

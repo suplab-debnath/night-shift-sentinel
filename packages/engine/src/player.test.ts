@@ -77,12 +77,13 @@ describe('gates', () => {
     expect(s.state.gate?.status).toBe('open');
     expect(p.advance(1000)).toEqual([]);
     expect(p.decide('g2', 'approved')).toBe(false);
+    const atGate = s.clock;
     expect(p.decide('g1', 'approved', 'Asha')).toBe(true);
     expect(p.getSnapshot().status).toBe('playing');
     p.advance(1000);
     const after = p.getSnapshot();
     expect(after.state.gate).toMatchObject({ status: 'approved', by: 'Asha' });
-    expect(after.clock >= '02:09:40').toBe(true);
+    expect(after.clock > atGate).toBe(true);
     runUntil(p, () => p.getSnapshot().status === 'ended');
     expect(p.getSnapshot().playing).toBe(false);
     expect(p.getSnapshot().state.endCard).not.toBeNull();

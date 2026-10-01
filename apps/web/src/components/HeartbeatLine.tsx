@@ -1,5 +1,7 @@
 import { useRef } from 'react';
 import { useAmbientMs } from '../hooks/useAmbientMs';
+import { useWidth } from '../hooks/useWidth';
+import { placeBeside } from '../lib/fit';
 import { copy } from '../copy';
 import { useElementSize } from '../hooks/useElementSize';
 import { formatLatency, formatPercent } from '../lib/format';
@@ -12,6 +14,8 @@ import styles from './HeartbeatLine.module.css';
 export function HeartbeatLine() {
   const ref = useRef<HTMLDivElement>(null);
   const { width, height } = useElementSize(ref);
+  const readoutRef = useRef<HTMLDivElement>(null);
+  const readoutWidth = useWidth(readoutRef);
   const t = useApp((s) => s.snap.t);
   const endT = useApp((s) => s.snap.timeline.endT);
   const ended = useApp((s) => s.snap.status === 'ended');
@@ -53,7 +57,15 @@ export function HeartbeatLine() {
           <span className={styles.sloLabel} style={{ top: geo.sloY }}>
             {copy.stage.slo(slo.p99Ms)}
           </span>
-          <div className={styles.readout} style={{ left: Math.min(geo.head.x + 10, width - 150), top: Math.max(4, geo.head.y - 40) }}>
+          <div
+            ref={readoutRef}
+            className={styles.readout}
+            style={{
+              left: placeBeside(geo.head.x, readoutWidth || 150, width),
+              // Above the line head, or below it when the head rides the top of the band.
+              top: geo.head.y - 40 >= 4 ? geo.head.y - 40 : geo.head.y + 12,
+            }}
+          >
             <span className={`${styles.errors} ${errorsHigh ? styles.errorsHigh : styles.errorsOk}`} data-testid="error-chip">
               {copy.stage.errors(formatPercent(errorRate))}
             </span>

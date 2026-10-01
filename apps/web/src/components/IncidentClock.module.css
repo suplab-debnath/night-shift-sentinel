@@ -34,3 +34,9 @@
   font-weight: 500;
   color: var(--ink-2);
 }
+
+/* A labelled fast-forward (rollout ×4) reads as information, not a warning. */
+.rate {
+  background: var(--signal-wash);
+  color: var(--signal);
+}

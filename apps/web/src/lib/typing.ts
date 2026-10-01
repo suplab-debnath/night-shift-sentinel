@@ -7,9 +7,10 @@
 // before the first token, then chunks of a few tokens at uneven gaps with the odd pause.
 // The schedule is seeded by the key, so a given line always streams the same way, and it
 // finishes in the same time as the even reveal, so beat timing is unchanged.
-import { hashString, mulberry32 } from '@night-shift/engine';
+import { hashString, mulberry32, STREAM_CPS } from '@night-shift/engine';
 
-export const THOUGHT_CPS = 45;
+/** Reading pace; the engine's paced timeline leaves exactly this long per line (D-072). */
+export const THOUGHT_CPS = STREAM_CPS;
 export const ARTIFACT_CPS = 120;
 export const MAX_WALL_CPS = 90;
 

@@ -3,6 +3,7 @@ import type { AgentId } from '@night-shift/engine';
 import { controlPoint, easeMove, edgePoints, nodeCenter, quadPath, quadPoint, type Size } from '../lib/geometry';
 import { AGENT_HUE } from '../lib/agents';
 import { useApp } from '../state/store';
+import { clampCentre, labelPillWidth } from '../lib/fit';
 import styles from './PacketLayer.module.css';
 
 const TRAVEL = 700;
@@ -81,7 +82,12 @@ export function PacketLayer({ size }: { size: Size }) {
           <div
             key={m.id}
             className={`${styles.packet} ${m.showLabel ? styles.labelled : ''}`}
-            style={{ left: p.x, top: p.y, background: AGENT_HUE[m.from], opacity }}
+            style={{
+              left: m.showLabel ? clampCentre(p.x, labelPillWidth(m.label), size.width) : p.x,
+              top: p.y,
+              background: AGENT_HUE[m.from],
+              opacity,
+            }}
             data-testid="packet"
           >
             {m.showLabel ? m.label : null}

@@ -1,0 +1,200 @@
+.bar {
+  height: var(--transport-h);
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 0 20px;
+  background: var(--surface);
+  border-top: 1px solid var(--line);
+  position: relative;
+  z-index: 5;
+}
+
+.primary {
+  flex: none;
+  min-width: 168px;
+  height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: var(--ink);
+  color: var(--surface);
+  font-weight: 600;
+  font-size: var(--t-sm);
+  cursor: pointer;
+}
+
+.primary:hover:not(:disabled) {
+  background: var(--ink-2);
+}
+
+.primary:disabled {
+  background: var(--paper);
+  color: var(--ink-2);
+  cursor: default;
+}
+
+.resume {
+  background: var(--signal);
+}
+
+.track {
+  flex: 1;
+  min-width: 0;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: flex-start;
+}
+
+.milestone {
+  flex: 1;
+  min-width: 0;
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  padding-top: 16px;
+  text-align: center;
+}
+
+/* The line joining one milestone to the next. */
+.milestone::before {
+  content: '';
+  position: absolute;
+  top: 5px;
+  left: -50%;
+  width: 100%;
+  height: 2px;
+  background: var(--line);
+}
+
+.milestone:first-child::before {
+  display: none;
+}
+
+.milestone[data-state='done']::before {
+  background: var(--ok);
+}
+
+.dot {
+  position: absolute;
+  top: 0;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 2px solid var(--line);
+}
+
+.milestone[data-state='done'] .dot {
+  background: var(--ok);
+  border-color: var(--ok);
+}
+
+.milestone[data-state='current'] .dot {
+  border-color: var(--signal);
+  box-shadow: 0 0 0 4px var(--signal-wash);
+}
+
+.milestone[data-state='stopped'] .dot {
+  border-style: dashed;
+}
+
+.label {
+  font-size: var(--t-xs);
+  font-weight: 600;
+  color: var(--ink-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.milestone[data-state='done'] .label,
+.milestone[data-state='current'] .label {
+  color: var(--ink);
+}
+
+.time {
+  font-size: var(--t-xs);
+  color: var(--ink-3);
+}
+
+.impact {
+  flex: none;
+  display: grid;
+  justify-items: end;
+  line-height: 1.2;
+}
+
+.impactLabel {
+  font-size: var(--t-xs);
+  color: var(--ink-2);
+}
+
+.impactValue {
+  font-size: var(--t-lg);
+  font-weight: 500;
+  color: var(--alert);
+}
+
+.impact[data-over] .impactValue {
+  color: var(--ink);
+}
+
+.group {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.text {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+  background: var(--surface);
+  color: var(--ink);
+  font-size: var(--t-sm);
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.text:disabled {
+  color: var(--ink-3);
+  cursor: default;
+}
+
+@media (max-width: 1599px) {
+  .bar {
+    gap: 14px;
+    padding: 0 14px;
+  }
+  .primary {
+    min-width: 150px;
+    padding: 0 14px;
+  }
+  .text {
+    padding: 0 10px;
+    font-size: var(--t-xs);
+  }
+}
+
+@media (max-width: 1023px) {
+  .track,
+  .impact {
+    display: none;
+  }
+}

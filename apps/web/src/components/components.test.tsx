@@ -9,6 +9,9 @@ import { createAppStore, StoreProvider, type UiState } from '../state/store';
 import { run } from '../hooks/useShortcuts';
 import { GateSheet } from './GateSheet';
 import { PacketLayer } from './PacketLayer';
+import { EndCard } from './EndCard';
+import { ScorecardSheet } from './ScorecardSheet';
+import { ShowSummary } from './ShowSummary';
 import { StreamItem } from './StreamItem';
 
 beforeAll(() => {
@@ -31,6 +34,7 @@ const UI: UiState = {
   splitOpen: false,
   shortcutsOpen: false,
   panelOpen: false,
+  summaryHidden: false,
 };
 
 function setup(opts: { seek?: number; ui?: Partial<UiState>; decisions?: [] } = {}) {
@@ -153,6 +157,48 @@ describe('shortcut dispatch', () => {
     expect(run({ type: 'reject' }, gate2.store.getState())).toBe(true);
     // Chaos stays available after a rejection (from Act 4 onward).
     expect(run({ type: 'chaos' }, gate2.store.getState())).toBe(true);
+  });
+});
+
+describe('summary (scorecard and end card)', () => {
+  const approve = { type: 'gate' as const, gateId: 'g1', decision: 'approved' as const, by: 'Asha' };
+  const END = compile(incidentCheckout.scenario, [approve]).endT;
+  const SCORE_T = compile(incidentCheckout.scenario, [approve]).events.find((e) => e.kind === 'scorecard.show')!.t;
+
+  function mount(t: number) {
+    const source = new ScriptedSource(incidentCheckout.scenario, { approver: 'Asha', decisions: [approve], raf: () => 1, caf: () => {} });
+    source.seek(t);
+    const store = createAppStore(source, incidentCheckout, UI);
+    render(
+      <StoreProvider store={store}>
+        <ScorecardSheet />
+        <EndCard />
+        <ShowSummary />
+      </StoreProvider>,
+    );
+    return { source, store };
+  }
+
+  it('closes the scorecard sheet with its button and brings it back', () => {
+    mount(SCORE_T + 500);
+    expect(screen.getByTestId('scorecard')).toBeTruthy();
+    fireEvent.click(screen.getByTestId('scorecard-close'));
+    expect(screen.queryByTestId('scorecard')).toBeNull();
+    fireEvent.click(screen.getByTestId('show-summary'));
+    expect(screen.getByTestId('scorecard')).toBeTruthy();
+  });
+
+  it('closes the end card with its button or Esc, and replay restores it', () => {
+    const { store, source } = mount(END);
+    expect(screen.getByTestId('end-card')).toBeTruthy();
+    fireEvent.click(screen.getByTestId('end-close'));
+    expect(screen.queryByTestId('end-card')).toBeNull();
+    expect(screen.getByTestId('show-summary')).toBeTruthy();
+    act(() => store.getState().setUi({ summaryHidden: false }));
+    expect(run({ type: 'close' }, store.getState())).toBe(true);
+    expect(store.getState().ui.summaryHidden).toBe(true);
+    act(() => source.reset());
+    expect(store.getState().ui.summaryHidden).toBe(false);
   });
 });
 

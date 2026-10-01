@@ -3,12 +3,12 @@ import { incidentCheckout } from '@night-shift/scenarios';
 import { describe, expect, it } from 'vitest';
 import { findTarget } from './agentTurn';
 import { checkPolicies } from './policy';
-import { incidentFacts, POSTMORTEM_TIMELINE } from './prompt';
+import { incidentFacts } from './prompt';
 import { policyFor } from './segments';
 import { allowedNumbersFrom, numbersIn, sentences, timelineStamps, validate, VALIDATOR_NAMES, type ValidationInput } from './validators';
 
 const { scenario, fixtures } = incidentCheckout;
-const allowed = allowedNumbersFrom(JSON.stringify(fixtures), incidentFacts(incidentCheckout), POSTMORTEM_TIMELINE);
+const allowed = allowedNumbersFrom(JSON.stringify(fixtures), incidentFacts(incidentCheckout));
 const base = (validator: string, text: string, extra: Partial<ValidationInput> = {}): ValidationInput => ({
   validator,
   text,
@@ -34,7 +34,8 @@ describe('validators', () => {
         text: target.text,
         kind: target.kind,
         maxSentences: beat.live!.maxSentences,
-        allowedNumbers: allowed,
+        // As in agentTurn: the beat's own scripted text grounds its numbers too.
+        allowedNumbers: allowedNumbersFrom(JSON.stringify(fixtures), incidentFacts(incidentCheckout), target.text),
         reference: target.text,
         ...(policy ? { policy } : {}),
       });
@@ -60,7 +61,7 @@ describe('validators', () => {
       ['nope', 'Any text.'],
     ];
     for (const [v, text] of bad) {
-      const ref = 'Timeline\n01:55 deploy\n02:04 errors\n02:11:10 done\n\nWhat went well';
+      const ref = 'Timeline\n01:55 deploy\n02:04 errors\n{{clock:a6.b03}} done\n\nWhat went well';
       expect(validate(base(v, text, v.startsWith('scribe') ? { kind: 'artifact', reference: ref } : {})).ok, `${v}: ${text}`).toBe(false);
     }
   });
@@ -89,7 +90,7 @@ describe('validators', () => {
   });
 
   it('reads the postmortem timeline for the path', () => {
-    expect(timelineStamps('Title\n\nTimeline\n01:55 a\n02:08:44 b\n02:08:44 c\n\nWhat went well\n03:00 x')).toEqual(['01:55', '02:08:44']);
+    expect(timelineStamps('Title\n\nTimeline\n01:55 a\n02:08:44 b\n02:08:44 c\n{{clock:a6.b03}} d\n\nWhat went well\n03:00 x')).toEqual(['01:55', '02:08:44', '{{clock:a6.b03}}']);
     expect(validate(base('scribe-postmortem', 'Anything.', { kind: 'artifact' }))).toMatchObject({ reason: 'no reference timeline' });
   });
 

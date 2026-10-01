@@ -22,6 +22,7 @@ const sourceOptions = {
   autoplay: url.autoplay,
   seek: url.seek,
   take: url.take ?? freshTake(),
+  pace: url.pace ?? brand.pace,
 };
 
 // Live mode only when served with an /api (dev:live, dev:live-mock, or the AWS build);
@@ -46,6 +47,7 @@ const store = createAppStore(source, incidentCheckout, {
   splitOpen: false,
   shortcutsOpen: false,
   panelOpen: false,
+  summaryHidden: false,
 });
 
 const root = document.getElementById('root');

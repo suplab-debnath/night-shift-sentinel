@@ -13,6 +13,10 @@ const LINE_RULES = (maxSentences: number) =>
 const DOC_RULES =
   'Write the document as plain text with short headings on their own lines. No exclamation marks, no emoji. Output only the document.';
 
+/** Run times are tokens the stage fills in (DECISIONS D-074); the model must copy them. */
+export const TOKEN_RULES =
+  'Times from tonight\'s run are placeholders in double braces, for example {{clock:a6.b03}} or {{hm:a6.b02}}. Copy every placeholder you use exactly, braces included; the stage fills in the real times. Never write a run time as digits.';
+
 export function incidentFacts(bundle: ScenarioBundle): string {
   const f = bundle.fixtures;
   const m = f.metrics;
@@ -24,7 +28,8 @@ export function incidentFacts(bundle: ScenarioBundle): string {
     `SLO: p99 latency at most ${m.slo.p99Ms} ms; error rate at most ${m.slo.errorRatePct}%.`,
     `Normal: p99 ${m.normal.p99Ms} ms, errors ${m.normal.errorRatePct}%, pool active ${m.normal.poolActivePerPod} of ${m.normal.poolMaxPerPod} per pod.`,
     `Peak: p99 ${m.peak.p99Ms / 1000} s, errors ${m.peak.errorRatePct}%, error budget burn ${m.peak.errorBudgetBurn} times normal.`,
-    `Times: first errors ${m.events.firstErrors}, alert ${m.events.alert}, errors stopped ${m.events.errorsStopped}, mitigated ${m.events.mitigated}, stable ${m.events.stableConfirmed}.`,
+    // Times after the alert depend on the run (gate waits, pauses), so they are tokens, not facts (D-074).
+    `Times: v2.14.0 deployed 01:55, first errors ${m.events.firstErrors}, alert at about ${(m.events.alert ?? '02:07').slice(0, 5)}.`,
     `Logs: ${f.logs.stats.errorCount.toLocaleString('en-US')} errors since 02:04; ${Math.round(f.logs.stats.signatureShare * 100)}% match "${f.logs.stats.signature}".`,
     `Pool now: ${m.podsAt.pods[0]!.poolActive} of ${m.podsAt.pods[0]!.poolMax} active on every pod; ${m.podsAt.pendingTotal} threads waiting.`,
     `orders-db: CPU ${db?.cpuPct}%, connections ${db?.connections} of ${db?.maxConnections}, healthy. ${dependents} services depend on orders-db.`,
@@ -53,7 +58,7 @@ export function systemPrompt(opts: {
     '',
     'Facts:',
     incidentFacts(opts.bundle),
-    opts.timeline ? `\nTimeline so far:\n${opts.timeline}` : '',
+    opts.timeline ? `\n${TOKEN_RULES}\nTimeline so far:\n${opts.timeline}` : '',
     policy
       ? `\nPolicy results computed by the policy engine (you may only explain these, never change them):\n${policy.rows
           .map((r) => `${r.policyId} ${r.description}: ${r.result} (${r.reason})`)
@@ -62,13 +67,7 @@ export function systemPrompt(opts: {
   ].join('\n');
 }
 
-export const POSTMORTEM_TIMELINE = [
-  '01:55 v2.14.0 deployed by pipeline',
-  '02:04 first connection timeout errors',
-  '02:07 SLO alert; squad engaged',
-  '02:08:44 root cause identified (confidence 0.92)',
-  '02:09:34 rollback proposed; policy checks passed',
-  '02:09:40 rollback approved by on-call engineer',
-  '02:11:10 rollback complete; errors stopped at 02:10:41',
-  '02:16 stable for 5 minutes',
-].join('\n');
+/** The "Timeline" section of a scripted postmortem (with run-time tokens), given to the model. */
+export function timelineSection(doc: string): string {
+  return doc.split(/^Timeline$/m)[1]?.split(/\n\s*\n/)[0]?.trim() ?? '';
+}

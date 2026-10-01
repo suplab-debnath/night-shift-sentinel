@@ -76,9 +76,10 @@ All agent lines: ≤ 14 words per sentence, ≤ 2 sentences per thought, no excl
 
 - **Playback time** (`t`, seconds at 1×) drives animation. Scrubber and speed controls act on playback time.
 - **Story clock** (HH:MM:SS) is the incident clock at top of screen. Each beat below lists both.
-- The story clock **pauses during gates** and shows "Awaiting approval" with a small waiting counter.
-- The recovery confirmation uses an explicit **time-lapse marker** ("+5 min") rather than faking real time.
-- Target at 1×: Act 1 14 s · Act 2 12 s · Act 3 47 s · Act 4 24 s · Gate (presenter) · Act 6 22 s · Act 7 28 s → ≈ 2 min 27 s plus the gate.
+- **Run clock** (DECISIONS D-074): the incident clock runs in real time from 02:07:00, one second per second of playback. It keeps running while a person decides at a gate and while the squad is paused; both count toward the outcome. It stands still during a chaos test, which is a what-if. Slow real-world work is shown as a labelled fast-forward (the rollout runs at ×4, labelled "Rolling back · ×4"), and the stability check uses an explicit **time-lapse marker** ("+5 min") rather than faking real time.
+- The **Clock** column below is the authored reference at `pace` 1 with no waits; a real run shows its own times. Text that quotes a run time uses run-time tokens (§11.2), filled in from the run.
+- Target at 1×: Act 1 14 s · Act 2 12 s · Act 3 47 s · Act 4 24 s · Gate (presenter) · Act 6 22 s · Act 7 28 s → ≈ 2 min 27 s plus the gate. These are the **authored** timings (`pace` 1).
+- **Pacing** (DECISIONS D-072): demos run at `pace` 1.15 (`config/branding.json`, URL `pace=`). Every duration is stretched by that factor, and the timeline becomes elastic: a stream item never lands while the previous line is still being read (lines stream at 30 characters a second, plus 0.6 s), and an agent pauses 0.7–1.6 s to think before each line (1.0 s on take 0). The stage shows that pause ("<Agent> thinking…" in the stream, a bubble on the node), and a tool call shows "running n s" until its result lands. The run becomes ≈ 4 min plus the gate, most of it in Act 3. Story clocks and canonical times are unchanged.
 - Times below are take 0, the canonical script. Other takes vary wording and timing within the limits in §11.
 
 Event kinds referenced below are defined in ARCHITECTURE.md §4.
@@ -150,7 +151,7 @@ Three streams interleave. The right panel shows them in one stream with agent co
 | 35.8 | 02:08:39 | orchestrator | `thought` | "Traffic is the trigger. The pool cut to 10 is the cause." |
 | 37.4 | 02:08:40 | orchestrator | `thought` | "Three signals agree: pool exhaustion, a pool-size change, and a healthy database." |
 | 40.4 | 02:08:44 | orchestrator | `evidence.conclude` | Root-cause card forms from the three clue cards: "v2.14.0 cut the connection pool from 40 to 10." Confidence 0.92 |
-| 42.4 | 02:08:48 | orchestrator | `thought` · `channel.post` | "Root cause identified in under two minutes. Moving to mitigation." Channel: "Identified: v2.14.0 cut the checkout-api connection pool from 40 to 10. Preparing a fix." |
+| 42.4 | 02:08:48 | orchestrator | `thought` · `channel.post` | "Root cause identified {{since:a1.b07}} after the alert. Moving to mitigation." Channel: "Identified: v2.14.0 cut the checkout-api connection pool from 40 to 10. Preparing a fix." |
 | 44.4 | 02:08:52 | log-detective, code-archaeologist | `agent.state` done | Check marks; Sentinel stays watching |
 
 ### Act 4 — Fix and guardrail (24 s)
@@ -207,7 +208,7 @@ On **Reject**: → Branch R (§5.1).
 | 0.0 | 02:09:40 | fixer | `agent.state` working · `tool.call` | `deploy.rollback {service:"checkout-api", to:"v2.13.2", strategy:"rolling", batch:1}` |
 | 1–13 | 02:09:45–02:11:05 | fixer | `progress.update` ×6 | "Pod 1 of 6 … 6 of 6 on v2.13.2", one every 2.2 s |
 | 3–15 | — | — | `metric.update` | Latency line eases down 4.8 s → 190 ms; errors → 0.2%; line colour transitions alert → ok as it crosses the SLO line |
-| 9.0 | 02:10:41 | log-detective | `thought` · `channel.post` | "Pool errors stopped at 02:10:41. Active connections are 22 of 40." Channel: "Monitoring: pool errors stopped at 02:10:41. Watching for five minutes." |
+| 9.0 | 02:10:41 | log-detective | `thought` · `channel.post` | "Pool errors stopped at {{clock}}. Active connections are 22 of 40." Channel: "Monitoring: pool errors stopped at {{clock:a6.b02}}. Watching for five minutes." |
 | 14.0 | 02:11:10 | fixer | `agent.state` done · `thought` | "Rollback complete. All six pods run v2.13.2." |
 | 16.0 | — | — | `timelapse` | Marker "+5 min" slides across the latency line |
 | 17.0 | 02:16:10 | sentinel | `thought` | "p99 is 190 milliseconds and errors are 0.2%. Stable for five minutes." |
@@ -242,7 +243,7 @@ On **Reject**: → Branch R (§5.1).
 | 9–15 | 02:09:58–10:10 | guardian | `guardrail.check` ×5 | P-01 Required · P-03 Pass · P-04 Pass · P-06 Pass · **P-08** "Runtime overrides must be recorded and expire" Pass — 48 h expiry set |
 | 16.0 | 02:10:12 | guardian→human | `gate.request` | Gate `g2`: "Approve runtime config override?" Summary: "Set pool size to 40 on checkout-api via the old key, then restart pods one at a time. Keeps v2.14.0. Expires in 48 hours." Buttons: Approve override · Reject. Pager posts first: "Approval requested from on-call: runtime override on checkout-api." |
 
-- `g2` **approved** → Act 6 variant: tool `config.override` then `deploy.restart {strategy:"rolling"}`; progress text "Pod n of 6 restarted with pool size 40"; clock offsets +32 s; Fixer done line: "Override applied. All six pods run with pool size 40." Act 7 postmortem adds action item: "Remove runtime override after the config fix ships (expires in 48 h)." Channel posts follow Act 6 and 7 with the override wording: "Mitigating: runtime override approved. Restarting pods with pool size 40." and "Monitoring: pool errors stopped at 02:11:13. Watching for five minutes."
+- `g2` **approved** → Act 6 variant: tool `config.override` then `deploy.restart {strategy:"rolling"}`; progress text "Pod n of 6 restarted with pool size 40"; the rollout fast-forward reads "Restarting pods · ×4"; Fixer done line: "Override applied. All six pods run with pool size 40." Act 7 postmortem adds action item: "Remove runtime override after the config fix ships (expires in 48 h)." Channel posts follow Act 6 and 7 with the override wording: "Mitigating: runtime override approved. Restarting pods with pool size 40." and "Monitoring: pool errors stopped at {{clock:o6.b02}}. Watching for five minutes."
 - `g2` **rejected** → End B: Orchestrator: "Holding. Escalating to the incident commander with both options and the evidence." Scribe drafts an escalation note (§6.3). Severity badge stays SEV-2, label "Handed to humans". End card copy: "The squad stopped where people said stop." This is a feature, not a failure — the presenter should say so. Channel: "Escalated to the incident commander. The squad is holding, nothing changed."
 
 ### 5.2 Branch C — chaos test (governance finale)
@@ -272,7 +273,7 @@ Available any time after Act 4 begins (button "Chaos test", shortcut `C`) and fr
 ### 6.1 Status update (stakeholders)
 
 > **Checkout incident — mitigated**
-> From 02:04 to 02:11 some customers could not complete checkout. The cause was a configuration change in last night's release that limited database connections. We rolled back the release at 02:11 after on-call approval, and checkout has been stable since. No data was lost. A full review follows tomorrow.
+> From 02:04 to {{hm:a6.b02}} some customers could not complete checkout. The cause was a configuration change in last night's release that limited database connections. We rolled back the release at {{hm:a6.b03}} after on-call approval, and checkout has been stable since. No data was lost. A full review follows tomorrow.
 
 ### 6.2 Postmortem draft (engineers, blameless)
 
@@ -280,7 +281,7 @@ Available any time after Act 4 begins (button "Chaos test", shortcut `C`) and fr
 Title: Checkout degradation after checkout-api v2.14.0
 Status: Draft — for review by the service team
 Severity: SEV-2
-Duration: ~7 min customer impact (02:04–02:11)
+Duration: customer impact 02:04–{{hm:a6.b02}}
 Impact (illustrative): 1,912 errored checkout requests; p99 peaked at 4.8 s
 
 Summary
@@ -291,12 +292,12 @@ Under promo traffic, pods exhausted their pools and requests timed out.
 Timeline
 01:55 v2.14.0 deployed by pipeline
 02:04 first connection timeout errors
-02:07 SLO alert; squad engaged
-02:08:44 root cause identified (confidence 0.92)
-02:09:34 rollback proposed; policy checks passed
-02:09:40 rollback approved by on-call engineer
-02:11:10 rollback complete; errors stopped at 02:10:41
-02:16 stable for 5 minutes
+{{clock:a1.b07}} SLO alert; squad engaged
+{{clock:a3.b20}} root cause identified (confidence 0.92)
+{{clock:a5.b01}} rollback proposed; policy checks passed
+{{clock:a5.b02}} rollback approved by on-call engineer
+{{clock:a6.b03}} rollback complete; errors stopped at {{clock:a6.b02}}
+{{hm:a6.b05}} stable for 5 minutes
 
 What went well
 Detection within 3 minutes of first errors. Evidence from logs, deploys, and traces
@@ -318,6 +319,8 @@ A4 Add a config diff section to the release review template — Release manageme
 
 ## 7. Human vs agent split view (illustrative)
 
+In the app the squad lane is measured from the run (`splitView.squadLive`, run-time tokens, D-074); the times below are the static reference used by the decks.
+
 Two lanes on a shared time axis 02:00–03:00. Label: "Illustrative comparison based on a typical manual response."
 
 | Manual lane | Time | Agent lane | Time |
@@ -334,6 +337,8 @@ Two lanes on a shared time axis 02:00–03:00. Label: "Illustrative comparison b
 ---
 
 ## 8. Scorecard (illustrative)
+
+In the app the Squad column is measured from the run (`squadLive`: time to engage, root cause, and mitigate from the alert; human time is the time spent deciding at gates; postmortem draft time after mitigation). The values below are the static reference used by the decks. The Manual column stays an illustrative estimate.
 
 | Measure | Manual | Squad |
 |---|---|---|
@@ -426,12 +431,27 @@ Spread: `a1.b04` ±0.4 s, `a1.b06` ±0.3 s, `a3.b07` ±0.5 s, `a3.b08` ±0.5 s, 
 | `a3.x08` | sentinel | "Traffic more than doubled at 02:03, from 1,100 to 2,600 requests a minute." | At 02:03 traffic jumped from 1,100 to 2,600 requests a minute. |
 | `a3.x09` | orchestrator | "Traffic is the trigger. The pool cut to 10 is the cause." | So the traffic rise exposed it. The smaller pool is the cause. |
 | `a3.b19` | orchestrator | "Three signals agree: pool exhaustion, a pool-size change, and a healthy database." | The evidence lines up: exhausted pool, pool-size change, healthy database. |
-| `a3.b21` | orchestrator | "Root cause identified in under two minutes. Moving to mitigation." | Root cause found in under two minutes. On to mitigation. |
-| `a6.b02` | log-detective | "Pool errors stopped at 02:10:41. Active connections are 22 of 40." | No pool errors since 02:10:41. Connections are at 22 of 40. |
+| `a3.b21` | orchestrator | "Root cause identified {{since:a1.b07}} after the alert. Moving to mitigation." | Root cause found {{since:a1.b07}} after the alert. On to mitigation. |
+| `a6.b02` | log-detective | "Pool errors stopped at {{clock}}. Active connections are 22 of 40." | No pool errors since {{clock}}. Connections are at 22 of 40. |
 | `a6.b03` | fixer | "Rollback complete. All six pods run v2.13.2." | All six pods are back on v2.13.2. Rollback done. |
 | `a6.b05` | sentinel | "p99 is 190 milliseconds and errors are 0.2%. Stable for five minutes." | Five minutes stable: p99 at 190 milliseconds, errors at 0.2%. |
 | `a7.b02` | scribe | "Two audiences: stakeholders now, engineers in the morning." | Stakeholders get an update now. Engineers get the postmortem for the morning. |
 | `r.b02` | orchestrator | "Rollback declined. Looking for a fix that keeps v2.14.0 live." | No rollback, then. Finding a fix that keeps v2.14.0 in place. |
+| `o6.b02` | log-detective | "Pool errors stopped at {{clock}}. Active connections are 22 of 40." | No pool errors since {{clock}}. Connections are at 22 of 40. |
 | `o6.b05` | sentinel | "p99 is 190 milliseconds and errors are 0.2%. Stable for five minutes." | Five minutes stable: p99 at 190 milliseconds, errors at 0.2%. |
 | `o7.b02` | scribe | "Two audiences: stakeholders now, engineers in the morning." | Stakeholders get an update now. Engineers get the postmortem for the morning. |
 | `c.b02` | fixer | "Faster idea: raise max_connections on orders-db and restart it." | Quicker option: bump max_connections on orders-db and restart it. |
+
+### 11.2 Run-time tokens (DECISIONS D-074)
+
+Any text that states a time or duration from the run uses a token, filled in when the run is compiled (and again whenever a gate wait or a squad pause moves the clock). Tokens appear in lines, channel posts, the status update, the postmortem, the end card headline, the scorecard, and the split view.
+
+| Token | Becomes |
+|---|---|
+| `{{clock}}` / `{{hm}}` | This moment on the run clock, `02:10:41` / `02:10` |
+| `{{clock:a6.b02}}` / `{{hm:a6.b02}}` | When that beat played |
+| `{{since:a1.b07}}` | Time from that beat to now, `2 min 18 s` |
+| `{{span:a1.b07:a6.b02}}` | Time between two beats |
+| `{{wait}}` / `{{wait:g1}}` | Time the person took at all gates / at one gate |
+
+`a6.b02|o6.b02` picks whichever beat played on this path. Live turns get the same tokens in their reference text and must copy them exactly; the validator checks that they did.

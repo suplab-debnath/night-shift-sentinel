@@ -22,6 +22,7 @@ export const EventTemplateSchema = z.discriminatedUnion('kind', [
   z.object({ kind: z.literal('scene.start'), act: z.number().int(), title: z.string(), card: z.boolean().optional(), ...withClock }),
   z.object({ kind: z.literal('scene.end'), act: z.number().int(), ...withClock }),
   z.object({ kind: z.literal('clock.set'), clock: clockString, running: z.boolean() }),
+  z.object({ kind: z.literal('clock.rate'), rate: z.number().positive().max(60), label: z.string().min(1).optional(), ...withClock }),
   z.object({ kind: z.literal('agent.state'), agent: agentId, state: z.enum(AGENT_STATES), ...withClock }),
   z.object({ kind: z.literal('thought'), agent: agentId, text: z.string().min(1), stream: z.boolean().optional(), ...withClock }),
   z.object({
@@ -198,6 +199,10 @@ export const ScorecardRowSchema = z.object({
   /** Minutes, for proportional bars and deck charts. */
   manualMinutes: z.number().nonnegative().optional(),
   squadMinutes: z.number().nonnegative().optional(),
+  /** The squad figure measured from this run (run-time tokens, D-074); `squad` stays for the decks. */
+  squadLive: z.string().min(1).optional(),
+  /** Beats ("a|b" lists) whose span sizes the squad bar in the app. */
+  squadSpan: z.tuple([z.string().min(1), z.string().min(1)]).optional(),
 });
 
 export const SplitLaneEntrySchema = z.object({ label: z.string().min(1), clock: z.string().regex(/^\d{2}:\d{2}(:\d{2})?$/) });
@@ -207,9 +212,23 @@ export const SplitViewSchema = z.object({
   axis: z.object({ from: z.string(), to: z.string() }),
   manual: z.array(SplitLaneEntrySchema).min(1),
   squad: z.array(SplitLaneEntrySchema).min(1),
+  /** The squad lane from this run: clocks are run-time tokens (D-074). */
+  squadLive: z.array(z.object({ label: z.string().min(1), clock: z.string().min(1) })).optional(),
 });
 
-export const EndingSchema = z.object({ headline: z.string().min(1), severityLabel: z.string().optional() });
+export const EndingSchema = z.object({
+  headline: z.string().min(1),
+  /** Headline with run-time tokens, shown in the app (D-074); `headline` stays for the decks. */
+  headlineLive: z.string().min(1).optional(),
+  severityLabel: z.string().optional(),
+});
+
+export const MilestoneSchema = z.object({
+  id: z.string().min(1),
+  label: z.string().min(1),
+  /** Beat ids ("a|b") whose first event marks the milestone on each path. */
+  beats: z.string().min(1),
+});
 
 export const ScenarioSchema = z.object({
   id: z.string().min(1),
@@ -229,6 +248,10 @@ export const ScenarioSchema = z.object({
   scorecardFootnote: z.string().min(1),
   endings: z.object({ A: EndingSchema, B: EndingSchema }),
   splitView: SplitViewSchema,
+  /** The incident milestones on the operations bar (D-075). */
+  milestones: z.array(MilestoneSchema).default([]),
+  /** Customer impact: from a fixed story time until a milestone beat (D-075). */
+  impact: z.object({ from: clockString, until: z.string().min(1) }).optional(),
 });
 
 export const ToolAccessSchema = z.enum(['read', 'write', 'approval']);
@@ -260,6 +283,7 @@ export type BeatEvent = EventTemplate & { offsetMs?: number; alt?: string[] };
 export type ScorecardRow = z.output<typeof ScorecardRowSchema>;
 export type SplitView = z.output<typeof SplitViewSchema>;
 export type Ending = z.output<typeof EndingSchema>;
+export type Milestone = z.output<typeof MilestoneSchema>;
 export type AgentDef = z.output<typeof AgentDefSchema>;
 export type AgentsFile = z.output<typeof AgentsSchema>;
 

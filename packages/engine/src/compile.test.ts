@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { compile, InvalidDecisionError, storyClock, type Decision } from './compile';
+import { parseClock } from './clock';
 import { parseScenario } from './schema';
 import { FIX, fixture, fixtureInput } from './test-fixture';
 
@@ -35,7 +36,7 @@ describe('compile', () => {
     const tl = compile(fixture, [approve]);
     expect(tl.end).toEqual({ kind: 'end', ending: 'A' });
     const resolve = tl.events.find((e) => e.kind === 'gate.resolve');
-    expect(resolve).toMatchObject({ t: FIX.g1ResolveT, decision: 'approved', by: 'Asha', clock: '02:09:40' });
+    expect(resolve).toMatchObject({ t: FIX.g1ResolveT, decision: 'approved', by: 'Asha', clock: storyClock(tl, FIX.g1ResolveT) });
     expect(tl.decisionPoints).toEqual([FIX.g1RequestT]);
     expect(tl.gatePoints[0]?.resolveT).toBe(FIX.g1ResolveT);
     expect(tl.endT).toBe(FIX.g1ResolveT + 500 + 4000 + 3000);
@@ -121,20 +122,15 @@ describe('compile', () => {
     expect(tl.gatePoints[0]?.resolveT).toBe(FIX.g1RequestT + FIX.chaosDuration + 600);
   });
 
-  it('produces a story clock that interpolates, pauses at gates, and time-lapses', () => {
+  it('runs the story clock in real time, then time-lapses (D-074)', () => {
     const tl = compile(fixture, [approve]);
     expect(storyClock(tl, 0)).toBe('02:07:00');
-    expect(storyClock(tl, 500)).toBe('02:07:02');
-    expect(storyClock(tl, 1000)).toBe('02:07:04');
-    // Holds at the gate until the resolve beat.
-    expect(storyClock(tl, FIX.g1RequestT + 300)).toBe('02:09:34');
-    expect(storyClock(tl, FIX.g1ResolveT)).toBe('02:09:40');
-    const recoveryStart = FIX.g1ResolveT + 500;
-    // Timelapse: holds 02:11:10 until the marker, then jumps +5 min.
-    expect(storyClock(tl, recoveryStart + 1500)).toBe('02:11:10');
-    expect(storyClock(tl, recoveryStart + 2000)).toBe('02:16:10');
-    expect(storyClock(tl, recoveryStart + 3000)).toBe('02:16:10');
-    const ev = tl.events.find((e) => e.kind === 'timelapse');
-    expect(ev?.clock).toBe('02:16:10');
+    expect(storyClock(tl, 1000)).toBe('02:07:01');
+    expect(storyClock(tl, 5000)).toBe('02:07:05');
+    const ev = tl.events.find((e) => e.kind === 'timelapse')!;
+    const before = parseClock(storyClock(tl, ev.t - 1));
+    expect(parseClock(ev.clock!) - before).toBeGreaterThanOrEqual(300);
+    // Every emitted clock follows the run clock.
+    for (const e of tl.events) expect(e.clock).toBe(storyClock(tl, e.t));
   });
 });

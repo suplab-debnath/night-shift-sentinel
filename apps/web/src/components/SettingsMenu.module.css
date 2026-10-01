@@ -70,3 +70,26 @@
 .sourceDetail {
   color: var(--ink-3);
 }
+
+.speeds {
+  display: flex;
+  gap: 4px;
+  padding: 6px 10px;
+}
+
+.speed {
+  flex: 1;
+  height: 36px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+  background: none;
+  font-family: var(--font-mono);
+  font-size: var(--t-sm);
+  cursor: pointer;
+}
+
+.speed[aria-checked='true'] {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--surface);
+}

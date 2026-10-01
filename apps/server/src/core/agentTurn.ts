@@ -4,7 +4,7 @@ import type { AgentId, Beat, BeatOverride, EventTemplate } from '@night-shift/en
 import type { ScenarioBundle } from '@night-shift/scenarios';
 import type { ServerConfig } from '../config';
 import type { PolicyOutcome } from './policy';
-import { incidentFacts, POSTMORTEM_TIMELINE, systemPrompt } from './prompt';
+import { incidentFacts, systemPrompt, timelineSection } from './prompt';
 import { ProviderError, type LlmProvider, type Msg } from './providers/types';
 import { runTool, toolSpecs } from './tools';
 import { allowedNumbersFrom, validate, type TargetKind } from './validators';
@@ -100,7 +100,7 @@ export async function runAgentTurn(input: TurnInput): Promise<TurnResult> {
 
   const inBeat = beat.events.find((e) => e.kind === 'tool.call') as Extract<EventTemplate, { kind: 'tool.call' }> | undefined;
   const scriptedTool = inBeat ? { name: inBeat.tool, input: inBeat.args } : input.toolHint;
-  const timeline = target.kind === 'artifact' ? POSTMORTEM_TIMELINE : undefined;
+  const timeline = target.kind === 'artifact' ? timelineSection(target.text) || undefined : undefined;
   const system = systemPrompt({ bundle, agent, kind: target.kind, maxSentences: live.maxSentences, policy: input.policy, timeline });
   const messages: Msg[] = [
     {
@@ -175,7 +175,7 @@ export async function runAgentTurn(input: TurnInput): Promise<TurnResult> {
 
   const cleaned = text.trim().replace(/^["“]|["”]$/g, '');
   // Numbers may come from the fixtures, the facts given to the model, the timeline, the context, or the script.
-  const allowed = allowedNumbersFrom(JSON.stringify(bundle.fixtures), incidentFacts(bundle), POSTMORTEM_TIMELINE, input.context, target.text);
+  const allowed = allowedNumbersFrom(JSON.stringify(bundle.fixtures), incidentFacts(bundle), input.context, target.text);
   const verdict = validate({
     validator: live.validator,
     text: cleaned,

@@ -54,7 +54,7 @@ Sentinel, Orchestrator, Log Detective, Code Archaeologist, Fixer, Guardian, Scri
 - Localization (English only; copy kept in one file to make it possible later).
 
 ## 8. Success criteria
-- Runs end to end offline at 1× in about 3 minutes (acts 1–7), with no visual glitches at 1920×1080 and 1366×768.
+- Runs end to end offline at 1× in about 4 minutes at the default pace, so the audience can follow each agent think and act (about 2½ minutes at `pace=1`; DECISIONS D-072), with no visual glitches at 1920×1080 and 1366×768.
 - A first-time presenter can run it using only RUNBOOK.md after one rehearsal.
 - Every branch (approve, reject → alternative, chaos) plays correctly from any point it can be triggered.
 - Live mode completes a full run on Bedrock with each turn under the timeout, and survives a forced failure by falling back invisibly.

@@ -2,7 +2,7 @@ import { expect, test, type Page } from '@playwright/test';
 import { snapshot, sourceLine, trackConsoleErrors, waitForGate } from './helpers';
 
 async function toGate(page: Page, query = '') {
-  await page.goto(`/?take=0&speed=8&autoplay=1${query}`);
+  await page.goto(`/?take=0&pace=1&speed=8&autoplay=1${query}`);
   await waitForGate(page);
 }
 
@@ -16,7 +16,7 @@ test.describe('branches (SCENARIO §5)', () => {
     await expect(page.getByTestId('checklist')).toContainText('P-08', { timeout: 20_000 });
     await waitForGate(page);
     await expect(page.getByTestId('gate-sheet')).toContainText('Approve runtime config override?');
-    expect((await snapshot(page)).clock).toBe('02:10:12');
+    expect((await snapshot(page)).clock).toMatch(/^02:\d{2}:\d{2}$/);
     await page.keyboard.press('a');
     await expect(page.getByText('Pod 6 of 6 restarted with pool size 40')).toBeVisible({ timeout: 30_000 });
     await expect(page.getByTestId('end-card')).toHaveAttribute('data-ending', 'A', { timeout: 40_000 });
@@ -40,7 +40,7 @@ test.describe('branches (SCENARIO §5)', () => {
   });
 
   test('scrubbing back before the gate clears the decision', async ({ page }) => {
-    await page.goto('/?take=0&speed=8&autoplay=1&autoDecide=g1:approved');
+    await page.goto('/?take=0&pace=1&speed=8&autoplay=1&autoDecide=g1:approved');
     await expect.poll(async () => (await snapshot(page)).act, { timeout: 60_000 }).toBeGreaterThanOrEqual(6);
     expect(await page.evaluate(() => window.__nightShift!.source.getSnapshot().decisions.length)).toBe(1);
     await page.keyboard.press('4');
@@ -51,7 +51,7 @@ test.describe('branches (SCENARIO §5)', () => {
 
 test.describe('chaos test (SCENARIO §5.2)', () => {
   test('is unavailable before Act 4, then blocks twice and returns to the trigger point', async ({ page }) => {
-    await page.goto('/?take=0&speed=8&autoplay=1&pauseAt=a3.b10');
+    await page.goto('/?take=0&pace=1&speed=8&autoplay=1&pauseAt=a3.b10');
     await expect.poll(async () => (await snapshot(page)).status, { timeout: 20_000 }).toBe('paused');
     await expect(page.getByTestId('chaos-button')).toBeDisabled();
     await page.keyboard.press('c');
@@ -86,7 +86,7 @@ test.describe('chaos test (SCENARIO §5.2)', () => {
   });
 
   test('runs from the end card and returns to it', async ({ page }) => {
-    await page.goto('/?take=0&speed=8&autoplay=1&autoDecide=g1:approved');
+    await page.goto('/?take=0&pace=1&speed=8&autoplay=1&autoDecide=g1:approved');
     await expect(page.getByTestId('end-card')).toBeVisible({ timeout: 60_000 });
     await expect.poll(async () => (await snapshot(page)).status, { timeout: 20_000 }).toBe('ended');
     await page.getByRole('button', { name: 'Try the chaos test' }).click();
@@ -98,7 +98,7 @@ test.describe('chaos test (SCENARIO §5.2)', () => {
 
 test.describe('overlays', () => {
   test('split view opens with S and from the end card, closes with Esc', async ({ page }) => {
-    await page.goto('/?take=0&speed=8');
+    await page.goto('/?take=0&pace=1&speed=8');
     await page.keyboard.press('s');
     const split = page.getByTestId('split-view');
     await expect(split).toBeVisible();
@@ -111,7 +111,7 @@ test.describe('overlays', () => {
   });
 
   test('inspector shows tools, approvals and never-allowed actions', async ({ page }) => {
-    await page.goto('/?take=0&speed=8');
+    await page.goto('/?take=0&pace=1&speed=8');
     await page.locator('[data-agent="fixer"]').click();
     const insp = page.getByTestId('inspector');
     await expect(insp).toContainText('Proposes and, once approved, executes mitigations');
@@ -129,7 +129,7 @@ test.describe('overlays', () => {
 test.describe('shortcuts (RUNBOOK §5)', () => {
   test('play, step, acts, speed, help, presenter, notes, reset', async ({ page }) => {
     const errors = trackConsoleErrors(page);
-    await page.goto('/?take=0');
+    await page.goto('/?take=0&pace=1');
     await page.keyboard.press(' ');
     await expect.poll(async () => (await snapshot(page)).status).toBe('playing');
     await page.keyboard.press(' ');
@@ -151,12 +151,17 @@ test.describe('shortcuts (RUNBOOK §5)', () => {
     await page.keyboard.press('7');
     expect((await snapshot(page)).act).toBe(7);
 
+    const speed = () => page.evaluate(() => window.__nightShift!.source.getSnapshot().speed);
     await page.keyboard.press('+');
-    await expect(page.getByRole('radio', { name: '1.5×' })).toHaveAttribute('aria-checked', 'true');
+    expect(await speed()).toBe(1.5);
     await page.keyboard.press('+');
-    await expect(page.getByRole('radio', { name: '2×' })).toHaveAttribute('aria-checked', 'true');
+    expect(await speed()).toBe(2);
     await page.keyboard.press('-');
+    expect(await speed()).toBe(1.5);
+    // Speed lives in the settings menu now (D-075).
+    await page.getByTestId('settings').click();
     await expect(page.getByRole('radio', { name: '1.5×' })).toHaveAttribute('aria-checked', 'true');
+    await page.getByTestId('settings').click();
 
     await page.keyboard.press('?');
     await expect(page.getByTestId('shortcuts')).toContainText('Chaos test (from Act 4 onward)');
@@ -180,7 +185,7 @@ test.describe('shortcuts (RUNBOOK §5)', () => {
   });
 
   test('settings toggle reduced motion', async ({ page }) => {
-    await page.goto('/?take=0&reducedMotion=0');
+    await page.goto('/?take=0&pace=1&reducedMotion=0');
     await page.getByTestId('settings').click();
     await page.getByTestId('setting-reducedMotion').click();
     expect(await page.evaluate(() => document.documentElement.dataset.reducedMotion)).toBe('true');
@@ -189,7 +194,7 @@ test.describe('shortcuts (RUNBOOK §5)', () => {
 
 test('iPad landscape: the panel becomes a drawer', async ({ page }) => {
   await page.setViewportSize({ width: 1180, height: 820 });
-  await page.goto('/?take=0&speed=8&autoplay=1&pauseAt=a2.b02');
+  await page.goto('/?take=0&pace=1&speed=8&autoplay=1&pauseAt=a2.b02');
   const panel = page.locator('#details-panel');
   const box = await panel.boundingBox();
   expect(box!.x).toBeGreaterThanOrEqual(1180 - 1);
@@ -201,7 +206,7 @@ test('iPad landscape: the panel becomes a drawer', async ({ page }) => {
 test.describe('realism layer (SCENARIO §11)', () => {
   test('investigation texture: a failed call, suspects ruled out, a channel that fills', async ({ page }) => {
     const errors = trackConsoleErrors(page);
-    await page.goto('/?take=0&speed=8&autoplay=1&pauseAt=a3.b10');
+    await page.goto('/?take=0&pace=1&speed=8&autoplay=1&pauseAt=a3.b10');
     await expect.poll(() => page.evaluate(() => window.__nightShift!.source.getSnapshot().playing), { timeout: 60_000 }).toBe(false);
     await expect(page.getByTestId('tool-error')).toContainText('trace store returned 503');
     await expect(page.getByTestId('suspect-card')).toHaveCount(2);
@@ -210,7 +215,7 @@ test.describe('realism layer (SCENARIO §11)', () => {
     await expect(page.getByTestId('channel-post')).toHaveCount(3);
     await expect(page.getByTestId('channel')).toContainText('Paging on-call and the agent squad.');
     // The approval sheet reads like a change request with a live waiting time.
-    await page.goto('/?take=0&speed=8&autoplay=1');
+    await page.goto('/?take=0&pace=1&speed=8&autoplay=1');
     await waitForGate(page);
     await expect(page.getByTestId('gate-sheet')).toContainText('CHG-24817');
     await expect(page.getByTestId('gate-waiting')).toHaveText(/waiting 0:0[1-9]/, { timeout: 5_000 });
@@ -223,18 +228,102 @@ test.describe('realism layer (SCENARIO §11)', () => {
   for (const take of [7, 4242]) {
     test(`take ${take} plays every branch to an ending with different wording`, async ({ page }) => {
       const errors = trackConsoleErrors(page);
-      await page.goto('/?take=0&speed=16&autoplay=1&autoDecide=g1:approved');
+      await page.goto('/?take=0&pace=1&speed=16&autoplay=1&autoDecide=g1:approved');
       await expect(page.getByTestId('end-card')).toBeVisible({ timeout: 60_000 });
       const canonical = await thoughts(page);
       for (const decide of ['g1:rejected,g2:approved', 'g1:rejected,g2:rejected', 'g1:approved']) {
-        await page.goto(`/?take=${take}&speed=16&autoplay=1&autoDecide=${decide}`);
+        await page.goto(`/?take=${take}&pace=1&speed=16&autoplay=1&autoDecide=${decide}`);
         await expect(page.getByTestId('end-card')).toBeVisible({ timeout: 60_000 });
       }
       const lines = await thoughts(page);
       expect(lines).toHaveLength(canonical.length);
       expect(lines.filter((l) => !canonical.includes(l)).length).toBeGreaterThan(3);
-      expect(await sourceLine(page)).toBe(`Scriptedtake ${take}`);
+      expect(await sourceLine(page)).toBe(`Scriptedtake ${take} · authored pace`);
       expect(errors).toEqual([]);
     });
   }
+});
+
+test.describe('pacing and the end summary (DECISIONS D-072, D-073)', () => {
+  test('agents think before they speak and tool calls run until their result', async ({ page }) => {
+    const errors = trackConsoleErrors(page);
+    // Default pace; stop just before Sentinel's second line.
+    await page.goto('/?take=0&speed=2&autoplay=1&pauseAt=a1.b04');
+    await expect.poll(() => page.evaluate(() => window.__nightShift!.source.getSnapshot().playing), { timeout: 30_000 }).toBe(false);
+    const next = await page.evaluate(() => {
+      const s = window.__nightShift!.source.getSnapshot();
+      return s.timeline.events.find((e) => e.id === 'a1.b05.e0')!.t;
+    });
+    await page.evaluate((t) => window.__nightShift!.source.seek(t - 400), next);
+    await expect(page.getByTestId('thinking')).toContainText('Sentinel');
+    await expect(page.getByTestId('thinking-bubble')).toHaveCount(1);
+    const call = await page.evaluate(() => window.__nightShift!.source.getSnapshot().timeline.events.find((e) => e.id === 'a3.b01.e1')!.t);
+    await page.evaluate((t) => window.__nightShift!.source.seek(t + 600), call);
+    await expect(page.getByTestId('tool-running').first()).toContainText(/running 0\.\d s/);
+    expect(errors).toEqual([]);
+  });
+
+  test('the scorecard and end card close, and come back', async ({ page }) => {
+    await page.goto('/?take=0&pace=1&speed=16&autoplay=1&autoDecide=g1:approved');
+    await expect(page.getByTestId('end-card')).toBeVisible({ timeout: 60_000 });
+    await page.getByTestId('end-close').click();
+    await expect(page.getByTestId('end-card')).toHaveCount(0);
+    await page.getByTestId('show-summary').click();
+    await expect(page.getByTestId('end-card')).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(page.getByTestId('end-card')).toHaveCount(0);
+    await page.getByTestId('show-summary').click();
+    await page.getByTestId('replay').click();
+    await expect(page.getByTestId('end-card')).toHaveCount(0);
+    await expect(page.getByTestId('show-summary')).toHaveCount(0);
+  });
+});
+
+test.describe('operations bar and run clock (DECISIONS D-074, D-075)', () => {
+  const clockSec = async (page: Page) => {
+    const [h, m, s] = ((await page.getByTestId('clock').textContent()) ?? '0:0:0').split(':').map(Number);
+    return h! * 3600 + m! * 60 + s!;
+  };
+
+  test('pause squad keeps the clock running and counts the pause; F freezes everything', async ({ page }) => {
+    const errors = trackConsoleErrors(page);
+    await page.goto('/?take=0&pace=1');
+    await expect(page.getByTestId('play')).toHaveText('Start');
+    await page.getByTestId('play').click();
+    await expect(page.getByTestId('play')).toHaveText('Pause squad');
+    await page.waitForTimeout(1500);
+    await page.getByTestId('play').click();
+    await expect(page.getByTestId('squad-paused')).toBeVisible();
+    await expect(page.getByTestId('play')).toHaveText('Resume squad');
+    const before = await clockSec(page);
+    await page.waitForTimeout(2500);
+    expect(await clockSec(page)).toBeGreaterThanOrEqual(before + 2);
+    await page.keyboard.press(' ');
+    await expect(page.getByTestId('squad-paused')).toHaveCount(0);
+    const holds = await page.evaluate(() => window.__nightShift!.source.getSnapshot().decisions.filter((d) => d.type === 'hold'));
+    expect(holds).toHaveLength(1);
+    await page.keyboard.press('f');
+    await expect(page.getByTestId('play')).toHaveText('Resume');
+    const frozen = await clockSec(page);
+    await page.waitForTimeout(1500);
+    expect(await clockSec(page)).toBe(frozen);
+    expect(errors).toEqual([]);
+  });
+
+  test('milestones and customer impact follow the run; the gate wait counts', async ({ page }) => {
+    await page.goto('/?take=0&pace=1&speed=16&autoplay=1');
+    await waitForGate(page);
+    await expect(page.getByTestId('milestone-root-cause')).toContainText(/02:\d{2}:\d{2}/);
+    await expect(page.getByTestId('milestone-approved')).toContainText('—');
+    await expect(page.getByTestId('play')).toHaveText('Waiting on you');
+    await page.waitForTimeout(1000);
+    await page.getByTestId('gate-approve').click();
+    const wait = await page.evaluate(() => window.__nightShift!.source.getSnapshot().decisions.find((d) => d.type === 'gate'));
+    expect(wait && 'waitedMs' in wait && (wait.waitedMs ?? 0) > 5000).toBe(true);
+    await expect(page.getByTestId('end-card')).toBeVisible({ timeout: 60_000 });
+    await expect(page.getByTestId('milestone-resolved')).toContainText(/02:\d{2}:\d{2}/);
+    await expect(page.getByTestId('impact')).toHaveAttribute('data-over', 'true');
+    await expect(page.getByTestId('end-card')).toContainText(/Mitigated in \d+ min/);
+    await expect(page.getByTestId('play')).toHaveText('Incident closed');
+  });
 });

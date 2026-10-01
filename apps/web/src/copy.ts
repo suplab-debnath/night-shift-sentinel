@@ -8,6 +8,7 @@ export const copy = {
     liveMock: 'Live, mock model',
     fallback: 'Live, scripted fallback',
     take: (n: number) => (n === 0 ? 'canonical take' : `take ${n}`),
+    pace: (p: number) => (p === 1 ? 'authored pace' : `pace ${p}`),
     fallbacks: (n: number) => `${n} scripted ${n === 1 ? 'line' : 'lines'}`,
   },
   clock: {
@@ -20,6 +21,8 @@ export const copy = {
   panel: {
     tabs: { stream: 'Stream', evidence: 'Evidence', channel: 'Channel', audit: 'Audit', artifacts: 'Artifacts' },
     jumpToLatest: 'Jump to latest',
+    thinking: 'thinking',
+    running: (ms: number) => `running ${(ms / 1000).toFixed(1)} s`,
     emptyStream: 'The squad is quiet. Press play to start the night.',
     emptyEvidence: 'Evidence appears here as specialists report back.',
     emptyAudit: 'Every tool call, policy check, and decision is recorded here.',
@@ -30,6 +33,21 @@ export const copy = {
     ruledOut: 'Ruled out',
     rootCause: 'Root cause',
     confidence: 'Confidence',
+  },
+  ops: {
+    start: 'Start',
+    pauseSquad: 'Pause squad',
+    resumeSquad: 'Resume squad',
+    resume: 'Resume',
+    waiting: 'Waiting on you',
+    done: 'Incident closed',
+    impact: 'Customer impact',
+    milestones: 'Incident milestones',
+    compare: 'Compare with manual response',
+    badIdea: 'Test a bad idea',
+    paused: (who: string) => `Squad paused by ${who}. Agents are holding their work; the incident clock keeps running.`,
+    pausedShort: 'Squad paused',
+    speed: 'Playback speed (presenter)',
   },
   transport: {
     play: 'Play',
@@ -77,6 +95,8 @@ export const copy = {
   },
   illustrative: 'Illustrative',
   end: {
+    close: 'Close summary',
+    showSummary: 'Show summary',
     showSplit: 'Show human vs agent timeline',
     tryChaos: 'Try the chaos test',
     replay: 'Replay',

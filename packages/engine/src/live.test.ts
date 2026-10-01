@@ -20,7 +20,7 @@ describe('beat overrides (live mode)', () => {
     expect(beat[0]!.t).toBe(1000);
     expect(beat[1]!.t).toBeGreaterThan(1000);
     expect(beat[1]!.t).toBeLessThan(2000);
-    expect(beat[0]!.clock).toBe('02:07:04');
+    expect(beat[0]!.clock).toBe('02:07:01');
     const others = (x: typeof tl) => x.events.filter((e) => e.beat !== 'a1.b02').map((e) => [e.id, e.t]);
     expect(others(tl)).toEqual(others(base));
     expect(tl.beats.map((b) => b.t)).toEqual(base.beats.map((b) => b.t));

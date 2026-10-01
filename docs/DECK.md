@@ -7,9 +7,9 @@ Two PowerPoint decks are generated from code by `deck/build-deck.mjs` (pptxgenjs
 - Layout `LAYOUT_WIDE` (13.333 × 7.5 in). Set before adding slides.
 - Colours from DESIGN.md §3, hex **without** `#`. Background white `FFFFFF` or `F4F6F9`; never cream.
 - Every `addText` uses `isTextBox: true`; margins ≥ 0.5 in from slide edges; ≥ 0.3 in between elements.
-- Speaker notes via `slide.addNotes()` — every slide has notes (text below).
+- Speaker notes via `slide.addNotes()` — every slide has notes. The executive deck's notes are taken from `docs/PRESENTER_SCRIPT.md` (spoken lines and stage directions per slide); the generator's own notes are the fallback.
 - Charts native (`addChart`) with title, data labels, palette colours, quiet gridlines.
-- No accent lines under titles, no decorative stripes or edge bars, no gradients, no stock photos, no third-party logos.
+- No accent lines under titles, no decorative stripes or edge bars, no stock photos, no third-party logos. No gradient fills on shapes; the executive deck's story backgrounds (night sky, dawn) and phone frames are drawn in code by `deck/art.mjs` as seeded SVG and rasterised with `sharp` (DECISIONS D-076).
 - `{{ORG_NAME}}`, `{{CLIENT_NAME}}`, `{{PRESENTER_NAME}}` come from `config/branding.json`. Unfilled values render visibly as the placeholder text so they are caught in review.
 - Any slide needing a real-world number shows `{{PRESENTER: add sourced figure}}` instead of an invented statistic.
 - Illustrative figures carry an "Illustrative" tag and the footnote from SCENARIO.md §8.
@@ -36,84 +36,42 @@ Captured from the offline build at 1920×1080, presenter mode on, via URL params
 | `08-split.png` | Split view |
 | `09-chaos.png` | Chaos: Guardian blocked, permission toast visible |
 | `10-inspector.png` | Inspector open on Fixer |
+| `11-suspects.png` | Act 3, suspects pinned and ruled out (`pauseAt=a3.x05`) |
 
 ---
 
-## 4. Executive deck — "Agentic AI in action" (14 slides)
+## 4. Executive deck — "When the pager rings at 2 AM" (20 slides)
 
-**1. Title**
-- Title: "When the pager rings at 2 AM"
-- Subtitle: "Agentic AI in action, with people in charge"
-- Footer text: "{{ORG_NAME}} for {{CLIENT_NAME}}", presenter name, date.
-- Visual: `06-recovery.png` cropped to the heartbeat line, full-bleed lower third.
-- Notes: "We'll show you a team of AI agents handling a real-shaped production incident. Watch what they do, and watch where they stop and ask a human."
+A story in four parts, told as one night (DECISIONS D-076). Parts 1–2 are dark "night" slides with a big amber clock stamp top left; Part 3 turns light (the squad and the app screenshots); Part 4 stays light and closes on a dawn slide. Every slide has speaker notes written as the presenter's script. Manual-response slides carry "Dramatization of a typical manual response. Times are illustrative."; outcome slides carry the "Illustrative" tag and footnote.
 
-**2. The shift we are seeing**
-- Title: "From answering questions to doing the work"
-- Three columns: Chat (answers questions) → Copilot (helps a person do a task) → Agent squad (runs a workflow, uses tools, asks for approval).
-- Notes: "Most organisations are between the first two. The value — and the risk — is in the third."
+| # | Stamp / title | Visual |
+|---|---|---|
+| 1 | "When the pager rings at 2 AM" / "One bad deploy. Two ways through the night." | Night sky, moon, sleeping city |
+| **Part 1 · We push the code** | | |
+| 2 | 01:55 "A small change ships. Every check is green." | Pipeline cards (commit, build, tests, deploy) and the Helm diff; "Nothing fails. Yet." |
+| 3 | 02:04 "Traffic doubles. Checkout starts failing." | Native line chart of fixture p99 01:58–02:07, promo and timeout chips, customer phone showing "Payment failed" |
+| **Part 2 · The traditional night** | | |
+| 4 | 02:07 "The pager goes off." | Night sky, lock-screen phone with the page |
+| 5 | 02:19 "Twelve minutes before anyone looks at the data." | Three steps from `splitView.manual` |
+| 6 | 02:27 "The war room fills up." | Incident chat of seven messages; "Six people woken across six teams" |
+| 7 | 02:29–02:44 "Page, wait, check, hand off. Repeat." | Hand-off map: on-call in the centre, five people around |
+| 8 | 02:55 "Recovered. 48 minutes after the alert." | Timeline with the customer-impact bar; three manual stat tiles |
+| **Part 3 · The same night, with a squad** | | |
+| 9 | "Rewind." | Night sky; "This time a squad of AI agents is on call, and a person still decides." |
+| 10 | "Seven specialists and one human" | Cast tiles, human tile apart |
+| 11 | "Let's watch the squad work." | Live demo hand-off card over a faded `01-alert` |
+| 12 | "What you just saw" | Storyboard: 01, 02, 11-suspects, 03, 05, 06 |
+| 13 | "They investigate like engineers: suspect, check, rule out" | `11-suspects` and three suspect cards |
+| 14 | "People stay in charge" | `05-gate` and `09-chaos` |
+| **Part 4 · What changed** | | |
+| 15 | "Same night, two timelines" | Manual lane 48 min vs squad lane 4 min, Illustrative |
+| 16 | "Minutes, not most of an hour" | Native clustered bar chart (engage, root cause, mitigate); "6 → 1 People woken up", "30 s Human time" |
+| 17 | "Where this sits in our AI journey" | Four stages, `{{PRESENTER: add 1–2 of our live use cases}}` |
+| 18 | "Where agents fit first" | 2×2 repeatability × risk |
+| 19 | "Proposed next step: a six-week pilot" | Four phases, "Proposal" tag, shadow mode line |
+| 20 | "Let the squad take the first shift." / "People keep the last word." | Dawn over the same city; closing question "Where would you want a squad like this first?" |
 
-**3. Where this sits on the adoption curve**
-- Title: "Our AI adoption journey"
-- Four stages left to right: Explore, Assist, Automate, Governed autonomy. Each with one-line definition and `{{PRESENTER: add 1–2 of our live use cases}}` under it. Highlight Governed autonomy with `2F4BDB` outline.
-- Notes: "This is the holistic view. Today's demo lives in the fourth stage, and it only works because the first three are in place: data access, tooling, and governance."
-
-**4. The scenario**
-- Title: "02:07. Checkout is slowing down."
-- Left: short setup (Parcelo, checkout-api, SLO, a release shipped at 01:55). Right: `01-alert.png`.
-- Notes: "Fictional company, realistic failure. A config change quietly shrank a database connection pool."
-
-**5. Meet the squad**
-- Title: "Seven specialists and one human"
-- Grid of 8 cast tiles: coloured circle in agent hue with white icon (react-icons rendered to PNG), name, one-line role. Human tile visually separate on the right.
-- Notes: "Each agent has one job and a limited set of tools. None of them can change production on their own."
-
-**6. How the story unfolds**
-- Title: "Seven acts in about four minutes"
-- Horizontal timeline of acts 1–7 with story-clock times (02:07 → 02:16) and one line each.
-- Notes: "Detect, fan out, diagnose, propose, approve, recover, document."
-
-**7. Diagnosis is teamwork**
-- Title: "Three clues, one root cause"
-- Visual `03-evidence.png`; three callouts: pool exhausted (Log Detective), key renamed in v2.14.0 (Code Archaeologist), database healthy (Sentinel).
-- Notes: "The Orchestrator doesn't guess. It waits until independent evidence agrees, and it states its confidence."
-
-**8. People stay in charge**
-- Title: "The human decides"
-- Visual `05-gate.png`; right side: "What the human sees" — summary, evidence, policy results, one clear decision.
-- Notes: "If the human rejects, the squad finds an alternative. If they reject again, it stops and escalates. It stops where people say stop."
-
-**9. Governance built in, not bolted on**
-- Title: "Two layers of defence"
-- Left: `09-chaos.png`. Right: two stacked blocks — "Policy as code: Guardian checks every action" and "Least-privilege tools: agents can't call what they aren't granted". Plus "Every step is audited."
-- Notes: "In the chaos test, an over-eager agent tries to restart the production database. Policy blocks it, and even if policy failed, the tool isn't granted."
-
-**10. The outcome**
-- Title: "Four minutes, one decision"
-- Native clustered bar chart, minutes: Time to engage (5 vs 0), Time to root cause (37 vs 1.7), Time to mitigate (48 vs 4.2); series Manual `6E7A8D`, Squad `2F4BDB`; data labels on. "Illustrative" tag + footnote.
-- Side stat: "Human time: 30 seconds of approval".
-- Notes: "These numbers are illustrative for this scenario. In a pilot we'd baseline your own incidents first."
-
-**11. Beyond incidents**
-- Title: "The same pattern, many workflows"
-- Three scenario tiles from SCENARIO.md §10: Legacy modernization squad, RFP response squad, Onboarding and access provisioning — each with cast, the human gate, and a chaos example.
-- Notes: "The engine is the same: specialists, a guardian, a scribe, and a human gate. Only the tools and policies change."
-
-**12. Choosing where to start**
-- Title: "Where agents fit first"
-- 2×2: x = process repeatability (low → high), y = risk of a wrong action (low → high). Place: incident triage (high repeat, medium risk, gated), RFP drafting (medium, low), code modernization (high, medium), payments changes (low, high → keep human-led).
-- Notes: "Start where the work is repeatable and actions are reversible. Keep humans leading where mistakes are costly or irreversible."
-
-**13. How it runs**
-- Title: "Built on AWS, runs anywhere we demo"
-- Simple diagram (shapes, not an image): Browser → CloudFront → Lambda → Amazon Bedrock (Claude); side note: "Offline mode for demos; policy engine and tools run in our code."
-- Notes: "The same code runs on a laptop with no network, or live on Amazon Bedrock in your account."
-
-**14. A pilot, not a promise**
-- Title: "Proposed next step: a six-week pilot"
-- Four phases: Weeks 1–2 pick one workflow and capture policies; Weeks 3–4 build on your data in shadow mode; Weeks 5–6 live with human gates; End: measure against your baseline. Label "Proposal".
-- Closing line: "What would you want a squad to take off your team's plate first?"
-- Notes: "Ask the question and stop talking."
+The "Beyond incidents" material lives in the patterns slide (§6) and the architecture in the technical deck (§5).
 
 ---
 

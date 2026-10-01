@@ -18,7 +18,9 @@ export function parseClock(clock: string): number {
 }
 
 export function formatClock(sec: number): string {
-  const s = Math.max(0, Math.floor(sec)) % 86400;
+  // The epsilon absorbs floating-point interpolation error at whole seconds, so the same
+  // moment formats the same way whatever anchors produced it (regression: D-074 property test).
+  const s = Math.max(0, Math.floor(sec + 1e-6)) % 86400;
   const hh = Math.floor(s / 3600);
   const mm = Math.floor((s % 3600) / 60);
   const ss = s % 60;

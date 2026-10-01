@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { beatShift, compile, pickTake } from './compile';
+import { beatShift, clampPace, compile, pickTake, STREAM_CPS, thinkMs } from './compile';
 import { createPlayer } from './player';
 import { initialStageState, reduce } from './reducer';
 import { parseScenario, ScenarioValidationError, type ScenarioInput } from './schema';
@@ -134,5 +134,59 @@ describe('investigation events', () => {
     s = reduce(s, { id: 'e3', t: 3, source: 'script', kind: 'channel.post', author: 'Scribe', agent: 'scribe', text: 'x' });
     s = reduce(s, { id: 'e4', t: 4, source: 'script', kind: 'chaos.end' });
     expect(s.channel).toHaveLength(1);
+  });
+});
+
+describe('pace (DECISIONS D-072)', () => {
+  const approve = { type: 'gate' as const, gateId: 'g1', decision: 'approved' as const, by: 'Asha' };
+  const STREAM = ['thought', 'tool.call', 'tool.result', 'message.send'];
+
+  it('pace 1 is the authored timing', () => {
+    const scenario = parseScenario(fixtureInput);
+    expect(compile(scenario, [approve], { pace: 1 }).events).toEqual(compile(scenario, [approve]).events);
+  });
+
+  it('slows everything and gives each line reading time and a thinking pause', () => {
+    const scenario = parseScenario(fixtureInput);
+    const base = compile(scenario, [approve]);
+    for (const take of [0, 7]) {
+      const slow = compile(scenario, [approve], { pace: 1.5, take });
+      const byId = new Map(slow.events.map((e) => [e.id, e]));
+      for (const b of base.events) {
+        const s = byId.get(b.id)!;
+        expect(s.t).toBeGreaterThanOrEqual(b.t * 1.5 - 1e-6);
+        if (b.kind === 'metric.update' && s.kind === 'metric.update') expect(s.durationMs).toBeCloseTo(b.durationMs * 1.5, 6);
+      }
+      const stream = slow.events.filter((e) => STREAM.includes(e.kind));
+      stream.forEach((e, i) => {
+        const prev = stream[i - 1];
+        if (!prev || prev.kind !== 'thought') return;
+        expect(e.t - prev.t, `${prev.id} → ${e.id}`).toBeGreaterThanOrEqual((prev.text.length / STREAM_CPS) * 1000);
+      });
+      for (const e of stream) {
+        if (e.kind !== 'thought') continue;
+        const before = stream.filter((x) => x.t < e.t).at(-1);
+        if (before) expect(e.t - before.t).toBeGreaterThanOrEqual(700);
+      }
+      expect(thinkMs(0, 'x')).toBe(1000);
+      expect(thinkMs(take, 'x')).toBeGreaterThanOrEqual(700);
+      const ts = slow.events.map((e) => e.t);
+      expect([...ts].sort((a, b) => a - b)).toEqual(ts);
+      expect(slow.endT).toBeGreaterThan(base.endT * 1.5);
+    }
+  });
+
+  it('clamps pace to 1–3 and players keep it through decisions', () => {
+    expect(clampPace(undefined)).toBe(1);
+    expect(clampPace(0.2)).toBe(1);
+    expect(clampPace(9)).toBe(3);
+    expect(clampPace(Number.NaN)).toBe(1);
+    const scenario = parseScenario(fixtureInput);
+    const player = createPlayer(scenario, { pace: 2 });
+    const endT = player.getSnapshot().timeline.endT;
+    expect(endT).toBe(compile(scenario, [], { pace: 2 }).endT);
+    player.seek(endT);
+    player.decide('g1', 'approved');
+    expect(player.getSnapshot().timeline.endT).toBe(compile(scenario, [approve], { pace: 2 }).endT);
   });
 });

@@ -178,6 +178,8 @@ export interface StageState {
   endCard: { t: number } | null;
   clock: string | null;
   lastEventT: number;
+  /** A labelled fast-forward of the run clock, while one is running (D-074). */
+  clockRate: { rate: number; label: string | null } | null;
   /** Live-mode fallbacks seen, for the subtle "scripted" marker. */
   fallbackCount: number;
 }
@@ -223,6 +225,7 @@ export function initialStageState(opts: InitialStateOptions): StageState {
     endCard: null,
     clock: opts.clock ?? null,
     lastEventT: 0,
+    clockRate: null,
     fallbackCount: 0,
   };
 }
@@ -264,6 +267,8 @@ function apply(s: StageState, e: EngineEvent, clock: string | null): StageState 
       return { ...s, endCard: { t: e.t } };
     case 'clock.set':
       return { ...s, clock: e.clock };
+    case 'clock.rate':
+      return { ...s, clockRate: e.rate === 1 ? null : { rate: e.rate, label: e.label ?? null } };
     case 'agent.state':
       return {
         ...s,

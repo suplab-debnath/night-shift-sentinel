@@ -1,4 +1,5 @@
 import { copy } from '../copy';
+import { edgeAnchor } from '../lib/fit';
 import { useApp } from '../state/store';
 import styles from './ProgressChip.module.css';
 
@@ -10,7 +11,7 @@ export function ProgressChip() {
   if (!progress || !agent || act !== 6) return null;
   return (
     <div
-      className={styles.chip}
+      className={`${styles.chip} ${styles[edgeAnchor(agent.position.x)]}`}
       style={{ left: `${agent.position.x}%`, top: `calc(${agent.position.y}% + var(--node) / 2 + 40px)` }}
       role="status"
       aria-label={`${copy.stage.progress}: ${progress.label}`}

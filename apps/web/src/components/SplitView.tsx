@@ -1,4 +1,4 @@
-import { parseClock } from '@night-shift/engine';
+import { parseClock, resolveRunText } from '@night-shift/engine';
 import { copy } from '../copy';
 import { layoutLabels } from '../lib/lanes';
 import { useApp } from '../state/store';
@@ -11,8 +11,18 @@ export function SplitView() {
   const open = useApp((s) => s.ui.splitOpen);
   const setUi = useApp((s) => s.setUi);
   const split = useApp((s) => s.bundle.scenario.splitView);
-  const mitigate = useApp((s) => s.bundle.scenario.scorecard.find((r) => r.measure === 'Time to mitigate'));
+  const timeline = useApp((s) => s.snap.timeline);
+  const t = useApp((s) => s.snap.t);
+  const mitigateRow = useApp((s) => s.bundle.scenario.scorecard.find((r) => r.measure === 'Time to mitigate'));
   if (!open) return null;
+  // The squad lane and figure come from this run when it has reached them (D-074).
+  const liveLane = (split.squadLive ?? []).map((e) => ({
+    label: resolveRunText(e.label, timeline, t),
+    clock: resolveRunText(e.clock, timeline, t),
+  }));
+  const squadLane = liveLane.length && liveLane.every((e) => !`${e.label}${e.clock}`.includes('{{')) ? liveLane : split.squad;
+  const liveMitigate = mitigateRow?.squadLive ? resolveRunText(mitigateRow.squadLive, timeline, t) : null;
+  const mitigate = mitigateRow && { ...mitigateRow, squad: liveMitigate && !liveMitigate.includes('{{') ? liveMitigate : mitigateRow.squad };
 
   const from = parseClock(split.axis.from);
   const to = parseClock(split.axis.to);
@@ -20,7 +30,7 @@ export function SplitView() {
   const ticks = Array.from({ length: 7 }, (_, i) => from + i * 600);
   const lanes = [
     { key: 'manual', title: copy.split.manual, entries: split.manual, tone: styles.manual },
-    { key: 'squad', title: copy.split.squad, entries: split.squad, tone: styles.squad },
+    { key: 'squad', title: copy.split.squad, entries: squadLane, tone: styles.squad },
   ];
 
   return (

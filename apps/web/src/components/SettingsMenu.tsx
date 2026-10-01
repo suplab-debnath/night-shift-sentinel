@@ -4,6 +4,7 @@ import { useShallow } from 'zustand/react/shallow';
 import { copy } from '../copy';
 import { useApp } from '../state/store';
 import type { StageSnapshot } from '../sources/types';
+import { SPEEDS } from '../lib/speeds';
 import styles from './SettingsMenu.module.css';
 
 function sourceLabel(mode: StageSnapshot['mode'], provider: StageSnapshot['provider']): string {
@@ -13,9 +14,17 @@ function sourceLabel(mode: StageSnapshot['mode'], provider: StageSnapshot['provi
 /** Hidden in presenter mode (DESIGN §11). Also the only place the source (scripted, live) shows. */
 export function SettingsMenu() {
   const ui = useApp((s) => s.ui);
+  const speed = useApp((s) => s.snap.speed);
+  const stage = useApp((s) => s.source);
   const setUi = useApp((s) => s.setUi);
   const source = useApp(
-    useShallow((s) => ({ mode: s.snap.mode, provider: s.snap.provider, take: s.snap.take, fallbacks: s.snap.state.fallbackCount })),
+    useShallow((s) => ({
+      mode: s.snap.mode,
+      provider: s.snap.provider,
+      take: s.snap.take,
+      pace: s.snap.pace,
+      fallbacks: s.snap.state.fallbackCount,
+    })),
   );
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -45,7 +54,7 @@ export function SettingsMenu() {
           <p className={styles.source} data-testid="mode">
             {sourceLabel(source.mode, source.provider)}
             <span className={styles.sourceDetail}>
-              {source.mode === 'scripted' ? copy.mode.take(source.take) : copy.mode.fallbacks(source.fallbacks)}
+              {source.mode === 'scripted' ? copy.mode.take(source.take) : copy.mode.fallbacks(source.fallbacks)} · {copy.mode.pace(source.pace)}
             </span>
           </p>
           {toggles.map((t) => (
@@ -64,6 +73,13 @@ export function SettingsMenu() {
               {t.label}
             </button>
           ))}
+          <div className={styles.speeds} role="radiogroup" aria-label={copy.ops.speed}>
+            {SPEEDS.map((sp) => (
+              <button key={sp} type="button" role="radio" aria-checked={speed === sp} className={styles.speed} onClick={() => stage.setSpeed(sp)}>
+                {sp}×
+              </button>
+            ))}
+          </div>
           <button
             type="button"
             role="menuitem"

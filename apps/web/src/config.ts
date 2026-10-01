@@ -11,6 +11,8 @@ export interface Branding {
   demoDate: string;
   defaultSpeed: number;
   showNotesStrip: boolean;
+  /** Pacing factor (DECISIONS D-072): 1 is the authored timing; above 1 agents pause to think and lines get reading time. */
+  pace: number;
 }
 
 export const brand: Branding = branding;
@@ -45,6 +47,8 @@ export interface UrlOptions {
   mockFail: string | null;
   /** Take to play (DECISIONS D-068); absent means a fresh take per page load. */
   take: number | null;
+  /** Pacing override (1–3); absent means config/branding.json. */
+  pace: number | null;
 }
 
 function bool(v: string | null): boolean | null {
@@ -95,5 +99,6 @@ export function parseUrlOptions(search: string): UrlOptions {
     passcode: p.get('passcode'),
     mockFail: p.get('mockFail'),
     take: takeParam(p.get('take')),
+    pace: num(p.get('pace')),
   };
 }

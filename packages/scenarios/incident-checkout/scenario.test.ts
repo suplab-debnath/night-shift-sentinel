@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { compile, formatArgs, parseClock, type Decision, type EngineEvent, type Timeline } from '@night-shift/engine';
+import { compile, formatArgs, parseClock, resolveRunText, storyClock, type Decision, type EngineEvent, type Timeline } from '@night-shift/engine';
 import { describe, expect, it } from 'vitest';
 import { incidentCheckout, getScenario } from '../index';
 
@@ -91,7 +91,7 @@ describe('incident-checkout scenario', () => {
     expect(tl.endT / 1000).toBeLessThan(152);
   });
 
-  it('keeps the story clock monotonic on every path and hits the canonical times', () => {
+  it('keeps the story clock monotonic on every path and starts at the alert', () => {
     for (const [name, decisions] of Object.entries(PATHS)) {
       const tl: Timeline = compile(scenario, decisions);
       let prev = -1;
@@ -101,15 +101,12 @@ describe('incident-checkout scenario', () => {
         prev = s;
       }
     }
+    // The run clock (D-074): real time from 02:07:00, so the alert lands seconds in.
     const tl = compile(scenario, PATHS.approve);
     const clockOf = (pred: (e: EngineEvent) => boolean) => tl.events.find(pred)?.clock;
-    expect(clockOf((e) => e.kind === 'stage.alert')).toBe('02:07:14');
-    expect(clockOf((e) => e.kind === 'evidence.conclude')).toBe('02:08:44');
-    expect(clockOf((e) => e.kind === 'gate.request')).toBe('02:09:34');
-    expect(clockOf((e) => e.kind === 'gate.resolve')).toBe('02:09:40');
-    expect(clockOf((e) => e.kind === 'agent.state' && e.agent === 'fixer' && e.state === 'done')).toBe('02:11:10');
-    expect(clockOf((e) => e.kind === 'timelapse')).toBe('02:16:10');
-    expect(clockOf((e) => e.kind === 'scorecard.show')).toBe('02:16:54');
+    expect(clockOf((e) => e.kind === 'stage.alert')! < '02:07:30').toBe(true);
+    const lapse = tl.events.find((e) => e.kind === 'timelapse')!;
+    expect(parseClock(lapse.clock!) - parseClock(storyClock(tl, lapse.t - 1))).toBeGreaterThanOrEqual(300);
   });
 
   it('has a unique beat id everywhere, usable for pauseAt', () => {
@@ -221,13 +218,16 @@ describe('SCENARIO.md coverage', () => {
     const statusQuote = /### 6\.1[\s\S]*?\n> \*\*(.+?)\*\*\n> (.+?)\n/.exec(SCENARIO_MD)!;
     const pmBlock = /### 6\.2[\s\S]*?```\n([\s\S]*?)```/.exec(SCENARIO_MD)![1]!;
     const escQuote = /### 6\.3[\s\S]*?\n> \*\*(.+?)\*\*\n> (.+?)\n/.exec(SCENARIO_MD)!;
-    const artifacts = allEvents().flatMap((e) => (e.kind === 'artifact.create' ? [e] : []));
-    const status = artifacts.find((a) => a.artifactId === 'status' && a.id.startsWith('a7'))!;
+    // Templates (with run-time tokens) are canon; compiled runs fill in the times.
+    const templates = Object.values(scenario.segments).flatMap((seg) =>
+      seg.acts.flatMap((a) => a.beats.flatMap((b) => b.events.flatMap((e) => (e.kind === 'artifact.create' ? [{ ...e, beat: b.id }] : [])))),
+    );
+    const status = templates.find((a) => a.artifactId === 'status' && a.beat.startsWith('a7'))!;
     expect(status.markdown).toContain(statusQuote[1]);
     expect(status.markdown).toContain(statusQuote[2]);
-    const pm = artifacts.find((a) => a.artifactId === 'postmortem' && a.id.startsWith('a7'))!;
+    const pm = templates.find((a) => a.artifactId === 'postmortem' && a.beat.startsWith('a7'))!;
     expect(pm.markdown).toBe(pmBlock.trimEnd());
-    const esc = artifacts.find((a) => a.artifactId === 'escalation')!;
+    const esc = templates.find((a) => a.artifactId === 'escalation')!;
     expect(esc.markdown).toContain(escQuote[1]);
     expect(esc.markdown).toContain(escQuote[2]);
   });
@@ -372,5 +372,79 @@ describe('takes (DECISIONS D-068)', () => {
     );
     expect(alts.length).toBeGreaterThanOrEqual(25);
     expect(alts.filter((a) => !section.includes(a))).toEqual([]);
+  });
+});
+
+describe('pacing (DECISIONS D-072)', () => {
+  it('paced runs keep the story clock monotonic on every path', () => {
+    for (const pace of [1.15, 1.5]) {
+      for (const take of [0, 7, 4242]) {
+        for (const [name, decisions] of Object.entries(PATHS)) {
+          const tl = compile(scenario, decisions, { pace, take });
+          let prev = -1;
+          for (const e of tl.events) {
+            const s = parseClock(e.clock!);
+            expect(s, `pace ${pace} take ${take} ${name} ${e.id}`).toBeGreaterThanOrEqual(prev);
+            prev = s;
+          }
+          const chaos = compile(scenario, [...decisions, { type: 'chaos', at: tl.endT }], { pace, take });
+          expect(chaos.events.filter((e) => e.kind === 'chaos.end')).toHaveLength(1);
+        }
+      }
+    }
+    const tl = compile(scenario, PATHS.approve, { pace: 1.15 });
+    // The default pace makes a run of about four minutes (DECISIONS D-072).
+    expect(tl.endT / 1000).toBeGreaterThan(220);
+    expect(tl.endT / 1000).toBeLessThan(260);
+  });
+});
+
+describe('run clock and tokens (DECISIONS D-074)', () => {
+  const TOKEN = /\{\{[^}]*\}\}/;
+  const wait = (d: Decision): Decision => (d.type === 'gate' ? { ...d, waitedMs: 25_000 } : d);
+
+  it('resolves every run-time token on every path, take, and pace, including chaos', () => {
+    for (const pace of [1, 1.15]) {
+      for (const take of [0, 7]) {
+        for (const [name, decisions] of Object.entries(PATHS)) {
+          const base = compile(scenario, decisions.map(wait), { pace, take });
+          const tl = compile(scenario, [...decisions.map(wait), { type: 'chaos', at: base.endT }], { pace, take });
+          for (const e of tl.events) {
+            const text = JSON.stringify(e);
+            expect(TOKEN.test(text), `${name} ${e.id} ${text.slice(0, 120)}`).toBe(false);
+          }
+        }
+      }
+    }
+  });
+
+  it('resolves the end card, scorecard, and split view from the run', () => {
+    for (const [name, decisions] of Object.entries(PATHS)) {
+      const tl = compile(scenario, decisions.map(wait), { pace: 1.15 });
+      const rows = scenario.scorecard.map((r) => resolveRunText(r.squadLive ?? r.squad, tl, tl.endT));
+      const lane = (scenario.splitView.squadLive ?? []).map((x) => resolveRunText(`${x.label} ${x.clock}`, tl, tl.endT));
+      const ending = tl.end.kind === 'end' ? scenario.endings[tl.end.ending] : undefined;
+      const headline = resolveRunText(ending?.headlineLive ?? ending?.headline ?? '', tl, tl.endT);
+      if (name === 'reject-reject') continue; // End B never mitigates; the app shows the static lane there.
+      for (const text of [...rows, ...lane, headline]) expect(TOKEN.test(text), `${name}: ${text}`).toBe(false);
+      expect(rows.find((r) => r.includes('deciding'))).toBe(name === 'approve' ? '25 s deciding' : '50 s deciding');
+    }
+  });
+
+  it('gives a realistic outcome: mitigated about 3 to 6 minutes after the alert at the default pace', () => {
+    const tl = compile(scenario, PATHS.approve!.map(wait), { pace: 1.15 });
+    const mitigate = resolveRunText('{{span:a1.b07:a6.b02}}', tl, tl.endT);
+    const min = Number(/^(\d+) min/.exec(mitigate)?.[1] ?? 0);
+    expect(min).toBeGreaterThanOrEqual(3);
+    expect(min).toBeLessThanOrEqual(6);
+    // The rollout fast-forward is labelled and returns to real time.
+    const rates = tl.events.flatMap((e) => (e.kind === 'clock.rate' ? [e.rate] : []));
+    expect(rates).toEqual([4, 1]);
+  });
+
+  it('marks every milestone and the impact window on the paths that reach them', () => {
+    const tl = compile(scenario, PATHS.approve!, { pace: 1.15 });
+    for (const m of scenario.milestones) expect(resolveRunText(`{{clock:${m.beats}}}`, tl, 0), m.id).toMatch(/^\d{2}:\d{2}:\d{2}$/);
+    expect(resolveRunText(`{{clock:${scenario.impact!.until}}}`, tl, 0)).toMatch(/^02:1\d:\d{2}$/);
   });
 });

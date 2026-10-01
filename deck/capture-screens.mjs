@@ -17,8 +17,8 @@ mkdirSync(OUT, { recursive: true });
 
 const FILE = pathToFileURL(OFFLINE).href;
 // Presenter mode per DECK §3; notes strip off because it is for the presenter's eyes only.
-// take=0: the canonical script, so decks show the lines in SCENARIO.md.
-const BASE = 'take=0&speed=8&autoplay=1&presenter=1&notes=0';
+// take=0, pace=1: the canonical script at authored timing, so decks show the lines in SCENARIO.md.
+const BASE = 'take=0&pace=1&speed=8&autoplay=1&presenter=1&notes=0';
 
 /** @type {{ file: string; query: string; after?: (page: import('@playwright/test').Page) => Promise<void> }[]} */
 const SHOTS = [
@@ -50,6 +50,7 @@ const SHOTS = [
       await page.evaluate(() => window.__nightShift.source.pause());
     },
   },
+  { file: '11-suspects', query: 'pauseAt=a3.x05' },
   {
     file: '10-inspector',
     query: 'pauseAt=a4.b06',

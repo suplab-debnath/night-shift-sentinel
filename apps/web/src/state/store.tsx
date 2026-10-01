@@ -16,6 +16,8 @@ export interface UiState {
   splitOpen: boolean;
   shortcutsOpen: boolean;
   panelOpen: boolean;
+  /** The presenter closed the scorecard / end card to look at the finished stage. */
+  summaryHidden: boolean;
 }
 
 export interface AppState {
@@ -36,7 +38,11 @@ export function createAppStore(source: StageSource, bundle: ScenarioBundle, ui: 
     bundle,
     setUi: (patch) => set((s) => ({ ui: { ...s.ui, ...patch } })),
   }));
-  source.subscribe((snap) => store.setState({ snap }));
+  source.subscribe((snap) => {
+    // A closed summary comes back on the next run (replay, or seeking back before it).
+    const reopen = snap.state.scorecard === null && store.getState().ui.summaryHidden;
+    store.setState(reopen ? { snap, ui: { ...store.getState().ui, summaryHidden: false } } : { snap });
+  });
   return store;
 }
 

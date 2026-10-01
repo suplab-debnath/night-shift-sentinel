@@ -30,7 +30,7 @@ export function presenterNote(s: StageSnapshot, splitOpen: boolean): string {
     case 3:
       return st.evidence.conclusion
         ? 'Three independent clues agree. Root cause in under two minutes, with a confidence score, not a guess.'
-        : 'Watch the evidence board. Logs say the app is starving for connections. A release shipped twelve minutes earlier. The database is fine.';
+        : 'Watch them think. Two suspects get ruled out, a trace call fails and is retried, and the Orchestrator asks why it broke at 02:04, not 01:55.';
     case 4:
       return 'Fixer proposes options with time, risk, and reversibility. Guardian checks the recommended one. One rule remains: a human must approve.';
     case 5:

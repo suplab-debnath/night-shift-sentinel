@@ -85,3 +85,42 @@ describe('ScriptedSource', () => {
     expect(src.getSnapshot().t).toBe(0);
   });
 });
+
+describe('ScriptedSource run clock (D-074, D-075)', () => {
+  const wallClock = () => {
+    let now = 1000;
+    return { now: () => now, advance: (ms: number) => (now += ms) };
+  };
+
+  it('counts the time a person takes at the gate', () => {
+    const w = wallClock();
+    const src = new ScriptedSource(incidentCheckout.scenario, { approver: 'Asha', now: w.now, raf: () => 1, caf: () => {} });
+    src.seek(src.getSnapshot().timeline.endT);
+    expect(src.getSnapshot().clockHold).toEqual({ kind: 'gate', since: 1000 });
+    w.advance(42_000);
+    src.decide('g1', 'approved');
+    const s = src.getSnapshot();
+    expect(s.decisions[0]).toMatchObject({ type: 'gate', waitedMs: 42_000 });
+    expect(s.clockHold).toBeNull();
+  });
+
+  it('pauses the squad with the clock running, and freezes without it', () => {
+    const w = wallClock();
+    const src = new ScriptedSource(incidentCheckout.scenario, { approver: 'Asha', now: w.now, raf: () => 1, caf: () => {} });
+    src.toggleSquad(); // start
+    expect(src.getSnapshot().playing).toBe(true);
+    src.seek(5000);
+    src.play();
+    src.toggleSquad(); // pause squad
+    expect(src.getSnapshot()).toMatchObject({ playing: false, clockHold: { kind: 'squad' }, frozen: false });
+    w.advance(20_000);
+    src.toggleSquad(); // resume: the pause becomes a hold on the clock
+    expect(src.getSnapshot().decisions).toEqual([{ type: 'hold', at: 5000, ms: 20_000 }]);
+    expect(src.getSnapshot().playing).toBe(true);
+    src.toggleFreeze();
+    expect(src.getSnapshot()).toMatchObject({ playing: false, frozen: true, clockHold: null });
+    w.advance(60_000);
+    src.toggleFreeze();
+    expect(src.getSnapshot().decisions).toHaveLength(1);
+  });
+});

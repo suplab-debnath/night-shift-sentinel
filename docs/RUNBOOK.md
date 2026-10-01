@@ -21,32 +21,28 @@
 - Open the offline build; press `R` to reset. Press `P` for presenter mode.
 - If a tablet will be handed over for approval: open the same build on it or use the laptop.
 
-## 3. Presenter script (about 6 minutes)
+## 3. Presenter script (about 7 minutes)
+
+This is the demo on its own. For the full talk (the story deck with the demo in the middle, about 20 minutes), use `docs/PRESENTER_SCRIPT.md`; its lines are also the executive deck's speaker notes.
 
 | Time | On screen | Say (suggested) |
 |---|---|---|
 | 0:00 | Title card | "It's 2:07 in the morning. Checkout at an online retailer is slowing down. Nobody's awake. Let's see who is." |
 | 0:15 | Act 1 alert | "Sentinel watches the numbers. Latency is six times over target. It's not a blip, so it raises a SEV-2." |
-| 0:35 | Act 2 fan-out | "The Orchestrator asks three questions at once: what's failing, what changed, how far it spreads." |
-| 0:50 | Act 3 | "Watch the evidence board. Logs say the app is starving for database connections. The deploy history shows a release twelve minutes earlier. The database itself is fine." |
-| 1:30 | Root cause card | "Three independent clues agree. Root cause in under two minutes, with a confidence score, not a guess." |
-| 1:45 | Act 4 | "Fixer proposes options with time, risk, and reversibility. Guardian checks the recommended one against policy. Everything passes, except one rule: a human must approve production changes." |
-| 2:15 | Gate | Hand over the tablet or turn to the client: "You're the on-call engineer. Your call." |
-| 2:30 | Act 6 | "Rolling back one pod at a time. Watch the line." (pause) "Back under target." |
-| 3:10 | Act 7 | "Scribe writes two things: a plain update for stakeholders and a blameless postmortem for engineers. Owners are proposed, not assigned." |
-| 3:40 | Scorecard | "Illustrative, but the shape is real: minutes instead of most of an hour, and thirty seconds of human time." |
-| 4:00 | Split view (`S`) | "Here's the same night done by hand." |
-| 4:30 | Chaos (`C`) | "Now the part people ask about. What if an agent gets it wrong?" … "Blocked twice: by policy, and because the tool isn't even granted." |
-| 5:30 | End card | "Where would you want a squad like this first?" |
+| 0:30 | Act 2 fan-out | "The Orchestrator asks three questions at once: what's failing, what changed, how far it spreads." |
+| 0:50 | Act 3 | "Watch them think. Each agent pauses before it speaks, and tool calls run until the answer comes back. Log Detective suspects the database; Sentinel checks and rules it out. Code Archaeologist suspects the Spring Boot upgrade, reads the diff, and rules that out too. A trace call even fails and gets retried." |
+| 2:00 | Trigger vs cause | "Before it accepts the answer, the Orchestrator asks why it broke at 02:04 and not at the 01:55 deploy. Traffic doubled at 02:03: that's the trigger. The smaller pool is the cause." |
+| 2:20 | Root cause card | "Three independent clues agree. Root cause in under two minutes of incident time, with a confidence score, not a guess." |
+| 2:35 | Act 4 | "Fixer proposes options with time, risk, and reversibility. Guardian checks the recommended one against policy. Everything passes, except one rule: a human must approve production changes." |
+| 3:00 | Gate | Hand over the tablet or turn to the client: "You're the on-call engineer. Your call. The clock is still running." The time they take shows up in the scorecard as human time. |
+| 3:15 | Act 6 | "Rolling back one pod at a time. Watch the line." (pause) "Back under target." |
+| 3:45 | Act 7 | "Scribe writes two things: a plain update for stakeholders and a blameless postmortem for engineers. Owners are proposed, not assigned." |
+| 4:10 | Scorecard | "Illustrative, but the shape is real: minutes instead of most of an hour, and thirty seconds of human time." |
+| 4:30 | Split view (`S`) | "Here's the same night done by hand." |
+| 5:00 | Chaos (`C`) | "Now the part people ask about. What if an agent gets it wrong?" … "Blocked twice: by policy, and because the tool isn't even granted." |
+| 6:00 | End card | "Where would you want a squad like this first?" Close it (`Esc` or ✕) to show the finished stage; "Show summary" brings it back. |
 
 If the client clicks **Reject**: "Good. Let's see what happens." After the alternative: "If you reject again, it stops and escalates. It stops where people say stop."
-
-**Letting it run at 0.3×.** The script above assumes the presenter narrates and pauses at
-1×. To let the demo play unattended end to end (e.g. a booth loop, a recorded walkthrough,
-or opening a pitch with "watch it actually think") press `-` to drop to 0.3×: the same
-canonical timeline stretches to a ~7–8 min run-through, closer to how long real agent
-tool calls and deliberation would take (DECISIONS D-072). Speed back to 1× before
-resuming the narrated script above, since its cues are timed against 1×.
 
 ## 4. Recovery playbook
 
@@ -57,12 +53,15 @@ resuming the narrated script above, since its cues are timed against 1×.
 | Wrong branch taken | Press `R` to reset or scrub back before the gate; decisions after that point are cleared. |
 | Projector resolution changes | Layout adapts; press `P` twice to re-fit presenter mode. |
 | Laptop dies | USB backup on any machine with a modern browser. No install needed. |
+| Need to talk mid-run | `F` freezes everything (clock included) without a banner; `F` again resumes. "Pause squad" is for making the point that a person can stop the agents: the clock keeps running and the pause counts toward the outcome. |
+| Running long | Press `+` for 1.5× or 2×: the agents still pause, just shorter. For a short slot, open with `pace=1` in the URL (about 2½ minutes). |
 
 ## 5. Keyboard shortcuts
 
 | Key | Action |
 |---|---|
-| `Space` | Play / pause |
+| `Space` | Start, pause the squad (the incident clock keeps running and the pause counts), resume |
+| `F` | Freeze everything, clock included, for questions (no banner; the audience sees a still stage) |
 | `→` / `←` | Next / previous beat |
 | `1`–`7` | Jump to act |
 | `A` / `X` | Approve / reject at an open gate |
@@ -72,8 +71,9 @@ resuming the narrated script above, since its cues are timed against 1×.
 | `P` | Presenter mode |
 | `N` | Toggle presenter notes strip |
 | `M` | Switch mode (scripted ↔ live, if available) |
-| `+` / `-` | Speed up / down (0.3×, 1×, 1.5×, 2×) |
+| `+` / `-` | Speed up / down (1×, 1.5×, 2×) |
 | `R` | Reset to title |
+| `Esc` | Close the open overlay; at the end, close the scorecard or end card ("Show summary" brings it back) |
 | `?` | Show shortcuts |
 
 ## 6. Likely questions

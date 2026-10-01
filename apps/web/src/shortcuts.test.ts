@@ -7,7 +7,8 @@ const k = (key: string, extra: Record<string, unknown> = {}) => resolveShortcut(
 
 describe('shortcut map (RUNBOOK §5)', () => {
   it('maps every RUNBOOK key', () => {
-    expect(k(' ')).toEqual({ type: 'togglePlay' });
+    expect(k(' ')).toEqual({ type: 'toggleSquad' });
+    expect(k('f')).toEqual({ type: 'togglePlay' });
     expect(k('ArrowRight')).toEqual({ type: 'stepForward' });
     expect(k('ArrowLeft')).toEqual({ type: 'stepBack' });
     for (let n = 1; n <= 7; n++) expect(k(String(n))).toEqual({ type: 'jumpToAct', act: n });
@@ -24,17 +25,15 @@ describe('shortcut map (RUNBOOK §5)', () => {
     expect(k('?')).toEqual({ type: 'toggleHelp' });
     expect(k('Escape')).toEqual({ type: 'close' });
     expect(k('z')).toBeNull();
-    expect(SHORTCUT_HELP).toHaveLength(13);
+    expect(SHORTCUT_HELP).toHaveLength(15);
   });
 
-  it('steps speed through 0.3×, 1×, 1.5×, 2× and clamps', () => {
+  it('steps speed through 1×, 1.5×, 2× and clamps', () => {
     expect(resolveShortcut({ key: '+' }, { speed: 1 })).toEqual({ type: 'setSpeed', speed: 1.5 });
     expect(resolveShortcut({ key: '=' }, { speed: 1.5 })).toEqual({ type: 'setSpeed', speed: 2 });
     expect(resolveShortcut({ key: '+' }, { speed: 2 })).toEqual({ type: 'setSpeed', speed: 2 });
     expect(resolveShortcut({ key: '-' }, { speed: 2 })).toEqual({ type: 'setSpeed', speed: 1.5 });
-    expect(resolveShortcut({ key: '-' }, { speed: 1 })).toEqual({ type: 'setSpeed', speed: 0.3 });
-    expect(resolveShortcut({ key: '-' }, { speed: 0.3 })).toEqual({ type: 'setSpeed', speed: 0.3 });
-    expect(resolveShortcut({ key: '+' }, { speed: 0.3 })).toEqual({ type: 'setSpeed', speed: 1 });
+    expect(resolveShortcut({ key: '-' }, { speed: 1 })).toEqual({ type: 'setSpeed', speed: 1 });
     // From a URL speed outside the list.
     expect(resolveShortcut({ key: '-' }, { speed: 8 })).toEqual({ type: 'setSpeed', speed: 2 });
     expect(resolveShortcut({ key: '+' }, { speed: 1.2 })).toEqual({ type: 'setSpeed', speed: 1.5 });

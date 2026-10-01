@@ -207,7 +207,7 @@ export class LiveSource extends ScriptedSource {
   }
 
   override decide = (gateId: string, decision: GateDecision) => {
-    const ok = this.player.decide(gateId, decision, this.opts.approver);
+    const ok = this.decideWithWait(gateId, decision);
     if (ok) {
       const gate = this.scenario.gates[gateId];
       if (gate) this.requestSegment(decision === 'approved' ? gate.onApprove : gate.onReject);

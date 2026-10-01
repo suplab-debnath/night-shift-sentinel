@@ -1,7 +1,9 @@
 import { ArrowRight } from 'lucide-react';
 import { formatArgs, type StreamEntry } from '@night-shift/engine';
+import { toolRunningMs } from '../lib/pending';
 import { visibleChars } from '../lib/typing';
 import { useApp } from '../state/store';
+import { copy } from '../copy';
 import { AgentChip } from './AgentChip';
 import { CodeBlock } from './CodeBlock';
 import styles from './StreamItem.module.css';
@@ -12,6 +14,21 @@ function Meta({ entry, children }: { entry: StreamEntry; children: React.ReactNo
       {children}
       {entry.clock && <time className={`${styles.time} mono`}>{entry.clock}</time>}
     </div>
+  );
+}
+
+/** Spinner and elapsed time while a tool call waits on its result. */
+function Running({ callId, t0 }: { callId: string; t0: number }) {
+  const ms = useApp((s) => {
+    const v = toolRunningMs(s.snap.timeline, callId, t0, s.snap.t);
+    return v === null ? null : Math.floor(v / 100) * 100;
+  });
+  if (ms === null) return null;
+  return (
+    <span className={styles.running} data-testid="tool-running">
+      <span className={styles.spinner} aria-hidden />
+      <span className="mono">{copy.panel.running(ms)}</span>
+    </span>
   );
 }
 
@@ -50,6 +67,7 @@ export function StreamItem({ entry }: { entry: StreamEntry }) {
         <li className={styles.item} data-testid="tool-call">
           <Meta entry={entry}>
             <AgentChip agent={entry.agent} compact />
+            <Running callId={entry.callId} t0={entry.t} />
           </Meta>
           <CodeBlock>
             <span className={styles.prompt}>▸</span> {entry.tool} {formatArgs(entry.args)}

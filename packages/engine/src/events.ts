@@ -67,6 +67,8 @@ export type EventBody =
   | { kind: 'scene.start'; act: number; title: string; card?: boolean }
   | { kind: 'scene.end'; act: number }
   | { kind: 'clock.set'; clock: string; running: boolean }
+  /** Fast-forward the run clock (rate > 1) until the next rate event; label names it on screen. */
+  | { kind: 'clock.rate'; rate: number; label?: string }
   | { kind: 'agent.state'; agent: AgentId; state: AgentState }
   | { kind: 'thought'; agent: AgentId; text: string; stream?: boolean }
   | { kind: 'tool.call'; agent: AgentId; callId: string; tool: string; args: Record<string, unknown> }
@@ -130,6 +132,7 @@ export const EVENT_KINDS: readonly EventKind[] = [
   'scene.start',
   'scene.end',
   'clock.set',
+  'clock.rate',
   'agent.state',
   'thought',
   'tool.call',

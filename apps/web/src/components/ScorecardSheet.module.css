@@ -102,3 +102,25 @@
     padding: 2px 12px 2px 0;
   }
 }
+
+.headEnd {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.close {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--ink-2);
+  cursor: pointer;
+}
+
+.close:hover {
+  background: var(--paper);
+}

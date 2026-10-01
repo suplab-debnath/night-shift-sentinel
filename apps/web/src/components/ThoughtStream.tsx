@@ -2,6 +2,7 @@ import { ArrowDown } from 'lucide-react';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { copy } from '../copy';
 import { useApp } from '../state/store';
+import { PendingThought } from './PendingThought';
 import { StreamItem } from './StreamItem';
 import styles from './ThoughtStream.module.css';
 
@@ -40,6 +41,7 @@ export function ThoughtStream() {
         {stream.map((entry) => (
           <StreamItem key={entry.id} entry={entry} />
         ))}
+        <PendingThought />
       </ol>
       {!pinned && (
         <button

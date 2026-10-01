@@ -5,10 +5,12 @@ import { brand } from '../config';
 import { copy } from '../copy';
 import { AGENT_HUE, AGENT_ICON, AGENT_WASH } from '../lib/agents';
 import { useApp } from '../state/store';
+import { pendingThought } from '../lib/pending';
 import styles from './AgentNode.module.css';
 
 export function AgentNode({ agent }: { agent: AgentDef }) {
   const state = useApp((s) => s.snap.state.agents[agent.id]);
+  const thinking = useApp((s) => pendingThought(s.snap.timeline, s.snap.state.stream, s.snap.t, s.snap.speed)?.agent === agent.id);
   const changedAt = useApp((s) => s.snap.state.agentChangedAt[agent.id]);
   const presenter = useApp((s) => s.ui.presenter);
   const setUi = useApp((s) => s.setUi);
@@ -59,6 +61,13 @@ export function AgentNode({ agent }: { agent: AgentDef }) {
           </span>
         )}
       </span>
+      {thinking && (
+        <span className={styles.thought} aria-hidden data-testid="thinking-bubble">
+          <span />
+          <span />
+          <span />
+        </span>
+      )}
       <span className={styles.name}>{label}</span>
     </button>
   );

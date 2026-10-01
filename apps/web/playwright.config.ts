@@ -14,7 +14,7 @@ export default defineConfig({
   },
   projects: [
     { name: 'fast', grepInvert: /@realtime/, testIgnore: [/offline\.spec\.ts/, /live\.spec\.ts/] },
-    { name: 'realtime', grep: /@realtime/, timeout: 300_000, testIgnore: [/offline\.spec\.ts/, /live\.spec\.ts/] },
+    { name: 'realtime', grep: /@realtime/, timeout: 420_000, testIgnore: [/offline\.spec\.ts/, /live\.spec\.ts/] },
     // Runs against apps/web/dist-offline/index.html via file:// (npm run build:offline first).
     { name: 'offline', testMatch: /offline\.spec\.ts/ },
   ],

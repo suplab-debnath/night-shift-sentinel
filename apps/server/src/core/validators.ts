@@ -75,7 +75,12 @@ const RULES: Record<string, (text: string, input: ValidationInput) => string | n
     if (verdict === 'needs-approval' && !any(t, ['human', 'approv'])) return 'must say a human approves';
     return null;
   },
-  'scribe-status': (t) => (!has(t, '02:04') || !has(t, '02:11') ? 'must state the impact window 02:04–02:11' : null),
+  // The impact window: from 02:04 until the run's own mitigation time (a token, D-074).
+  'scribe-status': (t, input) => {
+    const needed = ['02:04', ...tokensIn(input.reference ?? '')];
+    const missing = needed.filter((s) => !has(t, s));
+    return missing.length ? `must state the impact window (missing ${missing.join(', ')})` : null;
+  },
   // SCENARIO §9: every timeline timestamp of the postmortem, taken from this path's script.
   'scribe-postmortem': (t, input) => {
     const stamps = timelineStamps(input.reference ?? '');
@@ -85,10 +90,15 @@ const RULES: Record<string, (text: string, input: ValidationInput) => string | n
   },
 };
 
-/** Timestamps in the "Timeline" section of a postmortem. */
+/** Timestamps and run-time tokens in the "Timeline" section of a postmortem. */
 export function timelineStamps(doc: string): string[] {
   const section = doc.split(/^Timeline$/m)[1]?.split(/\n\s*\n/)[0] ?? '';
-  return [...new Set(section.match(/\b\d{2}:\d{2}(?::\d{2})?\b/g) ?? [])];
+  return [...new Set([...(section.match(/\b\d{2}:\d{2}(?::\d{2})?\b/g) ?? []), ...tokensIn(section)])];
+}
+
+/** Run-time tokens in a text (DECISIONS D-074). */
+export function tokensIn(text: string): string[] {
+  return [...new Set(text.match(/\{\{[^}]+\}\}/g) ?? [])];
 }
 
 export const VALIDATOR_NAMES = Object.keys(RULES);

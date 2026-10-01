@@ -3,14 +3,14 @@ import { snapshot, sourceLine, trackConsoleErrors, waitForGate } from './helpers
 
 test('happy path plays end to end: alert, diagnosis, gate, recovery, wrap-up', async ({ page }) => {
   const errors = trackConsoleErrors(page);
-  await page.goto('/?take=0&speed=8');
+  await page.goto('/?take=0&pace=1&speed=8');
 
   // Title card at rest; nothing plays until the presenter presses play.
   await expect(page.getByTestId('title-card')).toContainText('02:07. Checkout is slowing down.');
   await expect(page.getByTestId('clock')).toHaveText('02:07:00');
   // No mode badge on stage; the source shows only in the settings menu.
   await expect(page.getByTestId('mode')).toHaveCount(0);
-  expect(await sourceLine(page)).toBe('Scriptedcanonical take');
+  expect(await sourceLine(page)).toBe('Scriptedcanonical take · authored pace');
   await page.getByTestId('play').click();
 
   // Act 1: SEV-2.
@@ -23,14 +23,16 @@ test('happy path plays end to end: alert, diagnosis, gate, recovery, wrap-up', a
   await expect(page.getByTestId('option-card')).toHaveCount(3, { timeout: 20_000 });
   await expect(page.getByTestId('checklist')).toContainText('P-06');
 
-  // Act 5: the gate stops the clock.
+  // Act 5: playback waits at the gate; the run clock keeps running (D-074).
   await waitForGate(page);
   await expect(page.getByTestId('gate-sheet')).toContainText('Approve production rollback?');
   await expect(page.getByText('Awaiting approval')).toBeVisible();
   const atGate = await snapshot(page);
-  expect(atGate.clock).toBe('02:09:34');
-  await page.waitForTimeout(800);
+  expect(atGate.clock).toMatch(/^02:0\d:\d{2}$/);
+  const shownAt = await page.getByTestId('clock').textContent();
+  await page.waitForTimeout(1300);
   expect((await snapshot(page)).t).toBe(atGate.t);
+  expect(await page.getByTestId('clock').textContent()).not.toBe(shownAt);
   await expect(page.getByTestId('gate-approve')).toBeFocused();
   await page.getByTestId('gate-approve').click();
   await expect(page.getByTestId('gate-sheet')).toBeHidden();
@@ -43,15 +45,16 @@ test('happy path plays end to end: alert, diagnosis, gate, recovery, wrap-up', a
 
   // Act 7: scorecard and end card.
   await expect(page.getByTestId('end-card')).toBeVisible({ timeout: 30_000 });
-  await expect(page.getByTestId('end-card')).toContainText('Mitigated in 4 minutes. One human decision.');
+  // The headline is measured from the run (D-074).
+  await expect(page.getByTestId('end-card')).toContainText(/Mitigated in \d+ min( \d+ s)?\.A person approved every change\./);
   await expect(page.getByTestId('scorecard')).toContainText('Illustrative');
   // The end card shows at scene.end; Act 7 then runs to its full length before the timeline ends.
   await expect.poll(async () => (await snapshot(page)).status, { timeout: 20_000 }).toBe('ended');
-  expect((await snapshot(page)).clock).toBe('02:16:54');
+  expect((await snapshot(page)).clock).toMatch(/^02:1\d:\d{2}$/);
 
   // Panel tabs.
   await page.getByTestId('tab-artifacts').click();
-  await expect(page.getByTestId('artifact-postmortem')).toContainText('02:09:40 rollback approved by on-call engineer');
+  await expect(page.getByTestId('artifact-postmortem')).toContainText(/\d{2}:\d{2}:\d{2} rollback approved by on-call engineer/);
   await expect(page.getByTestId('artifact-status')).toContainText('Checkout incident — mitigated');
   await page.getByTestId('tab-audit').click();
   await expect(page.getByTestId('audit')).toContainText('Approved by On-call engineer: Approve production rollback?');
@@ -63,7 +66,7 @@ test('happy path plays end to end: alert, diagnosis, gate, recovery, wrap-up', a
 
 test('same inputs give the same frame (deterministic seek)', async ({ page }) => {
   const read = async () => {
-    await page.goto('/?take=0&seek=60000');
+    await page.goto('/?take=0&pace=1&seek=60000');
     await page.waitForTimeout(300);
     return page.evaluate(() => {
       const s = window.__nightShift!.source.getSnapshot();
@@ -75,7 +78,7 @@ test('same inputs give the same frame (deterministic seek)', async ({ page }) =>
 
 test('layout holds at 1366×768 with no horizontal overflow', async ({ page }) => {
   await page.setViewportSize({ width: 1366, height: 768 });
-  await page.goto('/?take=0&speed=8&autoplay=1&pauseAt=a4.b11');
+  await page.goto('/?take=0&pace=1&speed=8&autoplay=1&pauseAt=a4.b11');
   await expect(page.getByTestId('checklist')).toContainText('P-06', { timeout: 30_000 });
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth);
   expect(overflow).toBe(false);
@@ -86,18 +89,18 @@ test('layout holds at 1366×768 with no horizontal overflow', async ({ page }) =
 });
 
 test('reduced motion renders whole lines and no packets trails', async ({ page }) => {
-  await page.goto('/?take=0&speed=8&autoplay=1&pauseAt=a1.b04&reducedMotion=1');
+  await page.goto('/?take=0&pace=1&speed=8&autoplay=1&pauseAt=a1.b04&reducedMotion=1');
   await expect(page.getByTestId('thought').first()).toHaveText(/p99 latency on checkout-api is 4.8 seconds. The SLO is 800 milliseconds./, {
     timeout: 20_000,
   });
   expect(await page.evaluate(() => document.documentElement.dataset.reducedMotion)).toBe('true');
 });
 
-test('@realtime happy path at 1× runs in about the scripted length', async ({ page }) => {
+test('@realtime happy path at 1× runs at the default pace (about four minutes)', async ({ page }) => {
   await page.goto('/?take=0');
   await page.getByTestId('play').click();
   const start = Date.now();
-  await waitForGate(page, 120_000);
+  await waitForGate(page, 240_000);
   const toGate = Date.now() - start;
   await page.getByTestId('gate-approve').click();
   const resumed = Date.now();
@@ -105,7 +108,7 @@ test('@realtime happy path at 1× runs in about the scripted length', async ({ p
   const afterGate = Date.now() - resumed;
   const total = (toGate + afterGate) / 1000;
   console.log(`1× run: ${(toGate / 1000).toFixed(1)} s to the gate, ${(afterGate / 1000).toFixed(1)} s after it, ${total.toFixed(1)} s total`);
-  // SCENARIO §3: ≈ 2 min 27 s of acts plus the gate (DECISIONS D-008, D-069).
-  expect(total).toBeGreaterThan(132);
-  expect(total).toBeLessThan(157);
+  // SCENARIO §3: about four minutes plus the gate at the default pace (DECISIONS D-072).
+  expect(total).toBeGreaterThan(220);
+  expect(total).toBeLessThan(260);
 });

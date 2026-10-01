@@ -11,3 +11,10 @@
   font-size: var(--t-sm);
   border-bottom: 1px solid var(--line);
 }
+
+.paused {
+  background: var(--signal-wash);
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}

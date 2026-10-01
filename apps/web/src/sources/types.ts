@@ -10,6 +10,15 @@ export interface StageSnapshot extends PlayerSnapshot {
   provider?: 'bedrock' | 'mock' | null;
   /** Take being played (presenter-only information). */
   take: number;
+  /** Pacing factor in effect (presenter-only information). */
+  pace: number;
+  /**
+   * The run clock is running while playback waits (D-074): a person deciding at a gate, or the
+   * squad paused. `since` is wall time (performance.now); the clock adds (now - since) × speed.
+   */
+  clockHold: { kind: 'gate' | 'squad'; since: number } | null;
+  /** Playback stopped by the presenter (not the squad): nothing moves, the clock included. */
+  frozen: boolean;
 }
 
 export interface StageSource {
@@ -20,6 +29,10 @@ export interface StageSource {
   play(): void;
   pause(): void;
   togglePlay(): void;
+  /** The primary operations control: start, pause the squad (the clock keeps running), resume. */
+  toggleSquad(): void;
+  /** Presenter freeze for questions: stops everything, the clock included. */
+  toggleFreeze(): void;
   setSpeed(speed: number): void;
   seek(t: number): void;
   stepForward(): void;
