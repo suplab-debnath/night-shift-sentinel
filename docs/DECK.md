@@ -37,10 +37,13 @@ Captured from the offline build at 1920×1080, presenter mode on, via URL params
 | `09-chaos.png` | Chaos: Guardian blocked, permission toast visible |
 | `10-inspector.png` | Inspector open on Fixer |
 | `11-suspects.png` | Act 3, suspects pinned and ruled out (`pauseAt=a3.x05`) |
+| `12-pr.png` | Act 7, the draft pull request and its P-09/P-10 checks |
+| `13-audit.png` | Act 7, Audit tab by stage with the verified chain |
+| `14-inject.png` | Poisoned log test: P-11 fails, Guardian quarantines |
 
 ---
 
-## 4. Executive deck — "When the pager rings at 2 AM" (20 slides)
+## 4. Executive deck — "When the pager rings at 2 AM" (23 slides)
 
 A story in four parts, told as one night (DECISIONS D-076). Parts 1–2 are dark "night" slides with a big amber clock stamp top left; Part 3 turns light (the squad and the app screenshots); Part 4 stays light and closes on a dawn slide. Every slide has speaker notes written as the presenter's script. Manual-response slides carry "Dramatization of a typical manual response. Times are illustrative."; outcome slides carry the "Illustrative" tag and footnote.
 
@@ -53,7 +56,7 @@ A story in four parts, told as one night (DECISIONS D-076). Parts 1–2 are dark
 | **Part 2 · The traditional night** | | |
 | 4 | 02:07 "The pager goes off." | Night sky, lock-screen phone with the page |
 | 5 | 02:19 "Twelve minutes before anyone looks at the data." | Three steps from `splitView.manual` |
-| 6 | 02:27 "The war room fills up." | Incident chat of seven messages; "Six people woken across six teams" |
+| 6 | 02:27 "The war room fills up." | Incident chat of eight messages, including the shadow-AI moment at 02:36 (logs pasted into a public chatbot); "Six people woken across six teams" |
 | 7 | 02:29–02:44 "Page, wait, check, hand off. Repeat." | Hand-off map: on-call in the centre, five people around |
 | 8 | 02:55 "Recovered. 48 minutes after the alert." | Timeline with the customer-impact bar; three manual stat tiles |
 | **Part 3 · The same night, with a squad** | | |
@@ -63,13 +66,16 @@ A story in four parts, told as one night (DECISIONS D-076). Parts 1–2 are dark
 | 12 | "What you just saw" | Storyboard: 01, 02, 11-suspects, 03, 05, 06 |
 | 13 | "They investigate like engineers: suspect, check, rule out" | `11-suspects` and three suspect cards |
 | 14 | "People stay in charge" | `05-gate` and `09-chaos` |
+| 15 | "Their fixes follow your engineering rules" | `12-pr` and `14-inject` |
+| 16 | "Every step leaves evidence" | Crop of `13-audit` and five audit properties |
 | **Part 4 · What changed** | | |
-| 15 | "Same night, two timelines" | Manual lane 48 min vs squad lane 4 min, Illustrative |
-| 16 | "Minutes, not most of an hour" | Native clustered bar chart (engage, root cause, mitigate); "6 → 1 People woken up", "30 s Human time" |
-| 17 | "Where this sits in our AI journey" | Four stages, `{{PRESENTER: add 1–2 of our live use cases}}` |
-| 18 | "Where agents fit first" | 2×2 repeatability × risk |
-| 19 | "Proposed next step: a six-week pilot" | Four phases, "Proposal" tag, shadow mode line |
-| 20 | "Let the squad take the first shift." / "People keep the last word." | Dawn over the same city; closing question "Where would you want a squad like this first?" |
+| 17 | "Same night, two timelines" | Manual lane 48 min vs squad lane 4 min, Illustrative |
+| 18 | "Minutes, not most of an hour" | Native clustered bar chart (engage, root cause, mitigate); "6 → 1 People woken up", "30 s Human time" |
+| 19 | "The answer to shadow AI is a better sanctioned path" | The 02:36 chat line and its risks; four sanctioned-path tiles |
+| 20 | "Where this sits in our AI journey" | Four stages, `{{PRESENTER: add 1–2 of our live use cases}}` |
+| 21 | "Where agents fit first" | 2×2 repeatability × risk |
+| 22 | "Proposed next step: a six-week pilot" | Four phases, "Proposal" tag, shadow mode line |
+| 23 | "Let the squad take the first shift." / "People keep the last word." | Dawn over the same city; closing question "Where would you want a squad like this first?" |
 
 The "Beyond incidents" material lives in the patterns slide (§6) and the architecture in the technical deck (§5).
 

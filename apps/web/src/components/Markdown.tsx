@@ -8,8 +8,8 @@ function inline(text: string): ReactNode[] {
   );
 }
 
-const HEADING = /^(Summary|Timeline|What went well|What we will change.*)$/;
-const FIELD = /^(Title|Status|Severity|Duration|Impact[^:]*):\s/;
+const HEADING = /^(Summary|Timeline|What went well|What we will change.*|Why|Changes|Checks.*|Guidelines applied|Review)$/;
+const FIELD = /^(Title|Status|Severity|Duration|Impact[^:]*|Branch|Author):\s/;
 
 export function Markdown({ text }: { text: string }) {
   const lines = text.split('\n');

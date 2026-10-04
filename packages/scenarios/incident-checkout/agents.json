@@ -25,7 +25,8 @@
         "y": 14
       },
       "size": "md",
-      "persona": "You are Sentinel, a site reliability monitor. Report numbers first, then one-line judgement. Never speculate on cause."
+      "persona": "You are Sentinel, a site reliability monitor. Report numbers first, then one-line judgement. Never speculate on cause.",
+      "modelTier": "fast"
     },
     {
       "id": "orchestrator",
@@ -49,7 +50,8 @@
         "y": 40
       },
       "size": "lg",
-      "persona": "You coordinate an incident squad. You plan, delegate, and synthesize evidence into a root-cause statement with a confidence score. You never execute changes."
+      "persona": "You coordinate an incident squad. You plan, delegate, and synthesize evidence into a root-cause statement with a confidence score. You never execute changes.",
+      "modelTier": "main"
     },
     {
       "id": "log-detective",
@@ -76,7 +78,8 @@
         "y": 14
       },
       "size": "md",
-      "persona": "You analyze logs. Quantify, find the dominant signature, state what it implies. One idea per sentence."
+      "persona": "You analyze logs. Quantify, find the dominant signature, state what it implies. One idea per sentence.",
+      "modelTier": "fast"
     },
     {
       "id": "code-archaeologist",
@@ -103,7 +106,8 @@
         "y": 14
       },
       "size": "md",
-      "persona": "You correlate incidents with changes. Cite versions, times, and exact diff lines."
+      "persona": "You correlate incidents with changes. Cite versions, times, and exact diff lines.",
+      "modelTier": "fast"
     },
     {
       "id": "fixer",
@@ -127,6 +131,14 @@
         {
           "name": "deploy.restart",
           "access": "approval"
+        },
+        {
+          "name": "pr.draft",
+          "access": "write"
+        },
+        {
+          "name": "ci.run",
+          "access": "read"
         }
       ],
       "needsApprovalFor": [
@@ -136,14 +148,16 @@
       ],
       "neverAllowed": [
         "Act without Guardian pass and human approval",
-        "db.alter (not granted)"
+        "db.alter (not granted)",
+        "Merge or deploy code (no merge tool)"
       ],
       "position": {
         "x": 14,
         "y": 66
       },
       "size": "md",
-      "persona": "You propose mitigations as options with time, risk, and reversibility. Prefer the fastest reversible option. You act only after approval."
+      "persona": "You propose mitigations as options with time, risk, and reversibility. Prefer the fastest reversible option. You act only after approval.",
+      "modelTier": "fast"
     },
     {
       "id": "guardian",
@@ -166,7 +180,8 @@
         "y": 66
       },
       "size": "md",
-      "persona": "You evaluate proposed actions against the provided policies. Output pass/fail per policy with a short reason. You may block."
+      "persona": "You evaluate proposed actions against the provided policies. Output pass/fail per policy with a short reason. You may block.",
+      "modelTier": "main"
     },
     {
       "id": "scribe",
@@ -193,7 +208,8 @@
         "y": 66
       },
       "size": "md",
-      "persona": "You write clear, calm incident communications and blameless postmortems."
+      "persona": "You write clear, calm incident communications and blameless postmortems.",
+      "modelTier": "main"
     },
     {
       "id": "human",

@@ -33,3 +33,12 @@
     gap: 12px;
   }
 }
+
+/* Poisoned-log test: right of the Orchestrator, clear of Log Detective and the top row (D-079). */
+.sheet.chaos.inject {
+  top: 34%;
+  left: auto;
+  right: 16px;
+  translate: 0 0;
+  width: min(420px, 42%);
+}

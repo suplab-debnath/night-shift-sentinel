@@ -1,6 +1,6 @@
 // Request validation and SSE framing shared by the Fastify and Lambda transports.
 import { z } from 'zod';
-import type { LiveFrame } from '@night-shift/engine';
+import { OVERLAY_NAMES, type LiveFrame } from '@night-shift/engine';
 
 export const MAX_BODY_BYTES = 16 * 1024;
 export const MAX_CONTEXT_BYTES = 8 * 1024;
@@ -13,7 +13,8 @@ const decision = z.union([
     by: z.string().max(80),
     waitedMs: z.number().nonnegative().max(86_400_000).optional(),
   }),
-  z.object({ type: z.literal('chaos'), at: z.number().nonnegative() }),
+  // What-if overlays: the over-eager fix, or the poisoned log line (D-079).
+  z.object({ type: z.literal('chaos'), at: z.number().nonnegative(), overlay: z.enum(OVERLAY_NAMES).optional() }),
   // Squad pauses (DECISIONS D-074); the server ignores them, but they travel with the path.
   z.object({ type: z.literal('hold'), at: z.number().nonnegative(), ms: z.number().nonnegative().max(86_400_000) }),
 ]);

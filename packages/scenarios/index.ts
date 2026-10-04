@@ -10,6 +10,7 @@ import diff from './incident-checkout/fixtures/diff.json';
 import runbooks from './incident-checkout/fixtures/runbooks.json';
 import policies from './incident-checkout/fixtures/policies.json';
 import services from './incident-checkout/fixtures/services.json';
+import governance from './incident-checkout/fixtures/governance.json';
 import { FixturesSchema, type Fixtures } from './src/fixtures';
 
 export * from './src/fixtures';
@@ -45,6 +46,7 @@ export const incidentCheckout: ScenarioBundle = bundle('incident-checkout', scen
   runbooks,
   policies,
   services,
+  governance,
 });
 
 const REGISTRY: Record<ScenarioId, ScenarioBundle> = { 'incident-checkout': incidentCheckout };

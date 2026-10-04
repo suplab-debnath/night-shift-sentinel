@@ -9,6 +9,26 @@
   background-color: var(--stage);
   background-image: radial-gradient(circle, var(--stage-dot) 1px, transparent 1.2px);
   background-size: 24px 24px;
+  transition: background-color 0.8s ease;
+}
+
+/* Stage tone (D-080). */
+.stage[data-tone='alert'] {
+  background-color: var(--stage-alert);
+}
+
+.stage[data-tone='caution'] {
+  background-color: var(--stage-caution);
+}
+
+.stage[data-tone='ok'] {
+  background-color: var(--stage-ok);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stage {
+    transition: none;
+  }
 }
 
 .floor {

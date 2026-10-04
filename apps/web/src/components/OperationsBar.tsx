@@ -1,4 +1,4 @@
-import { Check, Columns2, Hand, Play, Zap } from 'lucide-react';
+import { Check, Columns2, FileWarning, Hand, Play, Zap } from 'lucide-react';
 import { useMemo } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import { copy } from '../copy';
@@ -96,6 +96,7 @@ function ImpactCounter() {
 
 export function OperationsBar() {
   const canChaos = useApp((s) => s.snap.canChaos);
+  const canInject = useApp((s) => s.snap.canInject);
   const source = useApp((s) => s.source);
   const setUi = useApp((s) => s.setUi);
   return (
@@ -109,6 +110,9 @@ export function OperationsBar() {
         </button>
         <button type="button" className={styles.text} onClick={() => source.triggerChaos()} disabled={!canChaos} data-testid="chaos-button">
           <Zap size={18} aria-hidden /> {copy.ops.badIdea}
+        </button>
+        <button type="button" className={styles.text} onClick={() => source.triggerChaos('inject')} disabled={!canInject} data-testid="inject-button">
+          <FileWarning size={18} aria-hidden /> {copy.ops.poisonedLog}
         </button>
       </div>
     </footer>

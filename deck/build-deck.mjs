@@ -25,7 +25,7 @@ const scenario = readJson('packages/scenarios/incident-checkout/scenario.json');
 const agentsFile = readJson('packages/scenarios/incident-checkout/agents.json');
 const policies = readJson('packages/scenarios/incident-checkout/fixtures/policies.json');
 
-for (const f of ['01-alert', '02-fanout', '03-evidence', '05-gate', '06-recovery', '09-chaos', '11-suspects']) {
+for (const f of ['01-alert', '02-fanout', '03-evidence', '05-gate', '06-recovery', '09-chaos', '11-suspects', '12-pr', '13-audit', '14-inject']) {
   if (!existsSync(path.join(SCREENS, `${f}.png`))) {
     console.error(`Missing ${f}.png. Run: node deck/capture-screens.mjs (after npm run build:offline)`);
     process.exit(1);
@@ -136,6 +136,15 @@ function screen(slide, file, x, y, w) {
   slide.addShape('rect', { x: x - 0.01, y: y - 0.01, w: w + 0.02, h: h + 0.02, fill: { color: C.line }, line: { color: C.line, width: 0 } });
   slide.addImage({ path: path.join(SCREENS, `${file}.png`), x, y, w, h });
   return h;
+}
+
+/** A region of a screenshot (pixels of the 1920×1080 capture), placed at height h. */
+async function screenCrop(slide, file, crop, x, y, h) {
+  const buf = await sharp(path.join(SCREENS, `${file}.png`)).extract(crop).png().toBuffer();
+  const w = (h * crop.width) / crop.height;
+  slide.addShape('rect', { x: x - 0.01, y: y - 0.01, w: w + 0.02, h: h + 0.02, fill: { color: C.line }, line: { color: C.line, width: 0 } });
+  slide.addImage({ data: `image/png;base64,${buf.toString('base64')}`, x, y, w, h });
+  return w;
 }
 
 function arrow(slide, x1, y1, x2, y2, color = C.ink3) {
@@ -435,12 +444,13 @@ async function executive() {
       ['DB', 'Database admin', '02:31', 'Database CPU is 22%. Connections look normal. Not us.', '7A4FD6'],
       ['PL', 'Platform engineer', '02:33', 'No infrastructure changes tonight. Nodes are healthy.', '0A8BA8'],
       ['EM', 'Engineering manager', '02:35', 'Customers are affected. Any ETA?', '6E7A8D'],
-      ['OC', 'On-call engineer', '02:36', 'Did anything ship in the last day?', 'C2410C'],
+      ['OC', 'On-call engineer', '02:36', 'Pasted the stack trace into a public AI chatbot. It says add DB connections.', 'C2410C'],
+      ['OC', 'On-call engineer', '02:37', 'Did anything ship in the last day?', 'C2410C'],
       ['RM', 'Release manager', '02:40', 'checkout-api v2.14.0 at 01:55. All checks passed.', 'B0306E'],
       ['AD', 'App developer', '02:44', 'Found it. The pool-size key was renamed in the Helm chart.', '138A5A'],
     ];
     msgs.forEach(([ini, who, when, what, hue], i) => {
-      const y = 2.45 + i * 0.62;
+      const y = 2.42 + i * 0.555;
       s.addText(ini, {
         shape: 'ellipse', x: M + 0.3, y, w: 0.46, h: 0.46, fontFace: F.body, fontSize: 11, bold: true, color: 'FFFFFF',
         fill: { color: hue }, line: { color: hue, width: 0 }, align: 'center', valign: 'middle', margin: 0, isTextBox: true,
@@ -449,7 +459,8 @@ async function executive() {
         { text: `${who}  `, options: { bold: true, color: N.ink } },
         { text: when, options: { fontFace: F.mono, color: N.ink3 } },
       ], { x: M + 0.9, y: y - 0.04, w: chatW - 1.2, h: 0.28, fontSize: 11 });
-      text(s, what, { x: M + 0.9, y: y + 0.22, w: chatW - 1.2, h: 0.3, fontSize: 13, color: i === msgs.length - 1 ? N.green : N.ink2 });
+      const shadow = what.includes('public AI');
+      text(s, what, { x: M + 0.9, y: y + 0.22, w: chatW - 1.2, h: 0.3, fontSize: 13, bold: shadow, color: i === msgs.length - 1 ? N.green : shadow ? N.red : N.ink2 });
     });
     const rx = M + chatW + 0.5;
     const rw = W - M - rx;
@@ -457,7 +468,8 @@ async function executive() {
     text(s, 'woken across six teams', { x: rx, y: 3.0, w: rw, h: 0.45, fontSize: 18, color: N.ink2 });
     const team = [['UserRound', 'C2410C'], ['Database', '7A4FD6'], ['Server', '0A8BA8'], ['Briefcase', '6E7A8D'], ['GitBranch', 'B0306E'], ['Code', '138A5A']];
     for (let i = 0; i < team.length; i++) await iconDisc(s, team[i][0], rx + (i % 3) * 0.72, 3.7 + Math.floor(i / 3) * 0.72, 0.58, team[i][1]);
-    text(s, 'Each person checks their own piece. Nobody sees the whole picture.', { x: rx, y: 5.3, w: rw, h: 1.0, fontSize: 16, color: N.amber, bold: true });
+    text(s, 'Each person checks their own piece. Nobody sees the whole picture.', { x: rx, y: 5.05, w: rw, h: 0.8, fontSize: 15, color: N.amber, bold: true });
+    text(s, '02:36 Production logs just left the company. Shadow AI, at 2 AM.', { x: rx, y: 5.95, w: rw, h: 0.8, fontSize: 15, color: N.red, bold: true });
     dramatization(s);
     s.addNotes(
       'By 02:27 the war room is filling up. The DBA says it is not the database. Platform says nothing changed. A manager asks for an ETA. It takes until 02:40 for someone to connect the release at 01:55, and until 02:44 to find the renamed key. Six people woken up, each checking their own piece.',
@@ -684,7 +696,54 @@ async function executive() {
     s.addNotes('Two independent controls. Policy is checked by code, not by the model, and the dangerous tool is simply not granted. And a person approves every production change.');
   }
 
-  // 15. Same night, two timelines
+  // 15. Their fixes follow your engineering rules (D-079)
+  {
+    const s = pres.addSlide();
+    s.background = { color: C.white };
+    lightTitle(s, 'Their fixes follow your engineering rules', PART3);
+    const sw = (CW - 0.5) / 2;
+    const cols = [
+      ['12-pr', 'GitPullRequestDraft', C.signal, 'The permanent fix goes through your pipeline', 'A draft pull request with tests that would have caught the bad release. The agent cannot merge; a person reviews.'],
+      ['14-inject', 'FileWarning', C.caution, 'Untrusted text is data, not orders', 'A log line that tries to instruct the agents is flagged and quarantined. Nothing runs.'],
+    ];
+    for (let i = 0; i < cols.length; i++) {
+      const [file, ic, hue, head, body] = cols[i];
+      const x = M + i * (sw + 0.5);
+      const h = screen(s, file, x, 1.75, sw);
+      await iconDisc(s, ic, x, 1.75 + h + 0.3, 0.6, hue);
+      text(s, head, { x: x + 0.8, y: 1.75 + h + 0.25, w: sw - 0.8, h: 0.4, fontSize: 18, bold: true });
+      text(s, body, { x: x + 0.8, y: 1.75 + h + 0.68, w: sw - 0.8, h: 0.7, fontSize: 14, color: C.ink2 });
+    }
+    s.addNotes('The squad fixes tonight with a reversible action. The permanent fix is code, so it goes through the same pipeline and review as any engineer’s change. And text inside logs or tickets is treated as evidence, never as an instruction.');
+  }
+
+  // 16. Every step leaves evidence (D-079)
+  {
+    const s = pres.addSlide();
+    s.background = { color: C.white };
+    lightTitle(s, 'Every step leaves evidence', PART3);
+    // The Audit tab: the side panel of the 1920×1080 capture.
+    const pw = await screenCrop(s, '13-audit', { left: 1482, top: 66, width: 438, height: 560 }, M, 1.7, 5.1);
+    const rx = M + pw + 0.7;
+    const rw = W - M - rx;
+    const rows = [
+      ['Layers', C.signal, 'Grouped by stage', 'Detect, diagnose, decide, recover, document: each stage with its own evidence.'],
+      ['Wrench', HUE.fixer, 'Every tool call, with its result', 'What each agent asked for, what it got back, and when.'],
+      ['ShieldCheck', HUE.guardian, 'Every policy check and human decision', 'Which rule passed, failed, or needed a person, and who decided.'],
+      ['Link', C.ok, 'Tamper-evident', 'Each record is chained to the one before it. Editing or deleting one breaks the chain.'],
+      ['Download', C.ink2, 'Exportable for your auditors', 'One click gives the full trail with its chain, as a file.'],
+    ];
+    for (let i = 0; i < rows.length; i++) {
+      const [ic, hue, head, body] = rows[i];
+      const y = 1.75 + i * 1.0;
+      await iconDisc(s, ic, rx, y, 0.56, hue);
+      text(s, head, { x: rx + 0.8, y: y - 0.02, w: rw - 0.8, h: 0.36, fontSize: 17, bold: true });
+      text(s, body, { x: rx + 0.8, y: y + 0.36, w: rw - 0.8, h: 0.55, fontSize: 13, color: C.ink2 });
+    }
+    s.addNotes('Every stage leaves evidence: tool calls with their results, policy checks, human decisions. The records are chained, so a changed record shows. In production the chain would be anchored in an append-only store.');
+  }
+
+  // 17. Same night, two timelines
   {
     const s = pres.addSlide();
     s.background = { color: C.white };
@@ -726,7 +785,7 @@ async function executive() {
     s.addNotes('Same alert, same fix. The squad has mitigated before the manual response has even opened a dashboard.');
   }
 
-  // 16. The outcome
+  // 18. The outcome
   {
     const s = pres.addSlide();
     s.background = { color: C.white };
@@ -763,7 +822,48 @@ async function executive() {
     s.addNotes("These numbers are illustrative for this scenario. In the live demo the squad's figures come from the run you just watched. In a pilot we'd baseline your own incidents first.");
   }
 
-  // 17. Where this sits in our AI journey
+  // 19. Sanctioned by design: the answer to shadow AI (D-079)
+  {
+    const s = pres.addSlide();
+    s.background = { color: C.white };
+    lightTitle(s, 'The answer to shadow AI is a better sanctioned path', PART4);
+    // Left: the 2 AM workaround, in the night palette.
+    const lw = 4.6;
+    s.addShape('roundRect', { x: M, y: 1.75, w: lw, h: 4.9, rectRadius: 0.12, fill: { color: N.bg }, line: { color: N.bg, width: 0 } });
+    text(s, '02:36 · #inc-checkout', { x: M + 0.35, y: 2.0, w: lw - 0.7, h: 0.3, fontFace: F.mono, fontSize: 12, color: N.ink3 });
+    text(s, '“Pasted the stack trace into a public AI chatbot. It says add DB connections.”', {
+      x: M + 0.35, y: 2.45, w: lw - 0.7, h: 1.5, fontSize: 18, bold: true, color: N.ink,
+    });
+    const risks = ['Production logs, possibly with customer data, leave the company', 'The advice is wrong: the database was healthy', 'No record of what was shared, or what was done with the answer'];
+    risks.forEach((r, i) => {
+      text(s, r, { x: M + 0.35, y: 4.15 + i * 0.75, w: lw - 0.7, h: 0.65, fontSize: 14, color: N.red, bullet: true });
+    });
+    // Right: what the squad does instead.
+    const rx = M + lw + 0.6;
+    const rw = W - M - rx;
+    const tiles = [
+      ['ShieldCheck', C.ok, 'Approved models only', 'Claude on Amazon Bedrock, in your own cloud account and region.'],
+      ['UserRound', C.signal, 'A named job for every agent', 'Each agent has a role, granted tools, and nothing more.'],
+      ['FileWarning', C.caution, 'Untrusted text stays data', 'Logs and tickets are evidence, never instructions.'],
+      ['ScrollText', C.ink2, 'Everything on the record', 'Every call, check, and decision, chained and exportable.'],
+    ];
+    const tw = (rw - 0.3) / 2;
+    for (let i = 0; i < tiles.length; i++) {
+      const [ic, hue, head, body] = tiles[i];
+      const x = rx + (i % 2) * (tw + 0.3);
+      const y = 1.75 + Math.floor(i / 2) * 2.0;
+      card(s, x, y, tw, 1.75, { fill: C.paper, line: C.paper });
+      await iconDisc(s, ic, x + 0.25, y + 0.25, 0.56, hue);
+      text(s, head, { x: x + 0.25, y: y + 0.92, w: tw - 0.5, h: 0.36, fontSize: 16, bold: true });
+      text(s, body, { x: x + 0.25, y: y + 1.26, w: tw - 0.5, h: 0.45, fontSize: 12, color: C.ink2 });
+    }
+    text(s, 'People reach for AI at 2 AM either way. Make the governed path the faster one.', {
+      x: rx, y: 5.9, w: rw, h: 0.7, fontSize: 16, bold: true, color: C.signal,
+    });
+    s.addNotes('People will use AI at two in the morning whether we plan for it or not. The answer is not a ban, it is a sanctioned path that is faster than the workaround.');
+  }
+
+  // 20. Where this sits in our AI journey
   {
     const s = pres.addSlide();
     s.background = { color: C.white };
@@ -791,7 +891,7 @@ async function executive() {
     s.addNotes("Tonight's squad lives in the fourth stage, and it only works because the first three are in place: data access, tooling, and governance.");
   }
 
-  // 18. Where agents fit first
+  // 21. Where agents fit first
   {
     const s = pres.addSlide();
     s.background = { color: C.white };
@@ -836,7 +936,7 @@ async function executive() {
     s.addNotes('Start where the work is repeatable and actions are reversible. Keep humans leading where mistakes are costly or irreversible.');
   }
 
-  // 19. A pilot, not a promise
+  // 22. A pilot, not a promise
   {
     const s = pres.addSlide();
     s.background = { color: C.white };
@@ -866,7 +966,7 @@ async function executive() {
     s.addNotes('Six weeks, one workflow, shadow mode first, then human gates, then measured against your own baseline.');
   }
 
-  // 20. Dawn
+  // 23. Dawn
   {
     const s = pres.addSlide();
     s.background = { data: dawn };

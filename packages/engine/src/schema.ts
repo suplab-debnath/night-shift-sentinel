@@ -2,7 +2,7 @@
 // types in events.ts are canonical; the schemas are checked against them at
 // compile time below.
 import { z } from 'zod';
-import { AGENT_IDS, AGENT_STATES, type EventTemplate } from './events';
+import { AGENT_IDS, AGENT_STATES, OVERLAY_NAMES, type EventTemplate } from './events';
 
 const agentId = z.enum(AGENT_IDS);
 const clockString = z.string().regex(/^\d{2}:\d{2}:\d{2}$/, 'clock must be HH:MM:SS');
@@ -128,7 +128,7 @@ export const EventTemplateSchema = z.discriminatedUnion('kind', [
   z.object({
     kind: z.literal('artifact.create'),
     artifactId: z.string().min(1),
-    type: z.enum(['plan', 'status', 'postmortem', 'escalation']),
+    type: z.enum(['plan', 'status', 'postmortem', 'escalation', 'pull-request']),
     title: z.string().min(1),
     markdown: z.string().min(1),
     stream: z.boolean(),
@@ -141,7 +141,7 @@ export const EventTemplateSchema = z.discriminatedUnion('kind', [
     text: z.string().min(1),
     ...withClock,
   }),
-  z.object({ kind: z.literal('chaos.start'), ...withClock }),
+  z.object({ kind: z.literal('chaos.start'), overlay: z.enum(OVERLAY_NAMES).optional(), ...withClock }),
   z.object({ kind: z.literal('chaos.end'), ...withClock }),
   z.object({ kind: z.literal('scorecard.show'), ...withClock }),
 ]);
@@ -223,12 +223,23 @@ export const EndingSchema = z.object({
   severityLabel: z.string().optional(),
 });
 
+/** A stage banner shown when a milestone is reached (D-080). Text may carry run-time tokens. */
+export const MomentSchema = z.object({
+  milestone: z.string().min(1),
+  tone: z.enum(['signal', 'ok', 'caution', 'alert']),
+  icon: z.enum(['radar', 'search', 'check', 'shield', 'hand']).default('check'),
+  title: z.string().min(1).max(70),
+  sub: z.string().min(1).max(110).optional(),
+});
+
 export const MilestoneSchema = z.object({
   id: z.string().min(1),
   label: z.string().min(1),
   /** Beat ids ("a|b") whose first event marks the milestone on each path. */
   beats: z.string().min(1),
 });
+
+const OverlaySchema = z.object({ segment: z.string().min(1), availableFrom: z.object({ act: z.number().int() }) });
 
 export const ScenarioSchema = z.object({
   id: z.string().min(1),
@@ -242,7 +253,9 @@ export const ScenarioSchema = z.object({
   gates: z.record(z.string(), z.object({ onApprove: z.string().min(1), onReject: z.string().min(1) })),
   segments: z.record(z.string(), SegmentSchema),
   overlays: z.object({
-    chaos: z.object({ segment: z.string().min(1), availableFrom: z.object({ act: z.number().int() }) }),
+    chaos: OverlaySchema,
+    /** The poisoned-log test (D-079). */
+    inject: OverlaySchema.optional(),
   }),
   scorecard: z.array(ScorecardRowSchema),
   scorecardFootnote: z.string().min(1),
@@ -250,6 +263,8 @@ export const ScenarioSchema = z.object({
   splitView: SplitViewSchema,
   /** The incident milestones on the operations bar (D-075). */
   milestones: z.array(MilestoneSchema).default([]),
+  /** Stage banners for the big moments (D-080). */
+  moments: z.array(MomentSchema).default([]),
   /** Customer impact: from a fixed story time until a milestone beat (D-075). */
   impact: z.object({ from: clockString, until: z.string().min(1) }).optional(),
 });
@@ -269,6 +284,8 @@ export const AgentDefSchema = z.object({
   position: z.object({ x: z.number().min(0).max(100), y: z.number().min(0).max(100) }),
   size: z.enum(['md', 'lg']).default('md'),
   persona: z.string().optional(),
+  /** Which approved model serves this agent in live mode: the main model or the faster one (D-079). */
+  modelTier: z.enum(['main', 'fast']).optional(),
 });
 
 export const AgentsSchema = z.object({ agents: z.array(AgentDefSchema).min(1) });
@@ -284,6 +301,7 @@ export type ScorecardRow = z.output<typeof ScorecardRowSchema>;
 export type SplitView = z.output<typeof SplitViewSchema>;
 export type Ending = z.output<typeof EndingSchema>;
 export type Milestone = z.output<typeof MilestoneSchema>;
+export type Moment = z.output<typeof MomentSchema>;
 export type AgentDef = z.output<typeof AgentDefSchema>;
 export type AgentsFile = z.output<typeof AgentsSchema>;
 
@@ -357,8 +375,14 @@ export function checkScenarioIntegrity(s: Scenario): string[] {
     );
     if (!requested) issues.push(`gate ${id} is never requested`);
   }
-  const chaos = s.segments[s.overlays.chaos.segment];
-  if (!chaos) issues.push(`overlay chaos points to unknown segment "${s.overlays.chaos.segment}"`);
-  else if (!('returnTo' in chaos.endsWith)) issues.push('the chaos segment must end with returnTo: trigger');
+  for (const m of s.moments) {
+    if (!s.milestones.some((x) => x.id === m.milestone)) issues.push(`moment points to unknown milestone "${m.milestone}"`);
+  }
+  for (const [name, overlay] of Object.entries(s.overlays)) {
+    if (!overlay) continue;
+    const seg = s.segments[overlay.segment];
+    if (!seg) issues.push(`overlay ${name} points to unknown segment "${overlay.segment}"`);
+    else if (!('returnTo' in seg.endsWith)) issues.push(`the ${name} segment must end with returnTo: trigger`);
+  }
   return issues;
 }

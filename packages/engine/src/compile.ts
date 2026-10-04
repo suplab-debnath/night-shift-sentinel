@@ -2,7 +2,7 @@
 // Gate decisions append the chosen continuation segment; chaos decisions splice
 // the overlay segment in at the trigger time and shift everything after it.
 import { clockAt, formatClock, parseClock, type ClockAnchor } from './clock';
-import type { EngineEvent, EventBody, EventSourceKind, EventTemplate, GateDecision } from './events';
+import type { EngineEvent, EventBody, EventSourceKind, EventTemplate, GateDecision, OverlayName } from './events';
 import { hashString, mulberry32 } from './prng';
 import { resolveTokens, runClockAnchors, type TokenContext } from './runclock';
 import type { BeatLive, Scenario, Segment } from './schema';
@@ -10,7 +10,8 @@ import type { BeatLive, Scenario, Segment } from './schema';
 export type Decision =
   /** waitedMs: story time the person took to decide; the run clock counts it (D-074). */
   | { type: 'gate'; gateId: string; decision: GateDecision; by: string; waitedMs?: number }
-  | { type: 'chaos'; at: number }
+  /** A what-if overlay spliced in at `at` (D-079); the over-eager fix when `overlay` is omitted. */
+  | { type: 'chaos'; at: number; overlay?: OverlayName }
   /** The squad was paused at playback time `at` for `ms` of story time (D-074). */
   | { type: 'hold'; at: number; ms: number };
 
@@ -259,9 +260,11 @@ function endOf(segment: Segment): TimelineEnd | null {
   return null;
 }
 
-/** First act start (non-overlay) with n >= the given act number. */
-export function chaosAvailableFrom(timeline: Timeline, scenario: Scenario): number | null {
-  const act = timeline.acts.find((a) => !a.overlay && a.n >= scenario.overlays.chaos.availableFrom.act);
+/** First act start (non-overlay) with n >= the overlay's first act; null if the scenario has no such overlay. */
+export function chaosAvailableFrom(timeline: Timeline, scenario: Scenario, name: OverlayName = 'chaos'): number | null {
+  const overlay = scenario.overlays[name];
+  if (!overlay) return null;
+  const act = timeline.acts.find((a) => !a.overlay && a.n >= overlay.availableFrom.act);
   return act ? act.t : null;
 }
 
@@ -324,14 +327,15 @@ export function compile(scenario: Scenario, decisions: readonly Decision[] = [],
       tl.decisionPoints.push(requestT);
     } else {
       const at = d.at;
-      const from = chaosAvailableFrom(tl, scenario);
+      const name = d.overlay ?? 'chaos';
+      const from = chaosAvailableFrom(tl, scenario, name);
       if (from === null || at < from || at > tl.endT) {
-        throw new InvalidDecisionError(`Chaos is not available at ${at}`);
+        throw new InvalidDecisionError(`The ${name} test is not available at ${at}`);
       }
       if (tl.chaosWindows.some((w) => at >= w.start && at < w.end)) {
         throw new InvalidDecisionError('Chaos is already running');
       }
-      const key = scenario.overlays.chaos.segment;
+      const key = scenario.overlays[name]!.segment;
       const seg = segmentOrThrow(scenario, key);
       chaosCount += 1;
       const chaos = buildSegment(seg, key, at, { idSuffix: `r${chaosCount}`, overlay: true, overrides, take, pace });

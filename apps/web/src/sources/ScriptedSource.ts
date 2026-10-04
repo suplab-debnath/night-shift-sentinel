@@ -1,5 +1,5 @@
 // Engine player driven by requestAnimationFrame (ARCHITECTURE §1, §6).
-import { clampPace, createPlayer, type Decision, type GateDecision, type Player, type Scenario } from '@night-shift/engine';
+import { clampPace, createPlayer, type Decision, type GateDecision, type OverlayName, type Player, type Scenario } from '@night-shift/engine';
 import type { StageSnapshot, StageSource } from './types';
 
 export interface ScriptedSourceOptions {
@@ -175,7 +175,7 @@ export class ScriptedSource implements StageSource {
     const waited = this.gateSince === null ? 0 : this.heldMs(this.gateSince);
     return this.player.decide(gateId, decision, this.opts.approver, waited);
   }
-  triggerChaos = () => this.player.triggerChaos();
+  triggerChaos = (overlay?: OverlayName) => this.player.triggerChaos(overlay);
   reset = () => {
     this.squadSince = null;
     this.player.reset();

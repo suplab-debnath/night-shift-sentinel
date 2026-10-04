@@ -7,6 +7,8 @@ import { AgentNode } from './AgentNode';
 import { AlertPulse } from './AlertPulse';
 import { ChannelToast } from './ChannelToast';
 import { ChaosBanner } from './ChaosBanner';
+import { MomentBanner } from './MomentBanner';
+import { stageTone } from '../lib/moments';
 import { SquadBanner } from './SquadBanner';
 import { EndCard } from './EndCard';
 import { EvidenceBoard } from './EvidenceBoard';
@@ -28,9 +30,10 @@ export function Stage() {
   const human = agents.find((a) => a.id === 'human');
   const gateOpen = useApp((s) => s.snap.state.gate?.status === 'open' && !s.snap.state.overlay.active);
   const paused = useApp((s) => s.snap.clockHold?.kind === 'squad' || s.snap.frozen);
+  const tone = useApp((s) => stageTone(s.bundle.scenario.impact, s.snap.timeline, s.snap.state, s.snap.t));
 
   return (
-    <section className={styles.stage} aria-label={copy.stage.label} data-gate-open={gateOpen || undefined} data-paused={paused || undefined}>
+    <section className={styles.stage} aria-label={copy.stage.label} data-gate-open={gateOpen || undefined} data-paused={paused || undefined} data-tone={tone}>
       <div className={styles.floor} ref={floorRef}>
         {human && <div className={styles.boundary} style={{ left: `${human.position.x - 7}%` }} aria-hidden />}
         <PacketLayer size={size} />
@@ -43,6 +46,7 @@ export function Stage() {
         <ScorecardSheet />
         <PermissionToast />
         <ChannelToast />
+        <MomentBanner />
         <AgentInspector />
       </div>
       <HeartbeatLine />

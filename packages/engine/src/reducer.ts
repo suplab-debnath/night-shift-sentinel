@@ -16,6 +16,7 @@ import {
   type GuardrailResult,
   type MetricSeries,
   type OptionCard,
+  type OverlayName,
   type PayloadType,
   type SeverityValue,
   type ToolStatus,
@@ -125,7 +126,8 @@ export interface ProgressView {
   t: number;
 }
 
-export type AuditCategory = 'tool' | 'policy' | 'gate' | 'permission' | 'note';
+/** tool, policy, gate, permission, note; evidence (pins, rule-outs, conclusions), decision (options), record (artifacts). */
+export type AuditCategory = 'tool' | 'policy' | 'gate' | 'permission' | 'note' | 'evidence' | 'decision' | 'record';
 
 export interface AuditRow {
   id: string;
@@ -137,6 +139,13 @@ export interface AuditRow {
   text: string;
   overlay: boolean;
   source: EventSourceKind;
+  /** The act the row belongs to (its stage), and the what-if test it came from, if any (D-079). */
+  act: number;
+  overlayName: OverlayName | null;
+  beat: string | null;
+  /** Tool rows: the call id, and the result once it arrives. */
+  callId?: string;
+  result?: { summary: string; status: ToolStatus };
 }
 
 export interface ArtifactView {
@@ -172,7 +181,7 @@ export interface StageState {
   artifacts: ArtifactView[];
   /** Incident channel (status updates, pager, people around the incident). */
   channel: ChannelPost[];
-  overlay: { active: boolean; startedAt: number | null; saved: StageState | null };
+  overlay: { active: boolean; name: OverlayName | null; startedAt: number | null; saved: StageState | null };
   chaosRuns: number;
   scorecard: { t: number } | null;
   endCard: { t: number } | null;
@@ -219,7 +228,7 @@ export function initialStageState(opts: InitialStateOptions): StageState {
     audit: [],
     artifacts: [],
     channel: [],
-    overlay: { active: false, startedAt: null, saved: null },
+    overlay: { active: false, name: null, startedAt: null, saved: null },
     chaosRuns: 0,
     scorecard: null,
     endCard: null,
@@ -238,9 +247,27 @@ function auditRow(
   s: StageState,
   e: EngineEvent,
   clock: string | null,
-  row: Pick<AuditRow, 'severity' | 'category' | 'agent' | 'text'>,
+  row: Pick<AuditRow, 'severity' | 'category' | 'agent' | 'text'> & Partial<Pick<AuditRow, 'callId'>>,
 ): AuditRow {
-  return { ...base(e, clock), ...row, overlay: s.overlay.active };
+  return {
+    ...base(e, clock),
+    ...row,
+    overlay: s.overlay.active,
+    act: s.act,
+    overlayName: s.overlay.active ? s.overlay.name : null,
+    beat: e.beat ?? null,
+  };
+}
+
+/** Attach a tool result to the latest audit row for that call. */
+function withResult(audit: AuditRow[], callId: string, result: { summary: string; status: ToolStatus }): AuditRow[] {
+  for (let i = audit.length - 1; i >= 0; i--) {
+    const row = audit[i]!;
+    if (row.category === 'tool' && row.callId === callId) {
+      return [...audit.slice(0, i), { ...row, result }, ...audit.slice(i + 1)];
+    }
+  }
+  return audit;
 }
 
 const GUARDRAIL_LABEL: Record<GuardrailResult, string> = { pass: 'Pass', fail: 'Fail', required: 'Required' };
@@ -300,8 +327,11 @@ function apply(s: StageState, e: EngineEvent, clock: string | null): StageState 
         ],
         audit:
           status === 'error'
-            ? [...s.audit, auditRow(s, e, clock, { severity: 'warn', category: 'tool', agent: e.agent, text: `Tool call failed: ${e.summary}` })]
-            : s.audit,
+            ? [
+                ...withResult(s.audit, e.callId, { summary: e.summary, status }),
+                auditRow(s, e, clock, { severity: 'warn', category: 'tool', agent: e.agent, text: `Tool call failed: ${e.summary}` }),
+              ]
+            : withResult(s.audit, e.callId, { summary: e.summary, status }),
       };
     }
     case 'message.send':
@@ -338,6 +368,15 @@ function apply(s: StageState, e: EngineEvent, clock: string | null): StageState 
             { cardId: e.cardId, agent: e.agent, text: e.text, t: e.t, kind: e.evidenceKind ?? 'clue', ruledOut: null },
           ],
         },
+        audit: [
+          ...s.audit,
+          auditRow(s, e, clock, {
+            severity: 'info',
+            category: 'evidence',
+            agent: e.agent,
+            text: `${e.evidenceKind === 'hypothesis' ? 'Suspect pinned' : 'Evidence pinned'}: ${e.text}`,
+          }),
+        ],
       };
     case 'evidence.ruleOut':
       return {
@@ -346,6 +385,15 @@ function apply(s: StageState, e: EngineEvent, clock: string | null): StageState 
           ...s.evidence,
           cards: s.evidence.cards.map((c) => (c.cardId === e.cardId ? { ...c, ruledOut: { reason: e.reason, t: e.t } } : c)),
         },
+        audit: [
+          ...s.audit,
+          auditRow(s, e, clock, {
+            severity: 'info',
+            category: 'evidence',
+            agent: s.evidence.cards.find((c) => c.cardId === e.cardId)?.agent ?? null,
+            text: `Ruled out: ${s.evidence.cards.find((c) => c.cardId === e.cardId)?.text ?? e.cardId}. ${sentence(e.reason)}`,
+          }),
+        ],
       };
     case 'evidence.conclude':
       return {
@@ -354,11 +402,31 @@ function apply(s: StageState, e: EngineEvent, clock: string | null): StageState 
           ...s.evidence,
           conclusion: { cardIds: e.cardIds, text: e.text, confidence: e.confidence, t: e.t },
         },
+        audit: [
+          ...s.audit,
+          auditRow(s, e, clock, {
+            severity: 'info',
+            category: 'evidence',
+            agent: 'orchestrator',
+            text: `Root cause concluded (confidence ${e.confidence.toFixed(2)}): ${sentence(e.text)} Based on ${e.cardIds.length} pieces of evidence.`,
+          }),
+        ],
       };
     case 'options.show':
       return {
         ...s,
         optionSets: [...s.optionSets, { id: e.id, agent: e.agent, recommended: e.recommended, options: e.options, t: e.t }],
+        audit: [
+          ...s.audit,
+          auditRow(s, e, clock, {
+            severity: 'info',
+            category: 'decision',
+            agent: e.agent,
+            text: `Options proposed: ${e.options
+              .map((o) => `${o.id} ${o.action} (${o.time}, ${o.risk} risk${o.reversible ? ', reversible' : ''})${o.id === e.recommended ? ' recommended' : ''}`)
+              .join('; ')}.`,
+          }),
+        ],
       };
     case 'guardrail.check':
       return onGuardrail(s, e, clock);
@@ -440,7 +508,11 @@ function apply(s: StageState, e: EngineEvent, clock: string | null): StageState 
         stream: e.stream,
         t: e.t,
       };
-      return { ...s, artifacts: [...s.artifacts.filter((a) => a.artifactId !== e.artifactId), artifact] };
+      return {
+        ...s,
+        artifacts: [...s.artifacts.filter((a) => a.artifactId !== e.artifactId), artifact],
+        audit: [...s.audit, auditRow(s, e, clock, { severity: 'info', category: 'record', agent: null, text: `Recorded: ${e.title}` })],
+      };
     }
     case 'channel.post':
       return {
@@ -449,8 +521,8 @@ function apply(s: StageState, e: EngineEvent, clock: string | null): StageState 
       };
     case 'chaos.start': {
       if (s.overlay.active) return s;
-      const saved: StageState = { ...s, overlay: { active: false, startedAt: null, saved: null } };
-      return { ...s, overlay: { active: true, startedAt: e.t, saved } };
+      const saved: StageState = { ...s, overlay: { active: false, name: null, startedAt: null, saved: null } };
+      return { ...s, overlay: { active: true, name: e.overlay ?? 'chaos', startedAt: e.t, saved } };
     }
     case 'chaos.end': {
       const saved = s.overlay.saved;
@@ -479,7 +551,7 @@ function onToolCall(s: StageState, e: EventOf<'tool.call'>, clock: string | null
     ],
     audit: [
       ...s.audit,
-      auditRow(s, e, clock, { severity: 'info', category: 'tool', agent: e.agent, text: `${e.tool} ${formatArgs(e.args)}` }),
+      auditRow(s, e, clock, { severity: 'info', category: 'tool', agent: e.agent, text: `${e.tool} ${formatArgs(e.args)}`, callId: e.callId }),
     ],
   };
   if (e.tool === 'policy.check') {

@@ -41,6 +41,14 @@
       "reversible": false,
       "strategy": "restart",
       "note": "Restart means ~90 s full outage"
+    },
+    "code.change": {
+      "mutates": false,
+      "targetKind": "service",
+      "outageSeconds": 0,
+      "reversible": true,
+      "strategy": "pull-request",
+      "note": "Draft pull request; nothing deploys until review"
     }
   },
   "policies": [
@@ -140,6 +148,49 @@
       "rule": {
         "type": "override-expiry",
         "maxHours": 72
+      },
+      "onMatch": "fail"
+    },
+    {
+      "id": "P-09",
+      "title": "Agent code changes go through the pipeline and a human review",
+      "shortTitle": "Code goes through the pipeline and a review",
+      "appliesTo": [
+        "code.change"
+      ],
+      "rule": {
+        "type": "review-required",
+        "reviewers": "the checkout service team"
+      },
+      "onMatch": "required"
+    },
+    {
+      "id": "P-10",
+      "title": "Code changes follow the coding guidelines and include tests",
+      "appliesTo": [
+        "code.change"
+      ],
+      "rule": {
+        "type": "checks-passed",
+        "checks": [
+          "build",
+          "unit-tests",
+          "new-tests",
+          "lint",
+          "secret-scan",
+          "sast"
+        ]
+      },
+      "onMatch": "fail"
+    },
+    {
+      "id": "P-11",
+      "title": "Tool output is treated as data, never as instructions",
+      "appliesTo": [
+        "tool.output"
+      ],
+      "rule": {
+        "type": "untrusted-input"
       },
       "onMatch": "fail"
     }

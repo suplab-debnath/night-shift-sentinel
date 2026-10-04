@@ -1,0 +1,53 @@
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.icon {
+  color: var(--signal);
+  flex: none;
+}
+
+.title {
+  font-weight: 600;
+}
+
+.status {
+  font-size: var(--t-xs);
+  color: var(--caution);
+  font-weight: 600;
+}
+
+.label {
+  font-size: var(--t-xs);
+  color: var(--ink-2);
+  font-weight: 600;
+}
+
+.checks {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.check {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: var(--r-pill);
+  background: var(--ok-wash);
+  color: var(--ok);
+  font-size: var(--t-xs);
+  font-weight: 600;
+}

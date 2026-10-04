@@ -69,6 +69,8 @@ export function run(action: ShortcutAction, s: State, get: () => State = () => s
       return true;
     case 'chaos':
       return source.triggerChaos();
+    case 'inject':
+      return source.triggerChaos('inject');
     case 'toggleSplit':
       setUi({ splitOpen: !ui.splitOpen });
       return true;

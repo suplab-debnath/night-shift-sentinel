@@ -31,6 +31,8 @@ function allEvents(): EngineEvent[] {
     const full = compile(scenario, decisions);
     const withChaos = compile(scenario, [...decisions, { type: 'chaos', at: full.endT }]);
     for (const e of withChaos.events) seen.set(e.id, e);
+    const withInject = compile(scenario, [...decisions, { type: 'chaos', at: full.endT, overlay: 'inject' }]);
+    for (const e of withInject.events) seen.set(e.id, e);
   }
   return [...seen.values()];
 }
@@ -39,7 +41,7 @@ describe('incident-checkout scenario', () => {
   it('is schema-valid and registered', () => {
     expect(getScenario('incident-checkout')).toBe(incidentCheckout);
     expect(getScenario('nope')).toBeUndefined();
-    expect(Object.keys(scenario.segments).sort()).toEqual(['chaos', 'g1-approved', 'g1-rejected', 'g2-approved', 'g2-rejected', 'main']);
+    expect(Object.keys(scenario.segments).sort()).toEqual(['chaos', 'g1-approved', 'g1-rejected', 'g2-approved', 'g2-rejected', 'inject', 'main']);
   });
 
   it('reaches every segment and both endings', () => {
@@ -51,6 +53,8 @@ describe('incident-checkout scenario', () => {
       if (tl.end.kind === 'end') endings.add(tl.end.ending);
       const chaos = compile(scenario, [...decisions, { type: 'chaos', at: tl.endT }]);
       chaos.beats.forEach((b) => visited.add(b.segment));
+      const inject = compile(scenario, [...decisions, { type: 'chaos', at: tl.endT, overlay: 'inject' }]);
+      inject.beats.forEach((b) => visited.add(b.segment));
     }
     expect([...visited].sort()).toEqual(Object.keys(scenario.segments).sort());
     expect([...endings].sort()).toEqual(['A', 'B']);
@@ -69,6 +73,36 @@ describe('incident-checkout scenario', () => {
     expect(() => compile(scenario, [g('g1', 'rejected'), { type: 'chaos', at: r.endT }])).not.toThrow();
   });
 
+  it('allows the poisoned-log test from Act 3 and returns to the trigger (D-079)', () => {
+    const main = compile(scenario);
+    const act3 = main.acts.find((a) => a.n === 3)!;
+    expect(() => compile(scenario, [{ type: 'chaos', at: act3.t - 1, overlay: 'inject' }])).toThrow();
+    const tl = compile(scenario, [{ type: 'chaos', at: act3.t, overlay: 'inject' }]);
+    expect(tl.events.find((e) => e.kind === 'chaos.start')).toMatchObject({ overlay: 'inject' });
+    expect(tl.events.filter((e) => e.kind === 'guardrail.check').map((e) => e.kind === 'guardrail.check' && [e.policyId, e.result])).toContainEqual(['P-11', 'fail']);
+    // Nothing in the overlay changes anything: no tool other than reads and the policy check.
+    const tools = tl.events.filter((e) => e.kind === 'tool.call' && e.beat?.startsWith('i.')).map((e) => e.kind === 'tool.call' && e.tool);
+    expect(tools).toEqual(['logs.search', 'policy.check']);
+  });
+
+  it('drafts the pull request through the pipeline on both recovery paths (D-079)', () => {
+    for (const decisions of [PATHS.approve!, PATHS['reject-approve']!]) {
+      const tl = compile(scenario, decisions);
+      const tools = tl.events.flatMap((e) => (e.kind === 'tool.call' && e.agent === 'fixer' ? [e.tool] : []));
+      expect(tools).toEqual(expect.arrayContaining(['pr.draft', 'ci.run']));
+      const rows = tl.events.flatMap((e) => (e.kind === 'guardrail.check' && ['P-09', 'P-10'].includes(e.policyId) ? [[e.policyId, e.result]] : []));
+      expect(rows).toEqual([
+        ['P-09', 'required'],
+        ['P-10', 'pass'],
+      ]);
+      // The PR is drafted before the postmortem, which points at it.
+      const prT = tl.events.find((e) => e.kind === 'artifact.create' && e.type === 'pull-request')!.t;
+      const pmT = tl.events.find((e) => e.kind === 'artifact.create' && e.type === 'postmortem')!.t;
+      expect(prT).toBeLessThan(pmT);
+    }
+    expect(agents.agents.find((a) => a.id === 'fixer')!.tools.map((t) => t.name)).not.toContain('pr.merge');
+  });
+
   it('matches SCENARIO §3 act timings', () => {
     const main = scenario.segments.main!.acts.map((a) => [a.n, a.durationMs]);
     // Act 4 is 24 s in SCENARIO §3: 20 s of beats, then the gate opens (Act 5). See DECISIONS D-022.
@@ -83,12 +117,12 @@ describe('incident-checkout scenario', () => {
     expect(approved).toEqual([
       [5, 1000],
       [6, 22000],
-      [7, 28000],
+      [7, 46000],
     ]);
     const tl = compile(scenario, PATHS.approve);
-    // ≈ 2 min 27 s of acts plus the gate (DECISIONS D-008, D-069).
-    expect(tl.endT / 1000).toBeGreaterThan(142);
-    expect(tl.endT / 1000).toBeLessThan(152);
+    // ≈ 2 min 43 s of acts plus the gate (DECISIONS D-008, D-069; Act 7 grew by the pull request, D-079).
+    expect(tl.endT / 1000).toBeGreaterThan(158);
+    expect(tl.endT / 1000).toBeLessThan(168);
   });
 
   it('keeps the story clock monotonic on every path and starts at the alert', () => {
@@ -167,6 +201,8 @@ describe('SCENARIO.md coverage', () => {
     'Try the chaos test': 'End card button: UI copy (apps/web/src/copy.ts)',
     'Chaos test': 'Transport button: UI copy',
     'Chaos test: an over-eager fix': 'ChaosBanner copy (DESIGN §6): UI copy',
+    'Injection test: a log line that gives orders': 'ChaosBanner copy for the inject overlay: UI copy',
+    'Test a poisoned log': 'Operations bar button: UI copy',
     'db.alter is not granted to Fixer': 'PermissionToast copy, built from permission.denied',
     'Pod 1 of 6 … 6 of 6 on v2.13.2': 'Range shorthand; six progress.update labels (checked below)',
     'Pod n of 6 restarted with pool size 40': 'Template; six progress.update labels (checked below)',
@@ -227,6 +263,11 @@ describe('SCENARIO.md coverage', () => {
     expect(status.markdown).toContain(statusQuote[2]);
     const pm = templates.find((a) => a.artifactId === 'postmortem' && a.beat.startsWith('a7'))!;
     expect(pm.markdown).toBe(pmBlock.trimEnd());
+    const prBlock = /### 6\.4[\s\S]*?```\n([\s\S]*?)```/.exec(SCENARIO_MD)![1]!;
+    for (const prefix of ['a7', 'o7']) {
+      const pr = templates.find((a) => a.artifactId === 'pull-request' && a.beat.startsWith(prefix))!;
+      expect(pr.markdown, prefix).toBe(prBlock.trimEnd());
+    }
     const esc = templates.find((a) => a.artifactId === 'escalation')!;
     expect(esc.markdown).toContain(escQuote[1]);
     expect(esc.markdown).toContain(escQuote[2]);
@@ -314,7 +355,7 @@ describe('fixtures agree with SCENARIO §1', () => {
     expect(dependents).toContain('checkout-api');
     expect(fixtures.services.services.find((s) => s.name === 'checkout-api')?.pods).toBe(6);
     const ids = fixtures.policies.policies.map((p) => p.id);
-    expect(ids).toEqual(['P-01', 'P-02', 'P-03', 'P-04', 'P-05', 'P-06', 'P-08']);
+    expect(ids).toEqual(['P-01', 'P-02', 'P-03', 'P-04', 'P-05', 'P-06', 'P-08', 'P-09', 'P-10', 'P-11']);
   });
 
   it('guardrail rows in the script match policy titles and applicability', () => {
@@ -393,9 +434,9 @@ describe('pacing (DECISIONS D-072)', () => {
       }
     }
     const tl = compile(scenario, PATHS.approve, { pace: 1.15 });
-    // The default pace makes a run of about four minutes (DECISIONS D-072).
-    expect(tl.endT / 1000).toBeGreaterThan(220);
-    expect(tl.endT / 1000).toBeLessThan(260);
+    // The default pace makes a run of about four and a half minutes (DECISIONS D-072, D-079).
+    expect(tl.endT / 1000).toBeGreaterThan(240);
+    expect(tl.endT / 1000).toBeLessThan(280);
   });
 });
 

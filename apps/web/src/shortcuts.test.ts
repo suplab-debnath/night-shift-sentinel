@@ -16,6 +16,7 @@ describe('shortcut map (RUNBOOK §5)', () => {
     expect(k('a')).toEqual({ type: 'approve' });
     expect(k('X')).toEqual({ type: 'reject' });
     expect(k('c')).toEqual({ type: 'chaos' });
+    expect(k('l')).toEqual({ type: 'inject' });
     expect(k('s')).toEqual({ type: 'toggleSplit' });
     expect(k('i')).toEqual({ type: 'toggleInspector' });
     expect(k('p')).toEqual({ type: 'togglePresenter' });
@@ -25,7 +26,7 @@ describe('shortcut map (RUNBOOK §5)', () => {
     expect(k('?')).toEqual({ type: 'toggleHelp' });
     expect(k('Escape')).toEqual({ type: 'close' });
     expect(k('z')).toBeNull();
-    expect(SHORTCUT_HELP).toHaveLength(15);
+    expect(SHORTCUT_HELP).toHaveLength(16);
   });
 
   it('steps speed through 1×, 1.5×, 2× and clamps', () => {

@@ -144,6 +144,10 @@ export const PolicyRuleSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('verified-target'), withinDays: z.number().int().positive() }),
   z.object({ type: z.literal('no-outage'), maxOutageSeconds: z.number().nonnegative() }),
   z.object({ type: z.literal('override-expiry'), maxHours: z.number().positive() }),
+  // Governance (D-079): code changes, and untrusted text in tool output.
+  z.object({ type: z.literal('review-required'), reviewers: z.string().min(1) }),
+  z.object({ type: z.literal('checks-passed'), checks: z.array(z.string()).min(1) }),
+  z.object({ type: z.literal('untrusted-input') }),
 ]);
 
 export const PoliciesFixtureSchema = z.object({
@@ -188,6 +192,25 @@ export const ServicesFixtureSchema = z.object({
   ),
 });
 
+/** The morning-after pull request and the poisoned log sample (D-079). */
+export const GovernanceFixtureSchema = z.object({
+  pullRequest: z.object({
+    number: z.number().int().positive(),
+    service: z.string(),
+    branch: z.string(),
+    base: z.string(),
+    title: z.string(),
+    files: z.array(z.object({ file: z.string(), unified: z.string() })).min(1),
+    testsAdded: z.number().int().nonnegative(),
+    ciRun: z.number().int().positive(),
+    checks: z.array(z.object({ id: z.string(), label: z.string(), result: z.enum(['pass', 'fail']), detail: z.string() })).min(1),
+    guidelines: z.array(z.string()).min(1),
+    reviewers: z.string(),
+    canMerge: z.literal(false),
+  }),
+  untrustedInput: z.object({ source: z.string(), field: z.string(), lines: z.array(z.string()).min(1) }),
+});
+
 export const FixturesSchema = z.object({
   metrics: MetricsFixtureSchema,
   logs: LogsFixtureSchema,
@@ -197,6 +220,7 @@ export const FixturesSchema = z.object({
   runbooks: RunbooksFixtureSchema,
   policies: PoliciesFixtureSchema,
   services: ServicesFixtureSchema,
+  governance: GovernanceFixtureSchema,
 });
 
 export type Fixtures = z.output<typeof FixturesSchema>;

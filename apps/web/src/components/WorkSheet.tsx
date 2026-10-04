@@ -2,9 +2,10 @@ import { AnimatePresence, motion } from 'motion/react';
 import { useApp } from '../state/store';
 import { GuardrailChecklist } from './GuardrailChecklist';
 import { OptionCards } from './OptionCards';
+import { PullRequestCard } from './PullRequestCard';
 import styles from './WorkSheet.module.css';
 
-/** Options and policy checks, in a sheet above the stage floor (Acts 4–5, Branch R, chaos). */
+/** Options and policy checks, in a sheet above the stage floor (Acts 4–5, Branch R, chaos, the Act 7 pull request). */
 export function WorkSheet() {
   const state = useApp((s) => s.snap.state);
   const speed = useApp((s) => s.snap.speed);
@@ -13,6 +14,7 @@ export function WorkSheet() {
   let content: React.ReactNode = null;
   let key = 'none';
   let chaos = false;
+  const inject = state.overlay.active && state.overlay.name === 'inject';
   if (state.overlay.active) {
     const start = state.overlay.startedAt ?? 0;
     const list = [...state.checklists].reverse().find((c) => c.t >= start);
@@ -20,6 +22,18 @@ export function WorkSheet() {
       key = `chaos-${list.id}-${start}`;
       chaos = true;
       content = <GuardrailChecklist list={list} speed={speed} />;
+    }
+  } else if (state.act === 7 && !state.scorecard) {
+    // The morning-after pull request and its policy checks (D-079), until the scorecard opens.
+    const list = [...state.checklists].reverse().find((c) => c.args.action === 'code.change');
+    if (list) {
+      key = list.id;
+      content = (
+        <>
+          <PullRequestCard list={list} />
+          <GuardrailChecklist list={list} speed={speed} />
+        </>
+      );
     }
   } else {
     const set = state.optionSets[state.optionSets.length - 1];
@@ -41,7 +55,7 @@ export function WorkSheet() {
       {content && (
         <motion.div
           key={key}
-          className={`${styles.sheet} ${chaos ? styles.chaos : ''}`}
+          className={`${styles.sheet} ${chaos ? styles.chaos : ''} ${inject ? styles.inject : ''}`}
           initial={reduced ? { opacity: 0 } : { opacity: 0, y: -12 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0 }}

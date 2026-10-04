@@ -139,6 +139,10 @@ export const TOOLS = [
       expires: z.string().optional(),
       key: z.string().optional(),
       value: z.string().optional(),
+      pr: z.number().int().optional(),
+      checks: z.array(z.string()).optional(),
+      source: z.string().optional(),
+      content: z.string().optional(),
     }),
     run: (a, { bundle }) => {
       const outcome = checkPolicies(a, bundle.fixtures);
@@ -146,6 +150,37 @@ export const TOOLS = [
         summary: `${outcome.verdict}: ${outcome.rows.map((r) => `${r.policyId} ${r.result}`).join(', ')}`,
         payload: { type: 'json', content: JSON.stringify(outcome.rows.map(({ policyId, result, reason }) => ({ policyId, result, reason }))) },
         data: outcome,
+      };
+    },
+  }),
+  def({
+    name: 'pr.draft',
+    description: 'Open a draft pull request with a code fix and its tests. Drafts only: agents cannot merge or deploy.',
+    schema: z.object({ service, branch: z.string().optional(), draft: z.boolean().default(true) }),
+    run: (_a, { bundle }) => {
+      const pr = bundle.fixtures.governance.pullRequest;
+      return {
+        summary: `Draft PR #${pr.number}: ${pr.files.length} files changed, ${pr.testsAdded} tests added`,
+        payload: { type: 'diff', content: pr.files.map((f) => `--- ${f.file}\n${f.unified}`).join('\n') },
+        data: { number: pr.number, title: pr.title, draft: true, canMerge: pr.canMerge, files: pr.files.map((f) => f.file) },
+      };
+    },
+  }),
+  def({
+    name: 'ci.run',
+    description: 'Run the CI pipeline (build, tests, lint, scans) on a pull request. Read only.',
+    schema: z.object({ pr: z.number().int() }),
+    run: (a, { bundle }) => {
+      const pr = bundle.fixtures.governance.pullRequest;
+      if (a.pr !== pr.number) return { summary: `No pull request #${a.pr}`, data: null };
+      const passed = pr.checks.filter((c) => c.result === 'pass').length;
+      return {
+        summary: `${passed} of ${pr.checks.length} checks passed. The new tests fail on v2.14.0 and pass with the fix.`,
+        payload: {
+          type: 'table',
+          content: ['check                      result  detail', ...pr.checks.map((c) => `${c.label.padEnd(26)} ${c.result.padEnd(7)} ${c.detail}`)].join('\n'),
+        },
+        data: { run: pr.ciRun, checks: pr.checks },
       };
     },
   }),

@@ -13,9 +13,17 @@ export interface Branding {
   showNotesStrip: boolean;
   /** Pacing factor (DECISIONS D-072): 1 is the authored timing; above 1 agents pause to think and lines get reading time. */
   pace: number;
+  /** The approved AI platform shown in the inspector (D-079). */
+  aiPlatform?: { model: string; region: string };
 }
 
 export const brand: Branding = branding;
+
+/** Approved model and region for the inspector; set in config/branding.json. */
+export const aiPlatform = {
+  model: brand.aiPlatform?.model ?? 'Claude on Amazon Bedrock',
+  region: brand.aiPlatform?.region ?? 'Region set by your deployment',
+};
 
 export const placeholders = {
   ORG_NAME: brand.orgName,

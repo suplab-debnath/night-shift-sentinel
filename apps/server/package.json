@@ -10,7 +10,8 @@
     "test": "vitest run",
     "dev": "tsx watch src/dev.ts --mode=live-bedrock",
     "dev:mock": "tsx watch src/dev.ts --mode=live-mock",
-    "start:mock": "tsx src/dev.ts --mode=live-mock"
+    "start:mock": "tsx src/dev.ts --mode=live-mock",
+    "build:lambda": "node scripts/build-lambda.mjs"
   },
   "dependencies": {
     "@aws-sdk/client-bedrock-runtime": "^3.1139.0",
@@ -22,6 +23,7 @@
   },
   "devDependencies": {
     "aws-sdk-client-mock": "^4.1.0",
+    "esbuild": "^0.28.2",
     "tsx": "^4.23.15"
   }
 }

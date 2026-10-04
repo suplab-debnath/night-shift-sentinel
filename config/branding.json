@@ -6,5 +6,9 @@
   "demoDate": "",
   "defaultSpeed": 1,
   "showNotesStrip": true,
-  "pace": 1.15
+  "pace": 1.15,
+  "aiPlatform": {
+    "model": "Claude on Amazon Bedrock",
+    "region": "Region: eu-west-1 (your AWS account)"
+  }
 }

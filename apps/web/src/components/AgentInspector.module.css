@@ -130,3 +130,31 @@
   display: grid;
   gap: 2px;
 }
+
+/* Approved model access (D-079): compact, under the header. */
+.model {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  margin-top: 12px;
+  padding: 8px 10px;
+  border-radius: var(--r-code);
+  background: var(--ok-wash);
+  font-size: var(--t-xs);
+  line-height: 1.4;
+}
+
+.modelIcon {
+  flex: none;
+  margin-top: 1px;
+  color: var(--ok);
+}
+
+.modelName {
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.modelMeta {
+  color: var(--ink-2);
+}

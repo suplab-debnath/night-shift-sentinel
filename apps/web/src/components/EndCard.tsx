@@ -1,4 +1,4 @@
-import { Columns2, RotateCcw, X, Zap } from 'lucide-react';
+import { Columns2, FileWarning, RotateCcw, X, Zap } from 'lucide-react';
 import { resolveRunText } from '@night-shift/engine';
 import { copy } from '../copy';
 import { useApp } from '../state/store';
@@ -14,6 +14,7 @@ export function EndCard() {
   const source = useApp((s) => s.source);
   const setUi = useApp((s) => s.setUi);
   const canChaos = useApp((s) => s.snap.canChaos);
+  const canInject = useApp((s) => s.snap.canInject);
   if (!visible) return null;
   const ending = handed ? endings.B : endings.A;
   const live = ending.headlineLive ? resolveRunText(ending.headlineLive, timeline, t) : null;
@@ -36,6 +37,9 @@ export function EndCard() {
         </button>
         <button type="button" className={styles.button} onClick={() => source.triggerChaos()} disabled={!canChaos}>
           <Zap size={18} aria-hidden /> {copy.end.tryChaos}
+        </button>
+        <button type="button" className={styles.button} onClick={() => source.triggerChaos('inject')} disabled={!canInject}>
+          <FileWarning size={18} aria-hidden /> {copy.end.tryInject}
         </button>
         <button type="button" className={styles.button} onClick={() => source.reset()} data-testid="replay">
           <RotateCcw size={18} aria-hidden /> {copy.end.replay}

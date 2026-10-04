@@ -10,7 +10,16 @@ export interface ActionRequest {
   to?: string;
   expires?: string;
   approvals?: string[];
+  /** code.change: checks that passed on the change (D-079). */
+  checks?: string[];
+  /** tool.output: the text to inspect; defaults to the fixture sample for its source. */
+  source?: string;
+  content?: string;
 }
+
+/** Instruction-like text aimed at the agents (prompt injection). Deterministic, and deliberately simple. */
+export const INSTRUCTION_PATTERN =
+  /\b(ignore (all |any )?(previous|prior|earlier) instructions|disregard (the |all )?(rules|policy|policies|instructions)|skip (the )?policy checks?|you are now|new instructions)\b|\bsystem:/i;
 
 export interface PolicyRow {
   policyId: string;
@@ -73,6 +82,21 @@ function evaluateRule(rule: PolicyRule, req: ActionRequest, f: Fixtures, onMatch
     case 'override-expiry': {
       const h = hours(req.expires);
       return h !== null && h <= rule.maxHours ? { result: 'pass', reason: `${h} h expiry set` } : { result: onMatch, reason: 'Override has no expiry within limits' };
+    }
+    case 'review-required':
+      return { result: onMatch, reason: `Draft only. A reviewer from ${rule.reviewers} merges; the pipeline deploys.` };
+    case 'checks-passed': {
+      const missing = rule.checks.filter((c) => !(req.checks ?? []).includes(c));
+      if (missing.length > 0) return { result: onMatch, reason: `Missing checks: ${missing.join(', ')}` };
+      const added = f.governance.pullRequest.testsAdded;
+      return { result: 'pass', reason: `${rule.checks.length} of ${rule.checks.length} required checks passed, ${added} new tests` };
+    }
+    case 'untrusted-input': {
+      const sample = f.governance.untrustedInput;
+      const text = req.content ?? (req.source === sample.source ? sample.lines.join('\n') : '');
+      return INSTRUCTION_PATTERN.test(text)
+        ? { result: onMatch, reason: `Instruction-like text in a ${sample.field}; quarantined` }
+        : { result: 'pass', reason: 'No instructions found in tool output' };
     }
   }
 }

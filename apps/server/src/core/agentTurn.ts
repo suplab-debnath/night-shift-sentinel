@@ -77,7 +77,8 @@ export async function runAgentTurn(input: TurnInput): Promise<TurnResult> {
   const live = beat.live!;
   const agent = bundle.agentById(live.agent)!;
   const target = findTarget(beat, live.agent);
-  const specialist = !['orchestrator', 'guardian', 'scribe'].includes(live.agent);
+  // The model tier comes from agents.json (D-079): main for Orchestrator, Guardian, Scribe; fast for specialists.
+  const specialist = agent.modelTier !== 'main';
   const modelId = provider.name === 'mock' ? 'mock' : ((specialist ? config.fastModelId : undefined) ?? config.modelId ?? '');
   const started = Date.now();
   const log: TurnLog = {

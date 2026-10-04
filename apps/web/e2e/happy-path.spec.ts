@@ -108,7 +108,7 @@ test('@realtime happy path at 1× runs at the default pace (about four minutes)'
   const afterGate = Date.now() - resumed;
   const total = (toGate + afterGate) / 1000;
   console.log(`1× run: ${(toGate / 1000).toFixed(1)} s to the gate, ${(afterGate / 1000).toFixed(1)} s after it, ${total.toFixed(1)} s total`);
-  // SCENARIO §3: about four minutes plus the gate at the default pace (DECISIONS D-072).
+  // SCENARIO §3: about four and a quarter minutes plus the gate at the default pace (DECISIONS D-072, D-079).
   expect(total).toBeGreaterThan(220);
-  expect(total).toBeLessThan(260);
+  expect(total).toBeLessThan(285); // Act 7 grew by the pull request (DECISIONS D-079).
 });

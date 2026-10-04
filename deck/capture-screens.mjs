@@ -51,6 +51,30 @@ const SHOTS = [
     },
   },
   { file: '11-suspects', query: 'pauseAt=a3.x05' },
+  // Governance (D-079): the morning-after pull request, the audit by stage, the poisoned log.
+  { file: '12-pr', query: 'pauseAt=a7.pr6&autoDecide=g1:approved' },
+  {
+    file: '13-audit',
+    query: 'pauseAt=a7.b05&autoDecide=g1:approved',
+    after: async (page) => {
+      await page.getByTestId('tab-audit').click();
+      await page.getByTestId('audit-chain').waitFor();
+    },
+  },
+  {
+    file: '14-inject',
+    query: 'pauseAt=a3.b10',
+    after: async (page) => {
+      await page.evaluate(() => {
+        const s = window.__nightShift.source;
+        s.setSpeed(2);
+        s.triggerChaos('inject');
+      });
+      await page.waitForFunction(() => window.__nightShift.source.getSnapshot().state.agents.guardian === 'blocked', null, { timeout: 30_000 });
+      await page.waitForTimeout(1200);
+      await page.evaluate(() => window.__nightShift.source.pause());
+    },
+  },
   {
     file: '10-inspector',
     query: 'pauseAt=a4.b06',

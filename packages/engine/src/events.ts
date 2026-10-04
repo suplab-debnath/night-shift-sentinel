@@ -34,7 +34,12 @@ export type GateDecision = 'approved' | 'rejected';
 
 export type AuditSeverity = 'info' | 'warn' | 'high';
 
-export type ArtifactType = 'plan' | 'status' | 'postmortem' | 'escalation';
+export type ArtifactType = 'plan' | 'status' | 'postmortem' | 'escalation' | 'pull-request';
+
+/** What-if tests spliced into the run (D-079): an over-eager fix, a poisoned log line. */
+export const OVERLAY_NAMES = ['chaos', 'inject'] as const;
+
+export type OverlayName = (typeof OVERLAY_NAMES)[number];
 
 export type PayloadType = 'log' | 'diff' | 'table' | 'json';
 
@@ -115,7 +120,7 @@ export type EventBody =
       stream: boolean;
     }
   | { kind: 'channel.post'; author: string; agent?: AgentId; text: string }
-  | { kind: 'chaos.start' }
+  | { kind: 'chaos.start'; overlay?: OverlayName }
   | { kind: 'chaos.end' }
   | { kind: 'scorecard.show' };
 

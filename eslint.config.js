@@ -8,6 +8,7 @@ export default tseslint.config(
       '**/dist/**',
       '**/dist-offline/**',
       '**/dist-aws/**',
+      '**/dist-lambda/**',
       '**/cdk.out/**',
       '**/coverage/**',
       'deck/out/**',
@@ -26,6 +27,11 @@ export default tseslint.config(
     languageOptions: {
       globals: { process: 'readonly', console: 'readonly', Buffer: 'readonly', window: 'readonly', document: 'readonly' },
     },
+  },
+  {
+    // Build scripts run in Node.
+    files: ['apps/*/scripts/*.mjs'],
+    languageOptions: { globals: { process: 'readonly', console: 'readonly', Buffer: 'readonly' } },
   },
   {
     // The engine must stay deterministic (CLAUDE.md §3.3).

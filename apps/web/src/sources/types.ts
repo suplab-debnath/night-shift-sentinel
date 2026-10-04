@@ -1,6 +1,6 @@
 // The UI consumes a StageSource. ScriptedSource wraps the engine player;
 // LiveSource (P6) streams events from the server. The UI never branches on mode.
-import type { GateDecision, PlayerSnapshot } from '@night-shift/engine';
+import type { GateDecision, OverlayName, PlayerSnapshot } from '@night-shift/engine';
 
 export type SourceMode = 'scripted' | 'live' | 'fallback';
 
@@ -39,7 +39,8 @@ export interface StageSource {
   stepBack(): void;
   jumpToAct(n: number): boolean;
   decide(gateId: string, decision: GateDecision): boolean;
-  triggerChaos(): boolean;
+  /** Start a what-if test: the over-eager fix (default) or the poisoned log line (D-079). */
+  triggerChaos(overlay?: OverlayName): boolean;
   reset(): void;
   /** Toggle scripted ↔ live when a live source exists (RUNBOOK §5 `M`). */
   switchMode?(): boolean;

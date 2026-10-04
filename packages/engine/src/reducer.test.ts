@@ -148,7 +148,7 @@ describe('reduce', () => {
     expect(during.permissionDenied?.tool).toBe('db.alter');
     expect(during.audit.every((a) => a.overlay)).toBe(true);
     const after = reduce(during, ev({ kind: 'chaos.end' }, 5));
-    expect(after.overlay).toEqual({ active: false, startedAt: null, saved: null });
+    expect(after.overlay).toEqual({ active: false, name: null, startedAt: null, saved: null });
     expect(after.agents.guardian).toBe('idle');
     expect(after.agents.fixer).toBe('working');
     expect(after.permissionDenied).toBeNull();

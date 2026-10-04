@@ -10,6 +10,7 @@ export type ShortcutAction =
   | { type: 'approve' }
   | { type: 'reject' }
   | { type: 'chaos' }
+  | { type: 'inject' }
   | { type: 'toggleSplit' }
   | { type: 'toggleInspector' }
   | { type: 'togglePresenter' }
@@ -42,6 +43,7 @@ export const SHORTCUT_HELP: { keys: string; action: string }[] = [
   { keys: '1–7', action: 'Jump to act' },
   { keys: 'A / X', action: 'Approve or reject at an open gate' },
   { keys: 'C', action: 'Chaos test (from Act 4 onward)' },
+  { keys: 'L', action: 'Poisoned log test (from Act 3 onward)' },
   { keys: 'S', action: 'Human vs agent split view' },
   { keys: 'I', action: 'Inspector for the focused agent' },
   { keys: 'P', action: 'Presenter mode' },
@@ -88,6 +90,8 @@ export function resolveShortcut(e: KeyLike, ctx: ShortcutContext): ShortcutActio
       return { type: 'reject' };
     case 'c':
       return { type: 'chaos' };
+    case 'l':
+      return { type: 'inject' };
     case 's':
       return { type: 'toggleSplit' };
     case 'i':

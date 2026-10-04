@@ -327,3 +327,50 @@ test.describe('operations bar and run clock (DECISIONS D-074, D-075)', () => {
     await expect(page.getByTestId('play')).toHaveText('Incident closed');
   });
 });
+
+test.describe('governance (DECISIONS D-079)', () => {
+  test('a poisoned log line is quarantined, never acted on, and returns to the trigger point', async ({ page }) => {
+    await page.goto('/?take=0&pace=1&speed=8&autoplay=1&pauseAt=a2.b07');
+    await expect.poll(async () => (await snapshot(page)).status, { timeout: 20_000 }).toBe('paused');
+    await expect(page.getByTestId('inject-button')).toBeDisabled();
+    await page.keyboard.press('3');
+    const before = await snapshot(page);
+    await page.evaluate(() => window.__nightShift!.source.setSpeed(2));
+    await page.keyboard.press('l');
+    await expect(page.getByTestId('chaos-banner')).toHaveText('Injection test: a log line that gives orders');
+    await expect(page.getByTestId('checklist')).toContainText('P-11', { timeout: 20_000 });
+    await expect(page.locator('[data-agent="guardian"]')).toHaveAttribute('data-state', 'blocked', { timeout: 20_000 });
+    await expect(page.getByTestId('chaos-banner')).toHaveCount(0, { timeout: 20_000 });
+    const after = await snapshot(page);
+    expect(after.act).toBe(3);
+    expect(after.clock >= before.clock).toBe(true);
+    await page.getByTestId('tab-audit').click();
+    await expect(page.getByTestId('audit')).toContainText('Injection test: poisoned log');
+    await expect(page.getByTestId('audit')).toContainText('Prompt injection attempt in logs');
+  });
+
+  test('the fix goes out as a tested draft pull request; the audit is chained by stage and exports', async ({ page }) => {
+    await page.goto('/?take=0&pace=1&speed=8&autoplay=1&autoDecide=g1:approved&pauseAt=a7.pr6');
+    await expect.poll(async () => (await snapshot(page)).status, { timeout: 60_000 }).toBe('paused');
+    await page.evaluate(() => window.__nightShift!.source.stepForward());
+    await expect(page.getByTestId('pr-card')).toContainText('Pull request #482');
+    await expect(page.getByTestId('checklist')).toContainText('P-09');
+    await expect(page.getByTestId('checklist')).toContainText('P-10');
+    await page.getByTestId('tab-artifacts').click();
+    await expect(page.getByTestId('artifact-pull-request')).toContainText('Agents cannot merge. The pipeline deploys after review.');
+
+    await page.getByTestId('tab-audit').click();
+    await expect(page.getByTestId('audit-chain')).toHaveAttribute('data-verified', 'true');
+    await expect(page.getByTestId('audit-stage').first()).toContainText('Act 7');
+    await expect(page.getByTestId('audit')).toContainText('Act 3 · Diagnosis');
+    await expect(page.getByTestId('audit')).toContainText('Root cause concluded (confidence 0.92)');
+    const [download] = await Promise.all([page.waitForEvent('download'), page.getByTestId('audit-export').click()]);
+    expect(download.suggestedFilename()).toBe('night-shift-audit-incident-checkout-take0.json');
+    const doc = JSON.parse(await (await download.createReadStream()).toArray().then((c) => Buffer.concat(c).toString('utf8')));
+    expect(doc.chain.verified).toBe(true);
+    expect(doc.stages.length).toBeGreaterThanOrEqual(6);
+
+    await page.locator('[data-agent="fixer"]').first().click();
+    await expect(page.getByTestId('inspector-model')).toContainText('Claude on Amazon Bedrock');
+  });
+});

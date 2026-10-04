@@ -1,7 +1,8 @@
+import { aiPlatform as platform } from '../config';
 import { useApp } from '../state/store';
 import { copy } from '../copy';
 import { AGENT_HUE, AGENT_ICON, AGENT_WASH } from '../lib/agents';
-import { X } from 'lucide-react';
+import { ShieldCheck, X } from 'lucide-react';
 import { useEffect, useRef } from 'react';
 import styles from './AgentInspector.module.css';
 
@@ -60,6 +61,18 @@ export function AgentInspector() {
         </div>
         {state && <span className={styles.state}>{state}</span>}
       </header>
+      {agent.modelTier && (
+        <section className={styles.model} aria-label={copy.inspector.model} data-testid="inspector-model">
+          <ShieldCheck size={16} aria-hidden className={styles.modelIcon} />
+          <div>
+            <div className={styles.modelName}>
+              {platform.model} · {copy.inspector.modelTier[agent.modelTier]}
+            </div>
+            <div className={styles.modelMeta}>{platform.region}</div>
+            <div className={styles.modelMeta}>{copy.inspector.dataStays}</div>
+          </div>
+        </section>
+      )}
       {agent.tools.length > 0 && (
         <section className={styles.section}>
           <h3 className={styles.heading}>{copy.inspector.tools}</h3>

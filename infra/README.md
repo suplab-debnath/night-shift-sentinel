@@ -47,5 +47,15 @@ scripted and the stage plays scripted.
   the OAC requirements for Function URLs, adjust `infra/lib/night-shift-stack.ts` and
   `apps/web/src/sources/LiveSource.ts` (DECISIONS D-057).
 
+## Manual deploy of the API Lambda (without CDK)
+`npm run build:lambda -w @night-shift/server` writes `apps/server/dist-lambda/lambda.zip` with the same
+bundling as the stack (esbuild, CJS, node22, AWS SDK included, no Docker) and smoke-tests it locally
+with the mock provider. Create the function with runtime Node.js 22.x, arm64, handler `index.handler`,
+512 MB, 120 s timeout, reserved concurrency 5, and the environment variables the stack sets
+(`AGENT_MODE=live-bedrock`, `BEDROCK_MODEL_ID`, `LIVE_TURN_TIMEOUT_MS=9000`,
+`LIVE_MAX_TOKENS_PER_TURN=600`, optional `BEDROCK_FAST_MODEL_ID`, `DEMO_PASSCODE_PARAM`). Give its role
+the Bedrock permissions under "Least privilege", add a Function URL with auth `AWS_IAM` and invoke mode
+`RESPONSE_STREAM`, and route CloudFront `/api/*` to it with a Lambda OAC.
+
 ## Tear down
 `npx cdk destroy -c region=eu-west-1` from `infra/`. The bucket only holds the rebuildable web build and is emptied automatically.

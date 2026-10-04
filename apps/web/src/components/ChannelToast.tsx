@@ -1,5 +1,6 @@
 import { copy } from '../copy';
 import { AGENT_HUE } from '../lib/agents';
+import { activeMoment } from '../lib/moments';
 import { useApp } from '../state/store';
 import styles from './ChannelToast.module.css';
 
@@ -11,7 +12,9 @@ export function ChannelToast() {
   const post = useApp((s) => {
     const last = s.snap.state.channel.at(-1);
     const gateOpen = s.snap.state.gate?.status === 'open';
-    return last && s.snap.t - last.t < SHOW_MS && s.ui.tab !== 'channel' && !gateOpen ? last : null;
+    // A moment banner owns the corner while it is up (D-080).
+    const moment = activeMoment(s.bundle.scenario.moments, s.bundle.scenario.milestones, s.snap.timeline, s.snap.state, s.snap.t);
+    return last && s.snap.t - last.t < SHOW_MS && s.ui.tab !== 'channel' && !gateOpen && !moment ? last : null;
   });
   if (!post) return null;
   return (

@@ -130,3 +130,111 @@
   color: var(--ink-3);
   font-family: var(--font-mono);
 }
+
+/* Audit tab: stages, results, and the hash chain (D-079). */
+.auditWrap {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.auditBar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--line);
+  font-size: var(--t-xs);
+}
+
+.chainOk,
+.chainBad {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+}
+
+.chainOk {
+  color: var(--ok);
+}
+
+.chainBad {
+  color: var(--alert);
+}
+
+.exportButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  cursor: pointer;
+}
+
+.exportButton:focus-visible {
+  outline: 2px solid var(--signal);
+  outline-offset: 2px;
+}
+
+.stage {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.stageHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.stageTitle {
+  margin: 0;
+  font-size: var(--t-sm);
+  font-weight: 600;
+}
+
+.whatIf .stageTitle {
+  color: var(--caution);
+}
+
+.stageRows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.result {
+  margin: 0;
+  font-size: var(--t-xs);
+  color: var(--ink-2);
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.resultError {
+  color: var(--alert);
+}
+
+.resultLabel {
+  font-weight: 600;
+}
+
+.hash {
+  align-self: flex-end;
+  font-size: 11px;
+  color: var(--ink-3);
+}

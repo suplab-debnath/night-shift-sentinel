@@ -25,7 +25,7 @@ export const copy = {
     running: (ms: number) => `running ${(ms / 1000).toFixed(1)} s`,
     emptyStream: 'The squad is quiet. Press play to start the night.',
     emptyEvidence: 'Evidence appears here as specialists report back.',
-    emptyAudit: 'Every tool call, policy check, and decision is recorded here.',
+    emptyAudit: 'Every tool call, policy check, piece of evidence, and decision is recorded here, stage by stage.',
     emptyArtifacts: 'Plans, status updates, and postmortems appear here.',
     emptyChannel: 'The incident channel is quiet.',
     channelName: '#inc-checkout-api',
@@ -45,6 +45,7 @@ export const copy = {
     milestones: 'Incident milestones',
     compare: 'Compare with manual response',
     badIdea: 'Test a bad idea',
+    poisonedLog: 'Test a poisoned log',
     paused: (who: string) => `Squad paused by ${who}. Agents are holding their work; the incident clock keeps running.`,
     pausedShort: 'Squad paused',
     speed: 'Playback speed (presenter)',
@@ -99,10 +100,12 @@ export const copy = {
     showSummary: 'Show summary',
     showSplit: 'Show human vs agent timeline',
     tryChaos: 'Try the chaos test',
+    tryInject: 'Try a poisoned log',
     replay: 'Replay',
   },
   chaos: {
     banner: 'Chaos test: an over-eager fix',
+    injectBanner: 'Injection test: a log line that gives orders',
     notGranted: (tool: string, agent: string) => `${tool} is not granted to ${agent}`,
   },
   split: {
@@ -111,6 +114,27 @@ export const copy = {
     squad: 'Agent squad',
     mitigate: 'Time to mitigate',
     versus: 'vs',
+  },
+  audit: {
+    verified: (n: number) => `Chain verified · ${n} records`,
+    broken: 'Chain check failed',
+    export: 'Export evidence',
+    exportHint: 'Download the audit trail with its hash chain (JSON)',
+    stage: (act: number, name: string) => `Act ${act} · ${name}`,
+    stageNames: { 5: 'Human approval' } as Record<number, string>,
+    overlay: { chaos: 'Chaos test: over-eager fix', inject: 'Injection test: poisoned log' } as Record<string, string>,
+    whatIf: 'What-if test',
+    counts: (tools: number, policies: number, evidence: number, decisions: number) =>
+      [
+        tools && `${tools} tool ${tools === 1 ? 'call' : 'calls'}`,
+        policies && `${policies} policy ${policies === 1 ? 'check' : 'checks'}`,
+        evidence && `${evidence} evidence`,
+        decisions && `${decisions} ${decisions === 1 ? 'decision' : 'decisions'}`,
+      ]
+        .filter(Boolean)
+        .join(' · '),
+    result: 'Result',
+    hash: 'Record hash',
   },
   inspector: {
     suffix: 'details',
@@ -121,6 +145,14 @@ export const copy = {
     approval: 'Needs approval',
     needsApproval: 'Needs approval for',
     neverAllowed: 'Never allowed',
+    model: 'Model access',
+    modelTier: { main: 'Main model', fast: 'Fast model' } as Record<string, string>,
+    dataStays: 'Data stays in your cloud account. No public AI services.',
+  },
+  pr: {
+    title: (n: string) => `Pull request ${n}`,
+    draft: 'Draft · awaiting human review',
+    checks: 'Checks',
   },
   shortcuts: {
     title: 'Keyboard shortcuts',

@@ -5,6 +5,14 @@
   --surface: #ffffff;
   --stage: #eef1f6;
   --stage-dot: #d9dfe8;
+  /* Stage tone (D-080): the incident felt, not read. */
+  --stage-alert: #f8eded;
+  --stage-caution: #f8f1e3;
+  --stage-ok: #e9f4ee;
+  /* Night-to-dawn strip under the top bar (D-080). */
+  --sky-night: linear-gradient(90deg, #0b1026 0%, #1b2a63 55%, #2c3b7a 100%);
+  --sky-dawn: linear-gradient(90deg, #1d2b63 0%, #6b5a9e 35%, #f08a6c 75%, #ffd39a 100%);
+  --on-tone: #ffffff;
   --line: #d9dfe8;
   --ink: #16202e;
   --ink-2: #4b5769;

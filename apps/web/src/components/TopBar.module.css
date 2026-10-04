@@ -75,3 +75,18 @@
     display: none;
   }
 }
+
+/* Night-to-dawn strip along the bottom edge (D-080). */
+.sky {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 6px;
+  background: var(--sky-night);
+  pointer-events: none;
+}
+
+.sky[data-dawn] {
+  background: var(--sky-dawn);
+}

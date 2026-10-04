@@ -117,12 +117,12 @@ export type EngineEvent = Base & (
   | { kind: 'artifact.create'; artifactId: string;
       type: 'plan' | 'status' | 'postmortem' | 'escalation'; title: string; markdown: string; stream: boolean }
   | { kind: 'channel.post'; author: string; agent?: AgentId; text: string }  // incident channel
-  | { kind: 'chaos.start' } | { kind: 'chaos.end' }
+  | { kind: 'chaos.start'; overlay?: 'chaos' | 'inject' } | { kind: 'chaos.end' }   // what-if overlays (D-079)
   | { kind: 'scorecard.show' }
 );
 ```
 
-Rules: events are immutable; the reducer is pure and total (unknown kinds are ignored with a dev warning); the audit log is derived from events (every `tool.call`, `guardrail.check`, `gate.*`, `permission.denied`, `audit` produces an audit row).
+Rules: events are immutable; the reducer is pure and total (unknown kinds are ignored with a dev warning); the audit log is derived from events (every `tool.call`, `guardrail.check`, `gate.*`, `permission.denied`, `audit`, `evidence.*`, `options.show`, and `artifact.create` produces an audit row). Each row carries its act, beat, and overlay; tool rows carry their result. `auditChain()` links the rows with a 64-bit FNV-1a hash chain (a checksum that makes edits visible on screen and in the export; production would anchor it in an append-only store). The Audit tab groups rows by stage and exports them as JSON (DECISIONS D-079).
 
 ## 5. Scenario schema (summary)
 
@@ -201,12 +201,12 @@ interface LlmProvider {
 - Temperature 0.3; `stopSequences` none; max 2 sentences enforced by validator, not by truncation.
 
 ### 7.5 Tools (fixture-backed, deterministic)
-`metrics.query`, `traces.get`, `logs.search`, `deploys.list`, `git.diff`, `runbook.lookup`, `policy.check`, `deploy.rollback`*, `config.override`*, `deploy.restart`*, `doc.write`, `comms.draft`. (* only callable when the segment's decision path contains the matching approval; otherwise return `permission.denied`.) `db.alter` exists in the registry so the chaos beat can demonstrate `permission.denied`, but is granted to no agent.
+`metrics.query`, `traces.get`, `logs.search`, `deploys.list`, `git.diff`, `runbook.lookup`, `policy.check`, `deploy.rollback`*, `config.override`*, `deploy.restart`*, `doc.write`, `comms.draft`, `pr.draft` (draft pull requests only; no merge tool exists), `ci.run`. (* only callable when the segment's decision path contains the matching approval; otherwise return `permission.denied`.) `db.alter` exists in the registry so the chaos beat can demonstrate `permission.denied`, but is granted to no agent.
 
 Each tool validates args with zod and returns a compact summary plus an optional payload. Tools never throw to the model; they return structured errors.
 
 ### 7.6 Policy engine
-`policy.check(action)` evaluates `policies.json` rules in code and returns per-policy results. The Guardian model receives these results and may only phrase the explanation. Validators reject any Guardian text that contradicts the computed outcome.
+`policy.check(action)` evaluates `policies.json` rules in code and returns per-policy results. Governance rules (D-079): `review-required` (agent code changes need a human review), `checks-passed` (named CI checks, including new tests), and `untrusted-input` (instruction-like text in tool output fails and is quarantined; a deterministic pattern, not a model judgement). Each agent's model tier (main or fast) comes from `agents.json`. The Guardian model receives these results and may only phrase the explanation. Validators reject any Guardian text that contradicts the computed outcome.
 
 `policies.json` includes P-01 human approval for prod changes, P-02 prod DB changes need DBA and change board, P-03 change freeze with incident exception, P-04 blast radius one service, P-05 rollback target verified within 30 days, P-06 no irreversible or outage-causing operations, P-08 runtime overrides recorded with expiry.
 

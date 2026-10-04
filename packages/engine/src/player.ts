@@ -1,6 +1,7 @@
 // Virtual-clock player (ARCHITECTURE §6). Driven by advance(dtMs); never reads
 // a clock. Invariant: state === reduce(initial, events with t <= this.t).
 import { chaosAvailableFrom, compile, storyClock, type BeatOverride, type Decision, type Timeline } from './compile';
+import type { OverlayName } from './events';
 import type { EngineEvent, GateDecision } from './events';
 import { initialStageState, reduce, type StageState } from './reducer';
 import type { Scenario } from './schema';
@@ -17,6 +18,8 @@ export interface PlayerSnapshot {
   clock: string;
   decisions: readonly Decision[];
   canChaos: boolean;
+  /** The poisoned-log test can start now (D-079). */
+  canInject: boolean;
   currentAct: number;
   pendingGateId: string | null;
   /** Beat playback is waiting for (live mode), or null. */
@@ -55,7 +58,8 @@ export interface Player {
   decide(gateId: string, decision: GateDecision, by?: string, waitedMs?: number): boolean;
   /** The squad was paused here for `ms` of story time; the run clock counts it (D-074). */
   holdClock(ms: number): void;
-  triggerChaos(): boolean;
+  /** Start a what-if overlay; the over-eager fix by default. */
+  triggerChaos(overlay?: OverlayName): boolean;
   reset(): void;
   /** Pause automatically once the given beat has fully played. */
   setPauseAt(beatId: string | null): void;
@@ -144,9 +148,9 @@ export function createPlayer(scenario: Scenario, options: PlayerOptions = {}): P
     return playing ? 'playing' : 'paused';
   }
 
-  function canChaos(): boolean {
+  function canChaos(name: OverlayName = 'chaos'): boolean {
     if (state.overlay.active) return false;
-    const from = chaosAvailableFrom(timeline, scenario);
+    const from = chaosAvailableFrom(timeline, scenario, name);
     if (from === null || t < from) return false;
     return true;
   }
@@ -181,6 +185,7 @@ export function createPlayer(scenario: Scenario, options: PlayerOptions = {}): P
       clock: storyClock(timeline, t),
       decisions,
       canChaos: canChaos(),
+      canInject: canChaos('inject'),
       currentAct: currentAct(),
       pendingGateId: t >= timeline.endT && timeline.end.kind === 'gate' ? timeline.end.gateId : null,
       holding: held && t >= held.t - 1 ? held.id : null,
@@ -321,9 +326,9 @@ export function createPlayer(scenario: Scenario, options: PlayerOptions = {}): P
       recompile([...decisions, { type: 'hold', at: t, ms: Math.round(ms) }]);
       notify();
     },
-    triggerChaos() {
-      if (!canChaos()) return false;
-      recompile([...decisions, { type: 'chaos', at: t }]);
+    triggerChaos(overlay = 'chaos') {
+      if (!canChaos(overlay)) return false;
+      recompile([...decisions, overlay === 'chaos' ? { type: 'chaos', at: t } : { type: 'chaos', at: t, overlay }]);
       const emitted = catchUp();
       playing = true;
       notify(emitted);

@@ -21,7 +21,7 @@
 - Open the offline build; press `R` to reset. Press `P` for presenter mode.
 - If a tablet will be handed over for approval: open the same build on it or use the laptop.
 
-## 3. Presenter script (about 7 minutes)
+## 3. Presenter script (about 8 minutes)
 
 This is the demo on its own. For the full talk (the story deck with the demo in the middle, about 20 minutes), use `docs/PRESENTER_SCRIPT.md`; its lines are also the executive deck's speaker notes.
 
@@ -39,7 +39,9 @@ This is the demo on its own. For the full talk (the story deck with the demo in 
 | 3:45 | Act 7 | "Scribe writes two things: a plain update for stakeholders and a blameless postmortem for engineers. Owners are proposed, not assigned." |
 | 4:10 | Scorecard | "Illustrative, but the shape is real: minutes instead of most of an hour, and thirty seconds of human time." |
 | 4:30 | Split view (`S`) | "Here's the same night done by hand." |
+| 4:10 | Pull request (Act 7) | "The real fix is code, so it goes through the pipeline. Tests included; the agent cannot merge." |
 | 5:00 | Chaos (`C`) | "Now the part people ask about. What if an agent gets it wrong?" … "Blocked twice: by policy, and because the tool isn't even granted." |
+| 5:30 | Poisoned log (`L`) and Audit tab | "Text in a log can never call a tool." Then the Audit tab: evidence by stage, chain verified, export. |
 | 6:00 | End card | "Where would you want a squad like this first?" Close it (`Esc` or ✕) to show the finished stage; "Show summary" brings it back. |
 
 If the client clicks **Reject**: "Good. Let's see what happens." After the alternative: "If you reject again, it stops and escalates. It stops where people say stop."
@@ -66,6 +68,7 @@ If the client clicks **Reject**: "Good. Let's see what happens." After the alter
 | `1`–`7` | Jump to act |
 | `A` / `X` | Approve / reject at an open gate |
 | `C` | Chaos test (from Act 4 onward) |
+| `L` | Poisoned log test (from Act 3 onward) |
 | `S` | Human vs agent split view |
 | `I` | Toggle inspector for the focused agent |
 | `P` | Presenter mode |
@@ -81,6 +84,9 @@ If the client clicks **Reject**: "Good. Let's see what happens." After the alter
 | Question | Answer |
 |---|---|
 | Is this real AI or a recording? | "The default run is scripted so it's reliable in any room. Live mode runs the same agents on Claude through Amazon Bedrock — happy to switch." |
+| Can an agent push code to production? | "No. It can open a draft pull request with tests. Your pipeline and a reviewer decide; there is no merge tool." |
+| What about prompt injection? | "Text from logs, tickets, or customers is evidence, never instructions. A deterministic check quarantines it, and agents can only call the tools they are granted, with policy and a person in the way." |
+| What about shadow AI? | "The answer is a sanctioned path that's faster than the workaround: approved models in your account, audited." |
 | What stops an agent doing damage? | "Three things: policies enforced in code, tools granted per agent, and human approval for production changes. Everything is audited." |
 | What if it's wrong about the root cause? | "It states confidence and shows its evidence. The human sees both before approving, and every action is reversible or blocked." |
 | Where does our data go? | "In a real deployment it stays in your AWS account; the model runs through Bedrock in the region you choose. This demo uses only fictional data." |
