@@ -4,7 +4,7 @@ This file is the operating manual for Claude Code in this repository. Read it fu
 
 ## 1. What we are building
 
-**Night Shift** is an interactive, visual demo of a multi-agent AI squad resolving a production incident ("Checkout meltdown at 2:07 AM"). It is shown to clients in a live meeting to make agentic AI and our organization's AI adoption tangible: autonomy with human control, governance built in, measurable outcomes.
+**Night Shift** is an interactive, visual demo of a multi-agent AI squad resolving a production incident ("Premium run at risk at 2:07 AM": a European life insurer's nightly SEPA premium collection; DECISIONS D-081). It is shown to clients in a live meeting to make agentic AI and our organization's AI adoption tangible: autonomy with human control, governance built in, measurable outcomes.
 
 Deliverables, in priority order:
 
@@ -35,7 +35,7 @@ If docs conflict: SCENARIO wins on content, DESIGN wins on visuals, ARCHITECTURE
 4. **Live mode is optional and must never break the demo.** Every live agent turn has a timeout; on error, timeout, or failed validation, that beat falls back to the scripted beat. Nothing on stage marks the mode or a fallback; the source and fallback count show only in the presenter's settings menu (DECISIONS D-070). The presenter never sees a stack trace.
 5. **One event protocol.** Scripted playback and live mode emit the *same* typed events (`packages/engine/src/events.ts`). The UI only consumes events; it never knows which mode produced them.
 6. **Light, modern UI** exactly per `docs/DESIGN.md`. Do not substitute a dark theme or the generic AI-demo look listed in DESIGN §9.
-7. **Honest numbers.** All outcome figures (MTTR, failed checkouts) are illustrative and must be labelled "Illustrative" in the UI and decks. Never invent industry statistics; where a deck slide needs a real number, leave a visible `{{PRESENTER: add sourced figure}}` placeholder.
+7. **Honest numbers.** All outcome figures (MTTR, premiums at risk) are illustrative and must be labelled "Illustrative" in the UI and decks. Never invent industry statistics; where a deck slide needs a real number, leave a visible `{{PRESENTER: add sourced figure}}` placeholder.
 8. **Secrets.** AWS credentials come from the default provider chain (profile/SSO) on the server side only. Nothing AWS-related ships to the browser. Never commit `.env`.
 9. **Do not guess Bedrock model IDs or SDK parameter names.** Model IDs come from env (`BEDROCK_MODEL_ID`, `BEDROCK_FAST_MODEL_ID`). Check the installed `@aws-sdk/client-bedrock-runtime` types for exact field names before using them.
 10. **Placeholders** `{{ORG_NAME}}`, `{{CLIENT_NAME}}`, `{{PRESENTER_NAME}}` stay configurable (`config/branding.json`); no logos or third-party brand assets are embedded.
@@ -62,7 +62,7 @@ night-shift/
 ├─ packages/
 │  ├─ engine/                           # events, scenario schema, player, reducer, PRNG
 │  └─ scenarios/
-│     └─ incident-checkout/             # scenario.json, fixtures/*.json, agents.json
+│     └─ premium-run/             # scenario.json, fixtures/*.json, agents.json
 ├─ apps/
 │  ├─ web/                              # React stage UI
 │  └─ server/                           # Fastify + providers (mock, bedrock) + tools

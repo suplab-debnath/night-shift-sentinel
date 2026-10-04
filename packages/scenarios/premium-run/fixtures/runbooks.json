@@ -1,0 +1,52 @@
+{
+  "runbooks": [
+    {
+      "id": "RB-207",
+      "title": "Quarantine failing records and resume a batch step",
+      "keywords": [
+        "quarantine",
+        "hold",
+        "skip",
+        "failing records",
+        "resume"
+      ],
+      "action": "batch.quarantine",
+      "strategy": "hold failed items, resume from the last commit",
+      "estimatedMinutes": 8,
+      "reversible": true,
+      "preconditions": [
+        "Failures limited to an identifiable set",
+        "No premium changes"
+      ],
+      "steps": [
+        "Identify the failing set",
+        "Hold it out of the run",
+        "Resume from the last commit",
+        "Watch throughput and projected finish"
+      ]
+    },
+    {
+      "id": "RB-219",
+      "title": "Pin a product to its previous rate for one run",
+      "keywords": [
+        "rate",
+        "pin",
+        "previous rate",
+        "temporary"
+      ],
+      "action": "rate.override",
+      "strategy": "temporary rate pin, 48 h expiry",
+      "estimatedMinutes": 10,
+      "reversible": true,
+      "preconditions": [
+        "Duty actuary approval",
+        "Expiry set"
+      ],
+      "steps": [
+        "Record the pin with expiry",
+        "Resume the run",
+        "Reconcile after the fix"
+      ]
+    }
+  ]
+}

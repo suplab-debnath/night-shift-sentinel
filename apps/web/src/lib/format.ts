@@ -4,6 +4,17 @@ export function formatLatency(ms: number): string {
   return `${Math.round(ms)} ms`;
 }
 
+/** Minutes after midnight as a clock time: 412 → "06:52" (D-081). */
+export function formatClockMinutes(minutes: number): string {
+  const m = ((Math.round(minutes) % 1440) + 1440) % 1440;
+  return `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
+}
+
+/** The heartbeat's primary value in the scenario's format. */
+export function formatPrimary(value: number, format: 'latency' | 'clock'): string {
+  return format === 'clock' ? formatClockMinutes(value) : formatLatency(value);
+}
+
 export function formatPercent(v: number): string {
   return v.toFixed(1);
 }

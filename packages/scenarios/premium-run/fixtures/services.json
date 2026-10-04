@@ -1,0 +1,108 @@
+{
+  "services": [
+    {
+      "name": "premium-collection",
+      "kind": "service",
+      "stack": "Java 21, Spring Batch 5",
+      "pods": 2,
+      "dependsOn": [
+        "policy-db",
+        "rating-service",
+        "sepa-gateway"
+      ]
+    },
+    {
+      "name": "rating-service",
+      "kind": "service",
+      "pods": 3,
+      "dependsOn": [
+        "policy-db"
+      ]
+    },
+    {
+      "name": "sepa-gateway",
+      "kind": "service",
+      "pods": 2,
+      "dependsOn": []
+    },
+    {
+      "name": "policy-db",
+      "kind": "database",
+      "engine": "PostgreSQL",
+      "maxConnections": 600,
+      "dependsOn": []
+    },
+    {
+      "name": "policy-admin",
+      "kind": "service",
+      "pods": 2,
+      "dependsOn": [
+        "policy-db"
+      ]
+    },
+    {
+      "name": "claims-portal",
+      "kind": "service",
+      "pods": 2,
+      "dependsOn": [
+        "policy-db"
+      ]
+    },
+    {
+      "name": "customer-portal",
+      "kind": "service",
+      "pods": 2,
+      "dependsOn": [
+        "policy-db"
+      ]
+    },
+    {
+      "name": "broker-api",
+      "kind": "service",
+      "pods": 2,
+      "dependsOn": [
+        "policy-db"
+      ]
+    },
+    {
+      "name": "document-service",
+      "kind": "service",
+      "pods": 2,
+      "dependsOn": [
+        "policy-db"
+      ]
+    },
+    {
+      "name": "billing-statements",
+      "kind": "service",
+      "pods": 2,
+      "dependsOn": [
+        "policy-db"
+      ]
+    },
+    {
+      "name": "agent-commissions",
+      "kind": "service",
+      "pods": 2,
+      "dependsOn": [
+        "policy-db"
+      ]
+    },
+    {
+      "name": "reinsurance-feed",
+      "kind": "service",
+      "pods": 2,
+      "dependsOn": [
+        "policy-db"
+      ]
+    },
+    {
+      "name": "regulatory-reporting",
+      "kind": "service",
+      "pods": 2,
+      "dependsOn": [
+        "policy-db"
+      ]
+    }
+  ]
+}

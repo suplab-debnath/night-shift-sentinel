@@ -117,7 +117,7 @@ const call = async (method, rawPath, body) => {
   return outputs.at(-1);
 };
 const health = await call('GET', '/api/health');
-const seg = await call('POST', '/api/segments', { scenarioId: 'incident-checkout', segment: 'main', decisions: [], context: '' });
+const seg = await call('POST', '/api/segments', { scenarioId: 'premium-run', segment: 'main', decisions: [], context: '' });
 process.env.AGENT_MODE = savedMode;
 if (health.status !== 200 || seg.status !== 200 || !seg.body.includes('"frame":"segment.end"')) {
   console.error('Smoke test failed', { health: health.status, segment: seg.status });

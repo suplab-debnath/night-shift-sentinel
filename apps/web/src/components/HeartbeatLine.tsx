@@ -4,13 +4,13 @@ import { useWidth } from '../hooks/useWidth';
 import { placeBeside } from '../lib/fit';
 import { copy } from '../copy';
 import { useElementSize } from '../hooks/useElementSize';
-import { formatLatency, formatPercent } from '../lib/format';
+import { formatPercent, formatPrimary } from '../lib/format';
 import { axisMs, buildHeartbeat, noisyErrorRate } from '../lib/heartbeat';
 import { metricValueAt } from '@night-shift/engine';
 import { useApp } from '../state/store';
 import styles from './HeartbeatLine.module.css';
 
-/** The one bold element: p99 latency across the stage base (DESIGN §2, §6). */
+/** The one bold element: the scenario's primary metric across the stage base (DESIGN §2, §6; D-081). */
 export function HeartbeatLine() {
   const ref = useRef<HTMLDivElement>(null);
   const { width, height } = useElementSize(ref);
@@ -22,6 +22,8 @@ export function HeartbeatLine() {
   const metrics = useApp((s) => s.snap.state.metrics);
   const timelapse = useApp((s) => s.snap.state.timelapse);
   const slo = useApp((s) => s.bundle.scenario.slo);
+  const display = useApp((s) => s.bundle.scenario.display);
+  const primary = display.primary;
   const reduced = useApp((s) => s.ui.reducedMotion);
   const waiting = useApp((s) => s.snap.status === 'awaitingGate');
   // The world keeps moving while a person decides (DECISIONS D-071).
@@ -29,7 +31,16 @@ export function HeartbeatLine() {
 
   const geo =
     width > 0
-      ? buildHeartbeat({ track: metrics.p99, t, axis: axisMs(t, endT, ended), width, height, sloMs: slo.p99Ms, headDriftMs: drift })
+      ? buildHeartbeat({
+          track: metrics.p99,
+          t,
+          axis: axisMs(t, endT, ended),
+          width,
+          height,
+          sloMs: slo.p99Ms,
+          headDriftMs: drift,
+          scale: { min: primary.min, max: primary.max, log: primary.scale === 'log' },
+        })
       : null;
   const rawErrorRate = metricValueAt(metrics.errorRate, t);
   const errorRate = noisyErrorRate(rawErrorRate, t, drift);
@@ -44,7 +55,7 @@ export function HeartbeatLine() {
   return (
     <div className={styles.band} ref={ref} data-testid="heartbeat">
       {geo && (
-        <svg width={width} height={height} className={styles.svg} role="img" aria-label={`p99 latency ${formatLatency(geo.head.value)}`}>
+        <svg width={width} height={height} className={styles.svg} role="img" aria-label={`${primary.label} ${formatPrimary(geo.head.value, primary.format)}`}>
           <line x1={0} x2={width} y1={geo.sloY} y2={geo.sloY} className={styles.slo} />
           {geo.runs.map((r, i) => (
             <path key={i} d={r.d} className={`${styles.path} ${styles[r.tone]}`} />
@@ -55,7 +66,7 @@ export function HeartbeatLine() {
       {geo && (
         <>
           <span className={styles.sloLabel} style={{ top: geo.sloY }}>
-            {copy.stage.slo(slo.p99Ms)}
+            {primary.thresholdLabel ?? copy.stage.slo(slo.p99Ms)}
           </span>
           <div
             ref={readoutRef}
@@ -67,10 +78,10 @@ export function HeartbeatLine() {
             }}
           >
             <span className={`${styles.errors} ${errorsHigh ? styles.errorsHigh : styles.errorsOk}`} data-testid="error-chip">
-              {copy.stage.errors(formatPercent(errorRate))}
+              {copy.stage.errors(formatPercent(errorRate), display.errorsLabel)}
             </span>
             <span className={`${styles.value} mono`} data-testid="latency">
-              {formatLatency(geo.head.value)}
+              {formatPrimary(geo.head.value, primary.format)}
             </span>
           </div>
           {lapse && (

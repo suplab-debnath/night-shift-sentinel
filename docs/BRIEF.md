@@ -22,18 +22,18 @@ It must leave the audience with three beliefs:
 - Slot length: 6–8 minutes for the demo, 10–15 minutes including the deck.
 
 ## 5. The story (summary; full script in SCENARIO.md)
-Fictional online retailer **Parcelo**. At 02:07 checkout latency spikes and errors climb. The squad:
+Fictional European life insurer **Nordhaven Life** (DECISIONS D-081). At 02:07 the nightly SEPA premium-collection run is projected to miss the bank's 05:30 cutoff: 48,600 premiums are due. The squad:
 
 | Act | Name | What the audience sees |
 |---|---|---|
-| 1 | Alert | Sentinel detects an SLO breach; the clock starts; the stage pulses red once |
+| 1 | Alert | Sentinel sees the projected finish cross the bank cutoff; the clock starts; the stage pulses red once |
 | 2 | Fan-out | Orchestrator plans and dispatches three specialists in parallel |
-| 3 | Diagnosis | Clues converge: pool exhaustion errors + a config change in last night's deploy |
-| 4 | Fix and guardrail | Fixer proposes a rollback; Guardian checks it against policy |
+| 3 | Diagnosis | Clues converge: one product fails + a duplicate rate row in last night's tariff release + a healthy database |
+| 4 | Fix and guardrail | Fixer proposes holding the 812 affected policies; Guardian checks it, including the actuarial rule |
 | 5 | Human in the loop | The demo pauses; the client taps Approve (or Reject → alternative fix) |
-| 6 | Recovery | Rollout progresses; the latency line falls back to green |
-| 7 | Wrap-up | Scribe drafts the status update and postmortem; scorecard vs. manual |
-| Finale | Chaos | An over-eager fix (restart the production database) is blocked by Guardian |
+| 6 | Recovery | The run resumes; projected finish drops back under the cutoff; the bank accepts the file |
+| 7 | Wrap-up | Fixer drafts a tested pull request; Scribe drafts the finance update and postmortem; scorecard vs. manual |
+| Finale | Chaos | An over-eager fix (delete tariff rows in production) is blocked by Guardian |
 
 ## 6. Cast
 Sentinel, Orchestrator, Log Detective, Code Archaeologist, Fixer, Guardian, Scribe — plus **the human on-call engineer**, who holds final authority. Full definitions in SCENARIO.md §2.

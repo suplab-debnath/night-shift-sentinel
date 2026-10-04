@@ -27,7 +27,9 @@ export function SplitView() {
   const from = parseClock(split.axis.from);
   const to = parseClock(split.axis.to);
   const pct = (clock: string) => ((parseClock(clock) - from) / (to - from)) * 100;
-  const ticks = Array.from({ length: 7 }, (_, i) => from + i * 600);
+  // Ticks every 10, 15, 30, or 60 minutes: whichever keeps the axis to seven labels at most (D-081).
+  const step = [600, 900, 1800, 3600].find((s) => (to - from) / s <= 6) ?? 3600;
+  const ticks = Array.from({ length: Math.floor((to - from) / step) + 1 }, (_, i) => from + i * step);
   const lanes = [
     { key: 'manual', title: copy.split.manual, entries: split.manual, tone: styles.manual },
     { key: 'squad', title: copy.split.squad, entries: squadLane, tone: styles.squad },

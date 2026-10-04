@@ -161,6 +161,13 @@ export const BeatLiveSchema = z.object({
   allowedTools: z.array(z.string()),
   validator: z.string().min(1),
   maxSentences: z.number().int().positive(),
+  /**
+   * Content rules for the "facts" validator (D-081): every group in `require` needs at least one
+   * of its words; no word in `forbid` may appear. Case-insensitive.
+   */
+  checks: z
+    .object({ require: z.array(z.array(z.string().min(1)).min(1)).default([]), forbid: z.array(z.string().min(1)).default([]) })
+    .optional(),
 });
 
 export const BeatSchema = z.object({
@@ -232,6 +239,33 @@ export const MomentSchema = z.object({
   sub: z.string().min(1).max(110).optional(),
 });
 
+/**
+ * How the stage presents this scenario's world (D-081): the primary metric on the heartbeat line
+ * (latency in ms, or a clock time in minutes after midnight), and the labels around it.
+ * Defaults reproduce the checkout incident.
+ */
+export const DisplaySchema = z
+  .object({
+    primary: z
+      .object({
+        label: z.string().default('p99 latency'),
+        format: z.enum(['latency', 'clock']).default('latency'),
+        scale: z.enum(['log', 'linear']).default('log'),
+        min: z.number().positive().default(100),
+        max: z.number().positive().default(6000),
+        /** Label on the threshold line; defaults to "SLO <p99Ms> ms". */
+        thresholdLabel: z.string().optional(),
+      })
+      .prefault({}),
+    errorsLabel: z.string().default('errors'),
+    impactLabel: z.string().default('Customer impact'),
+    channel: z.string().default('#inc-checkout-api'),
+    progressLabel: z.string().default('Rollout'),
+    /** Change-request references shown on the gate sheet, by gate id. */
+    changeRefs: z.record(z.string(), z.string()).default({ g1: 'CHG-24817', g2: 'CHG-24818' }),
+  })
+  .prefault({});
+
 export const MilestoneSchema = z.object({
   id: z.string().min(1),
   label: z.string().min(1),
@@ -263,6 +297,10 @@ export const ScenarioSchema = z.object({
   splitView: SplitViewSchema,
   /** The incident milestones on the operations bar (D-075). */
   milestones: z.array(MilestoneSchema).default([]),
+  /** Stage presentation of this world (D-081). */
+  display: DisplaySchema,
+  /** Facts given to live-mode agents as their whole world (D-081). */
+  liveFacts: z.array(z.string().min(1)).default([]),
   /** Stage banners for the big moments (D-080). */
   moments: z.array(MomentSchema).default([]),
   /** Customer impact: from a fixed story time until a milestone beat (D-075). */
@@ -302,6 +340,7 @@ export type SplitView = z.output<typeof SplitViewSchema>;
 export type Ending = z.output<typeof EndingSchema>;
 export type Milestone = z.output<typeof MilestoneSchema>;
 export type Moment = z.output<typeof MomentSchema>;
+export type Display = z.output<typeof DisplaySchema>;
 export type AgentDef = z.output<typeof AgentDefSchema>;
 export type AgentsFile = z.output<typeof AgentsSchema>;
 

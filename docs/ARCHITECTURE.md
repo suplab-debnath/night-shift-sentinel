@@ -33,7 +33,7 @@ The UI never branches on mode. It consumes one event stream (§4) from an `Event
                          │               ▼
                          │      Amazon Bedrock (Converse / ConverseStream)
                          ▼
-          packages/scenarios/incident-checkout (scenario.json, agents.json, fixtures)
+          packages/scenarios/premium-run (scenario.json, agents.json, fixtures)
 ```
 
 ## 3. Packages
@@ -49,7 +49,7 @@ Framework-free TypeScript. No DOM, no Node APIs.
 - `index.ts` — public API only.
 
 ### `packages/scenarios`
-- `incident-checkout/scenario.json`, `agents.json`, `fixtures/*.json`, `copy.json` (all agent lines).
+- `premium-run/scenario.json`, `agents.json`, `fixtures/*.json`, `copy.json` (all agent lines).
 - `index.ts` exports typed, validated scenarios. Future: `legacy-modernization/`, `rfp-response/`.
 
 ### `apps/web`
@@ -264,7 +264,7 @@ Viewer ─▶ CloudFront ─┬─ /*       ─▶ S3 (private, OAC)        stat
 
 ## 13. Adding a scenario
 
-1. Copy `packages/scenarios/incident-checkout` to a new folder.
+1. Copy `packages/scenarios/premium-run` to a new folder.
 2. Write the script in a new `docs/SCENARIO-<name>.md` following the same structure.
 3. Update `agents.json` (positions, hues may be reused), fixtures, policies, validators.
 4. Register it in `packages/scenarios/index.ts`; add a scenario picker entry (hidden unless `?scenario=` is set in v1).

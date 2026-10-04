@@ -1,4 +1,3 @@
-import { copy } from '../copy';
 import { AGENT_HUE } from '../lib/agents';
 import { activeMoment } from '../lib/moments';
 import { useApp } from '../state/store';
@@ -9,6 +8,7 @@ const SHOW_MS = 4500;
 
 /** The latest incident-channel post, briefly, unless the Channel tab is already open. */
 export function ChannelToast() {
+  const channel = useApp((s) => s.bundle.scenario.display.channel);
   const post = useApp((s) => {
     const last = s.snap.state.channel.at(-1);
     const gateOpen = s.snap.state.gate?.status === 'open';
@@ -22,7 +22,7 @@ export function ChannelToast() {
       <span className={styles.head}>
         <span className={styles.dot} style={post.agent ? { background: AGENT_HUE[post.agent] } : undefined} aria-hidden />
         {post.author}
-        <span className={`${styles.where} mono`}>{copy.panel.channelName}</span>
+        <span className={`${styles.where} mono`}>{channel}</span>
       </span>
       <span className={styles.text}>{post.text}</span>
     </div>

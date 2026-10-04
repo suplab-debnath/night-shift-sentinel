@@ -17,28 +17,9 @@ const DOC_RULES =
 export const TOKEN_RULES =
   'Times from tonight\'s run are placeholders in double braces, for example {{clock:a6.b03}} or {{hm:a6.b02}}. Copy every placeholder you use exactly, braces included; the stage fills in the real times. Never write a run time as digits.';
 
+/** The facts a live agent may use: the scenario's own list (DECISIONS D-081). */
 export function incidentFacts(bundle: ScenarioBundle): string {
-  const f = bundle.fixtures;
-  const m = f.metrics;
-  const d = f.deploys.deploys.find((x) => x.service === 'checkout-api');
-  const db = f.traces.dependencies.find((x) => x.service === 'orders-db') as Record<string, unknown> | undefined;
-  const dependents = f.services.services.filter((s) => s.dependsOn.includes('orders-db')).length;
-  return [
-    `Company: ${bundle.scenario.world.company}. Service: checkout-api (Java 21, Spring Boot 3, HikariCP), 6 pods.`,
-    `SLO: p99 latency at most ${m.slo.p99Ms} ms; error rate at most ${m.slo.errorRatePct}%.`,
-    `Normal: p99 ${m.normal.p99Ms} ms, errors ${m.normal.errorRatePct}%, pool active ${m.normal.poolActivePerPod} of ${m.normal.poolMaxPerPod} per pod.`,
-    `Peak: p99 ${m.peak.p99Ms / 1000} s, errors ${m.peak.errorRatePct}%, error budget burn ${m.peak.errorBudgetBurn} times normal.`,
-    // Times after the alert depend on the run (gate waits, pauses), so they are tokens, not facts (D-074).
-    `Times: v2.14.0 deployed 01:55, first errors ${m.events.firstErrors}, alert at about ${(m.events.alert ?? '02:07').slice(0, 5)}.`,
-    `Logs: ${f.logs.stats.errorCount.toLocaleString('en-US')} errors since 02:04; ${Math.round(f.logs.stats.signatureShare * 100)}% match "${f.logs.stats.signature}".`,
-    `Pool now: ${m.podsAt.pods[0]!.poolActive} of ${m.podsAt.pods[0]!.poolMax} active on every pod; ${m.podsAt.pendingTotal} threads waiting.`,
-    `orders-db: CPU ${db?.cpuPct}%, connections ${db?.connections} of ${db?.maxConnections}, healthy. ${dependents} services depend on orders-db.`,
-    d ? `Deploy: ${d.version} at ${d.at} by ${d.by}; previous ${d.previous} ran 9 days; schema migration: ${d.schemaMigration ? 'yes' : 'no'}.` : '',
-    `Diff: Helm values renamed ${f.diff.analysis.renamedKey.from} to ${f.diff.analysis.renamedKey.to}; the app still binds the old key, so HikariCP uses its default of ${f.diff.analysis.hikariDefaultPoolSize}. Production needs about ${f.diff.analysis.productionNeedsPerPod} per pod.`,
-    `Runbooks: RB-112 rollback (rolling, one pod at a time, about 3 min); RB-131 runtime override plus rolling restart, 48 h expiry.`,
-  ]
-    .filter(Boolean)
-    .join('\n');
+  return bundle.scenario.liveFacts.join('\n');
 }
 
 export function systemPrompt(opts: {

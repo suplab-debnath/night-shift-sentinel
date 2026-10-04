@@ -21,9 +21,9 @@ const SCREENS = path.join(here, 'assets/screens');
 
 const readJson = (p) => JSON.parse(readFileSync(path.join(root, p), 'utf8'));
 const branding = readJson('config/branding.json');
-const scenario = readJson('packages/scenarios/incident-checkout/scenario.json');
-const agentsFile = readJson('packages/scenarios/incident-checkout/agents.json');
-const policies = readJson('packages/scenarios/incident-checkout/fixtures/policies.json');
+const scenario = readJson('packages/scenarios/premium-run/scenario.json');
+const agentsFile = readJson('packages/scenarios/premium-run/agents.json');
+const policies = readJson('packages/scenarios/premium-run/fixtures/policies.json');
 
 for (const f of ['01-alert', '02-fanout', '03-evidence', '05-gate', '06-recovery', '09-chaos', '11-suspects', '12-pr', '13-audit', '14-inject']) {
   if (!existsSync(path.join(SCREENS, `${f}.png`))) {
@@ -276,7 +276,7 @@ async function executive() {
   const dawn = await dawnSky();
   const lock = await phone('lock');
   const app = await phone('app');
-  const metrics = readJson('packages/scenarios/incident-checkout/fixtures/metrics.json');
+  const metrics = readJson('packages/scenarios/premium-run/fixtures/metrics.json');
   const split = scenario.splitView;
   const PART1 = 'Part 1 · We push the code';
   const PART2 = 'Part 2 · The traditional night';
@@ -289,25 +289,25 @@ async function executive() {
     s.background = { data: night };
     text(s, `${ORG} for ${CLIENT}`, { x: M, y: 0.6, w: 8, h: 0.35, fontSize: 14, bold: true, color: N.ink2 });
     text(s, 'When the pager rings at 2 AM', { x: M, y: 1.85, w: 11, h: 1.9, fontFace: F.head, fontSize: 54, bold: true, color: N.ink });
-    text(s, 'One bad deploy. Two ways through the night.', { x: M, y: 3.85, w: 8.6, h: 0.6, fontSize: 24, color: N.ink2 });
+    text(s, 'One bad tariff. Two ways through the night.', { x: M, y: 3.85, w: 8.6, h: 0.6, fontSize: 24, color: N.ink2 });
     text(s, [{ text: PRESENTER, options: { breakLine: true } }, { text: DATE }], { x: M, y: 4.7, w: 8, h: 0.7, fontSize: 14, color: N.ink3 });
     s.addNotes(
-      "This is a story about one night and one bad deploy. First the way it usually goes. Then the same night again, with a squad of AI agents on call and a person still in charge. Then we'll talk about what it could mean for you.",
+      "This is a story about one night, one premium run, and one bad tariff update. First the way it usually goes. Then the same night again, with a squad of AI agents on call and a person still in charge. Then we'll talk about what it could mean for you.",
     );
   }
 
-  // 2. 01:55 — a small change ships, every check is green
+  // 2. 18:40 — a routine tariff update ships, every check is green
   {
     const s = pres.addSlide();
     s.background = { color: N.bg };
     kicker(s, PART1, N.amber);
-    stamp(s, '01:55');
-    nightTitle(s, 'A small change ships. Every check is green.', { x: M + 2.35, w: CW - 2.35 });
+    stamp(s, '18:40');
+    nightTitle(s, 'A routine tariff update ships. Every check is green.', { x: M + 2.35, w: CW - 2.35 });
     const steps = [
-      ['GitCommitHorizontal', 'Commit', 'Helm values refactor', N.blue],
+      ['GitCommitHorizontal', 'Commit', 'October tariff refresh', N.blue],
       ['Package', 'Build', 'Passed', N.green],
-      ['FlaskConical', 'Tests and checks', 'All passed', N.green],
-      ['Rocket', 'Deploy v2.14.0', '6 of 6 pods ready', N.green],
+      ['FlaskConical', 'Validation', 'Schema and row counts passed', N.green],
+      ['Rocket', 'Deploy', 'rating-tables v2026.10', N.green],
     ];
     const gap = 0.45;
     const cw = (CW - 3 * gap) / 4;
@@ -318,63 +318,70 @@ async function executive() {
       await iconDisc(s, ic, x + 0.3, 2.35, 0.7, hue === N.blue ? C.signal : C.ok);
       if (i > 0) await iconDisc(s, 'Check', x + cw - 0.62, 2.28, 0.4, C.ok);
       text(s, head, { x: x + 0.3, y: 3.2, w: cw - 0.5, h: 0.4, fontSize: 18, bold: true, color: N.ink });
-      text(s, sub, { x: x + 0.3, y: 3.6, w: cw - 0.5, h: 0.35, fontSize: 14, color: hue === N.green ? N.green : N.ink2 });
+      text(s, sub, { x: x + 0.3, y: 3.6, w: cw - 0.5, h: 0.4, fontSize: 14, color: hue === N.green ? N.green : N.ink2 });
       if (i < steps.length - 1) arrow(s, x + cw + 0.06, 3.1, x + cw + gap - 0.06, 3.1, N.ink3);
     }
     s.addShape('roundRect', { x: M, y: 4.5, w: CW, h: 1.55, rectRadius: 0.1, fill: { color: N.code }, line: { color: N.line, width: 1 } });
-    text(s, 'deploy/helm/values-prod.yaml', { x: M + 0.3, y: 4.62, w: 6, h: 0.3, fontFace: F.mono, fontSize: 12, color: N.ink3 });
+    text(s, 'tariffs/TP20.csv  ·  product, age from, age to, effective from, rate per mille', { x: M + 0.3, y: 4.62, w: CW - 0.6, h: 0.3, fontFace: F.mono, fontSize: 12, color: N.ink3 });
     text(s, [
-      { text: '-  SPRING_DATASOURCE_HIKARI_MAXIMUMPOOLSIZE: "40"', options: { color: N.red, breakLine: true } },
-      { text: '+  DB_POOL_MAX: "40"', options: { color: N.green } },
+      { text: '+  TP20,40,44,2026-10-01,1.91', options: { color: N.green, breakLine: true } },
+      { text: '+  TP20,40,44,2026-10-01,1.97', options: { color: N.green } },
     ], { x: M + 0.3, y: 5.0, w: CW - 0.6, h: 0.9, fontFace: F.mono, fontSize: 18 });
-    text(s, 'One setting was renamed. The app still reads the old name. Nothing fails. Yet.', {
+    text(s, 'Two October rates for the same age band. Nothing reads them until October. Nothing fails. Yet.', {
       x: M, y: 6.3, w: CW, h: 0.45, fontSize: 18, bold: true, color: N.amber,
     });
     s.addNotes(
-      'Friday night, 01:55. A routine release goes out: a tidy-up of the deployment settings. Build green, tests green, six of six pods healthy. But one setting was renamed, and the application still reads the old name. Nothing breaks yet, so nobody notices.',
+      'Evening, 18:40. A routine tariff update goes out for October. Build green, validation green. But two rows give two different rates for the same age band. Nothing reads October rates until tonight, so nobody notices.',
     );
   }
 
-  // 3. 02:04 — traffic doubles, checkout starts failing
+  // 3. 01:52 — the premium run starts failing
   {
     const s = pres.addSlide();
     s.background = { color: N.bg };
     kicker(s, PART1, N.amber);
-    stamp(s, '02:04');
-    nightTitle(s, 'Traffic doubles. Checkout starts failing.', { x: M + 2.35, w: CW - 2.35 });
-    const series = metrics.series.filter((p) => p.t >= '01:58:00' && p.t <= '02:07:00');
+    stamp(s, '01:52');
+    nightTitle(s, 'The nightly premium run starts failing.', { x: M + 2.35, w: CW - 2.35 });
+    const series = metrics.series.filter((p) => p.t >= '01:40:00' && p.t <= '02:07:00');
+    const labels = series.map((p) => p.t.slice(0, 5));
+    const hours = (min) => Math.round((min / 60) * 100) / 100;
     s.addChart(
       pres.charts.LINE,
-      [{ name: 'p99 latency (s)', labels: series.map((p) => (p.t.endsWith(':00') ? p.t.slice(0, 5) : '')), values: series.map((p) => Math.round(p.p99Ms / 100) / 10) }],
+      [
+        { name: 'Projected finish', labels, values: series.map((p) => hours(p.projectedFinish)) },
+        { name: 'Bank cutoff 05:30', labels, values: series.map(() => 5.5) },
+      ],
       {
-        x: M, y: 1.95, w: 7.9, h: 4.15, chartColors: [N.red], lineSize: 3, lineDataSymbol: 'none',
-        showTitle: true, title: 'p99 latency, seconds (target: under 0.8 s)', titleFontFace: F.body, titleFontSize: 14, titleColor: N.ink2,
-        showLegend: false, catAxisLabelColor: N.ink3, catAxisLabelFontSize: 11, catAxisLabelFrequency: 1, valAxisLabelColor: N.ink3, valAxisLabelFontSize: 11,
-        valGridLine: { color: N.line, size: 0.75 }, catGridLine: { style: 'none' }, valAxisMinVal: 0, valAxisMaxVal: 5,
+        x: M, y: 1.95, w: 7.9, h: 4.15, chartColors: [N.red, N.amber], lineSize: 3, lineDataSymbol: 'none',
+        showTitle: true, title: 'Projected finish of the premium run (hour of the night)', titleFontFace: F.body, titleFontSize: 14, titleColor: N.ink2,
+        showLegend: true, legendPos: 'b', legendFontFace: F.body, legendFontSize: 11, legendColor: N.ink2,
+        catAxisLabelColor: N.ink3, catAxisLabelFontSize: 11, valAxisLabelColor: N.ink3, valAxisLabelFontSize: 11, valAxisLabelFormatCode: '0":00"',
+        valGridLine: { color: N.line, size: 0.75 }, catGridLine: { style: 'none' }, valAxisMinVal: 1, valAxisMaxVal: 8, valAxisMajorUnit: 1,
         catAxisLineColor: N.line, valAxisLineShow: false,
       },
     );
-    chip(s, '02:03  promo email: traffic ×2.4', M, 6.3, 3.6, N.amber, N.bg);
-    chip(s, '02:04  first timeouts', M + 3.8, 6.3, 2.5, N.red, N.bg);
-    // A customer's phone at checkout
+    chip(s, '01:30  premium run starts', M, 6.3, 2.9, N.amber, N.bg);
+    chip(s, '01:52  first rating failures', M + 3.1, 6.3, 3.0, N.red, N.bg);
+    // What a policyholder sees if the file misses the bank cutoff
     const px = 9.45;
     const py = 1.75;
     const pw = 2.6;
     s.addImage({ data: app, x: px, y: py, w: pw, h: pw * 2 });
-    text(s, 'Parcelo', { x: px + 0.3, y: py + 0.55, w: pw - 0.6, h: 0.35, fontSize: 15, bold: true, color: C.ink });
-    text(s, 'Checkout', { x: px + 0.3, y: py + 0.9, w: pw - 0.6, h: 0.3, fontSize: 11, color: C.ink2 });
+    text(s, 'Nordhaven Life', { x: px + 0.3, y: py + 0.55, w: pw - 0.6, h: 0.35, fontSize: 15, bold: true, color: C.ink });
+    text(s, 'My policy', { x: px + 0.3, y: py + 0.9, w: pw - 0.6, h: 0.3, fontSize: 11, color: C.ink2 });
     for (let i = 0; i < 3; i++) {
       s.addShape('roundRect', { x: px + 0.3, y: py + 1.4 + i * 0.42, w: pw - 0.6, h: 0.3, rectRadius: 0.06, fill: { color: 'E6EAF0' }, line: { color: 'E6EAF0', width: 0 } });
     }
-    s.addShape('roundRect', { x: px + 0.25, y: py + 2.85, w: pw - 0.5, h: 1.0, rectRadius: 0.1, fill: { color: C.alertWash }, line: { color: C.alert, width: 1 } });
-    text(s, 'Payment failed', { x: px + 0.4, y: py + 2.95, w: pw - 0.8, h: 0.35, fontSize: 14, bold: true, color: C.alert });
-    text(s, 'Something went wrong. Please try again.', { x: px + 0.4, y: py + 3.3, w: pw - 0.8, h: 0.45, fontSize: 10, color: C.ink2 });
-    s.addText('Try again', {
-      shape: 'roundRect', rectRadius: 0.5, x: px + 0.3, y: py + 4.2, w: pw - 0.6, h: 0.45, fontFace: F.body, fontSize: 12, bold: true,
+    s.addShape('roundRect', { x: px + 0.25, y: py + 2.85, w: pw - 0.5, h: 1.2, rectRadius: 0.1, fill: { color: C.alertWash }, line: { color: C.alert, width: 1 } });
+    text(s, 'Payment not collected', { x: px + 0.4, y: py + 2.95, w: pw - 0.8, h: 0.35, fontSize: 13, bold: true, color: C.alert });
+    text(s, 'We could not collect your October premium. Please check your bank details.', { x: px + 0.4, y: py + 3.3, w: pw - 0.8, h: 0.7, fontSize: 10, color: C.ink2 });
+    s.addText('Update payment', {
+      shape: 'roundRect', rectRadius: 0.5, x: px + 0.3, y: py + 4.25, w: pw - 0.6, h: 0.45, fontFace: F.body, fontSize: 12, bold: true,
       color: C.white, fill: { color: C.ink }, line: { color: C.ink, width: 0 }, align: 'center', valign: 'middle', margin: 0, isTextBox: true,
     });
+    text(s, 'If the file misses the 05:30 cutoff', { x: px - 0.2, y: py + pw * 2 + 0.05, w: pw + 0.4, h: 0.3, fontSize: 11, italic: true, color: N.ink3, align: 'center' });
     s.addNotes(
-      "At 02:03 a promo email goes out and traffic more than doubles. The smaller connection pool can't keep up. From 02:04, customers trying to pay start seeing this. Nobody is awake to see it.",
+      'At 01:30 the nightly premium run starts: 48,600 direct debits, about 6.1 million euros, due at the bank by 05:30. From 01:52 the first October records hit the duplicate rate and fail. Every failure retries, the run slows to a crawl, and the projected finish slides past the cutoff. Miss it, and policyholders get this message instead of cover.',
     );
   }
 
@@ -393,22 +400,22 @@ async function executive() {
     text(s, '2:07', { x: px, y: py + 0.75, w: pw, h: 0.9, fontSize: 46, color: N.ink, align: 'center' });
     s.addShape('roundRect', { x: px + 0.25, y: py + 2.2, w: pw - 0.5, h: 1.45, rectRadius: 0.14, fill: { color: 'FFFFFF', transparency: 8 }, line: { color: 'FFFFFF', width: 0 } });
     text(s, 'PAGER · now', { x: px + 0.42, y: py + 2.32, w: pw - 0.8, h: 0.28, fontSize: 9, bold: true, color: C.ink3 });
-    text(s, 'SEV-2 · checkout-api', { x: px + 0.42, y: py + 2.6, w: pw - 0.8, h: 0.35, fontSize: 13, bold: true, color: C.alert });
-    text(s, 'p99 4.8 s · errors 11.4%. Acknowledge within 5 minutes.', { x: px + 0.42, y: py + 2.95, w: pw - 0.8, h: 0.6, fontSize: 10, color: C.ink });
-    s.addNotes('02:07. The SLO alert fires and pages the on-call engineer. It is two in the morning. Let\'s follow what usually happens next.');
+    text(s, 'SEV-2 · premium-collection', { x: px + 0.42, y: py + 2.6, w: pw - 0.8, h: 0.35, fontSize: 12, bold: true, color: C.alert });
+    text(s, 'Projected finish 06:52 · bank cutoff 05:30. Acknowledge within 5 minutes.', { x: px + 0.42, y: py + 2.95, w: pw - 0.8, h: 0.6, fontSize: 10, color: C.ink });
+    s.addNotes('02:07. The batch monitor sees the run will miss the bank cutoff and pages the on-call engineer. It is two in the morning. Let\'s follow what usually happens next.');
   }
 
-  // 5. 02:07 → 02:19 — wake up, log in, find the dashboards
+  // 5. 02:07 → 02:25 — wake up, log in, find the job
   {
     const s = pres.addSlide();
     s.background = { color: N.bg };
     kicker(s, PART2, N.amber);
-    stamp(s, '02:19');
-    nightTitle(s, 'Twelve minutes before anyone looks at the data.', { x: M + 2.35, w: CW - 2.35 });
+    stamp(s, '02:25');
+    nightTitle(s, 'Eighteen minutes before anyone looks at the job.', { x: M + 2.35, w: CW - 2.35 });
     const steps = [
       ['BellRing', split.manual[0], 'Asleep. The phone buzzes, then buzzes again.'],
       ['Smartphone', split.manual[1], 'Finds the phone, reads the alert, acknowledges.'],
-      ['Laptop', split.manual[2], 'Laptop, VPN, sign-in. Which dashboard was it?'],
+      ['Laptop', split.manual[2], 'Laptop, VPN, jump host. Which log was it?'],
     ];
     const gap = 0.5;
     const cw = (CW - 2 * gap) / 3;
@@ -422,32 +429,32 @@ async function executive() {
       text(s, entry.label, { x: x + 0.3, y: 3.5, w: cw - 0.6, h: 0.8, fontSize: 20, bold: true, color: N.ink });
       text(s, body, { x: x + 0.3, y: 4.35, w: cw - 0.6, h: 1.0, fontSize: 15, color: N.ink2 });
     }
-    text(s, 'Meanwhile, customers keep failing to pay.', { x: M, y: 6.0, w: CW, h: 0.45, fontSize: 18, bold: true, color: N.red });
+    text(s, 'Meanwhile, 48,600 premiums wait and the cutoff gets closer.', { x: M, y: 6.0, w: CW, h: 0.45, fontSize: 18, bold: true, color: N.red });
     dramatization(s);
     s.addNotes(
-      "The first twelve minutes are the human part nobody puts in a diagram: waking up, finding the phone, getting onto the VPN, remembering which dashboard to open. All while customers can't pay.",
+      "The first eighteen minutes are the human part nobody puts in a diagram: waking up, finding the phone, getting onto the VPN and the batch server, finding the right log. All while the clock runs toward the bank cutoff.",
     );
   }
 
-  // 6. 02:27 — the war room fills up
+  // 6. 02:41 — the war room fills up
   {
     const s = pres.addSlide();
     s.background = { color: N.bg };
     kicker(s, PART2, N.amber);
-    stamp(s, '02:27');
+    stamp(s, '02:41');
     nightTitle(s, 'The war room fills up.', { x: M + 2.35, w: CW - 2.35 });
     const chatW = 7.6;
     darkCard(s, M, 1.9, chatW, 4.95, N.panel);
-    text(s, '# inc-checkout', { x: M + 0.3, y: 2.02, w: 4, h: 0.3, fontFace: F.mono, fontSize: 12, color: N.ink3 });
+    text(s, '# inc-premium-run', { x: M + 0.3, y: 2.02, w: 4, h: 0.3, fontFace: F.mono, fontSize: 12, color: N.ink3 });
     const msgs = [
-      ['OC', 'On-call engineer', '02:27', 'Seeing connection timeouts on checkout. Paging the DBA.', 'C2410C'],
-      ['DB', 'Database admin', '02:31', 'Database CPU is 22%. Connections look normal. Not us.', '7A4FD6'],
-      ['PL', 'Platform engineer', '02:33', 'No infrastructure changes tonight. Nodes are healthy.', '0A8BA8'],
-      ['EM', 'Engineering manager', '02:35', 'Customers are affected. Any ETA?', '6E7A8D'],
-      ['OC', 'On-call engineer', '02:36', 'Pasted the stack trace into a public AI chatbot. It says add DB connections.', 'C2410C'],
-      ['OC', 'On-call engineer', '02:37', 'Did anything ship in the last day?', 'C2410C'],
-      ['RM', 'Release manager', '02:40', 'checkout-api v2.14.0 at 01:55. All checks passed.', 'B0306E'],
-      ['AD', 'App developer', '02:44', 'Found it. The pool-size key was renamed in the Helm chart.', '138A5A'],
+      ['OC', 'On-call engineer', '02:41', 'The batch is crawling. Rating lookups keep retrying. Paging the DBA.', 'C2410C'],
+      ['DB', 'Database admin', '02:47', 'policy-db CPU is 18%. Queries are fast. Not us.', '7A4FD6'],
+      ['AT', 'Application team', '02:58', 'No change to premium-collection this week.', '0A8BA8'],
+      ['FO', 'Finance operations', '03:10', 'Will the file make the 05:30 cutoff?', '6E7A8D'],
+      ['OC', 'On-call engineer', '03:22', 'Pasted failing policy records into a public AI chatbot. It says raise the retry limit.', 'C2410C'],
+      ['OC', 'On-call engineer', '03:30', 'Did anything ship yesterday?', 'C2410C'],
+      ['RM', 'Release manager', '03:52', 'rating-tables v2026.10 at 18:40. All checks passed.', 'B0306E'],
+      ['PA', 'Pricing analyst', '04:15', 'Found it. TP20 has two October rates for ages 40 to 44.', '138A5A'],
     ];
     msgs.forEach(([ini, who, when, what, hue], i) => {
       const y = 2.42 + i * 0.555;
@@ -464,15 +471,15 @@ async function executive() {
     });
     const rx = M + chatW + 0.5;
     const rw = W - M - rx;
-    text(s, 'Six people', { x: rx, y: 2.1, w: rw, h: 0.9, fontFace: F.head, fontSize: 44, bold: true, color: N.ink });
-    text(s, 'woken across six teams', { x: rx, y: 3.0, w: rw, h: 0.45, fontSize: 18, color: N.ink2 });
-    const team = [['UserRound', 'C2410C'], ['Database', '7A4FD6'], ['Server', '0A8BA8'], ['Briefcase', '6E7A8D'], ['GitBranch', 'B0306E'], ['Code', '138A5A']];
+    text(s, 'Five people', { x: rx, y: 2.1, w: rw, h: 0.9, fontFace: F.head, fontSize: 44, bold: true, color: N.ink });
+    text(s, 'woken, and finance waiting', { x: rx, y: 3.0, w: rw, h: 0.45, fontSize: 18, color: N.ink2 });
+    const team = [['UserRound', 'C2410C'], ['Database', '7A4FD6'], ['Server', '0A8BA8'], ['Landmark', '6E7A8D'], ['GitBranch', 'B0306E'], ['Calculator', '138A5A']];
     for (let i = 0; i < team.length; i++) await iconDisc(s, team[i][0], rx + (i % 3) * 0.72, 3.7 + Math.floor(i / 3) * 0.72, 0.58, team[i][1]);
     text(s, 'Each person checks their own piece. Nobody sees the whole picture.', { x: rx, y: 5.05, w: rw, h: 0.8, fontSize: 15, color: N.amber, bold: true });
-    text(s, '02:36 Production logs just left the company. Shadow AI, at 2 AM.', { x: rx, y: 5.95, w: rw, h: 0.8, fontSize: 15, color: N.red, bold: true });
+    text(s, '03:22 Policyholder data just left the company. Shadow AI, at 3 AM.', { x: rx, y: 5.95, w: rw, h: 0.8, fontSize: 15, color: N.red, bold: true });
     dramatization(s);
     s.addNotes(
-      'By 02:27 the war room is filling up. The DBA says it is not the database. Platform says nothing changed. A manager asks for an ETA. It takes until 02:40 for someone to connect the release at 01:55, and until 02:44 to find the renamed key. Six people woken up, each checking their own piece.',
+      'By 02:41 the war room is filling up. The DBA says it is not the database. The application team says nothing changed. Finance asks whether the file will make the cutoff. It takes until 03:52 for someone to connect the tariff release at 18:40, and until 04:15 for a pricing analyst to find the duplicate rate. Five people woken up, finance waiting, each checking their own piece.',
     );
   }
 
@@ -481,22 +488,22 @@ async function executive() {
     const s = pres.addSlide();
     s.background = { color: N.bg };
     kicker(s, PART2, N.amber);
-    stamp(s, '02:29–02:44', { w: 4.2, size: 32 });
+    stamp(s, '02:41–04:15', { w: 4.2, size: 32 });
     nightTitle(s, 'Page, wait, check, hand off. Repeat.', { x: M + 4.1, w: CW - 4.1, size: 28 });
     const cx = W / 2;
     const cy = 4.25;
     const people = [
-      ['Database', '7A4FD6', 'Database admin', 'paged 02:29', '“Not the database.”', -4.1, -1.35],
-      ['Server', '0A8BA8', 'Platform engineer', 'paged 02:31', '“No infra changes.”', 4.1, -1.35],
-      ['Briefcase', '6E7A8D', 'Engineering manager', 'joins 02:35', '“Any ETA?”', -4.1, 1.35],
-      ['GitBranch', 'B0306E', 'Release manager', 'paged 02:38', '“v2.14.0 at 01:55.”', 4.1, 1.35],
-      ['Code', '138A5A', 'App developer', 'paged 02:39 · found it 02:44', '“A key was renamed.”', 0, 2.05],
+      ['Database', '7A4FD6', 'Database admin', 'paged 02:41', '“Not the database.”', -4.1, -1.35],
+      ['Server', '0A8BA8', 'Application team', 'paged 02:52', '“No change this week.”', 4.1, -1.35],
+      ['Landmark', '6E7A8D', 'Finance operations', 'joins 03:10', '“Will we make 05:30?”', -4.1, 1.35],
+      ['GitBranch', 'B0306E', 'Release manager', 'paged 03:35', '“v2026.10 at 18:40.”', 4.1, 1.35],
+      ['Calculator', '138A5A', 'Pricing analyst', 'paged 03:58 · found 04:15', '“Two rates, one age band.”', 0, 2.05],
     ];
     for (const [, , , , , dx, dy] of people) s.addShape('line', { x: Math.min(cx, cx + dx), y: Math.min(cy, cy + dy), w: Math.abs(dx) || 0.001, h: Math.abs(dy) || 0.001, flipH: dx < 0, flipV: dy < 0, line: { color: N.line, width: 1.5, dashType: 'dash' } });
     await iconDisc(s, 'UserRound', cx - 0.6, cy - 0.6, 1.2, 'C2410C');
     text(s, 'On-call engineer', { x: cx - 1.5, y: cy + 0.65, w: 3, h: 0.35, fontSize: 14, bold: true, color: N.ink, align: 'center' });
     for (const [ic, hue, role, when, quote, dx, dy] of people) {
-      const bw = 3.3;
+      const bw = 3.6;
       const bx = cx + dx - bw / 2;
       const by = cy + dy - 0.55;
       darkCard(s, bx, by, bw, 1.1, N.panel2);
@@ -513,27 +520,28 @@ async function executive() {
     );
   }
 
-  // 8. 02:55 — recovered, 48 minutes later
+  // 8. 06:10 — the file goes out after the cutoff
   {
     const s = pres.addSlide();
     s.background = { color: N.bg };
     kicker(s, PART2, N.amber);
-    stamp(s, '02:55');
-    nightTitle(s, 'Recovered. 48 minutes after the alert.', { x: M + 2.35, w: CW - 2.35 });
+    stamp(s, '06:10');
+    nightTitle(s, 'The file goes out. Forty minutes too late.', { x: M + 2.35, w: CW - 2.35 });
     const ax = M + 0.2;
     const aw = CW - 0.4;
     const t0 = clockMin('02:00');
-    const t1 = clockMin('03:00');
+    const t1 = clockMin('06:30');
     const X = (c) => ax + ((clockMin(c) - t0) / (t1 - t0)) * aw;
     const ay = 3.6;
-    s.addShape('rect', { x: X('02:04'), y: ay - 0.5, w: X('02:55') - X('02:04'), h: 0.32, fill: { color: N.red, transparency: 15 }, line: { color: N.red, width: 0 } });
-    text(s, 'Customers affected  02:04–02:55', { x: X('02:04') + 0.1, y: ay - 0.5, w: 4, h: 0.32, fontSize: 11, bold: true, color: N.ink, valign: 'middle', margin: 0 });
+    s.addShape('rect', { x: X('02:00'), y: ay - 0.5, w: X('06:10') - X('02:00'), h: 0.32, fill: { color: N.red, transparency: 15 }, line: { color: N.red, width: 0 } });
+    text(s, 'Collection at risk  01:52–06:10', { x: X('02:00') + 0.1, y: ay - 0.5, w: 4, h: 0.32, fontSize: 11, bold: true, color: N.ink, valign: 'middle', margin: 0 });
+    s.addShape('line', { x: X('05:30'), y: ay - 0.75, w: 0, h: 1.2, line: { color: N.amber, width: 2, dashType: 'dash' } });
+    text(s, 'Bank cutoff 05:30', { x: X('05:30') + 0.1, y: ay + 0.2, w: 1.5, h: 0.28, fontSize: 11, bold: true, color: N.amber });
     s.addShape('line', { x: ax, y: ay, w: aw, h: 0, line: { color: N.ink3, width: 1.5 } });
-    split.manual.forEach((e, i) => {
+    split.manual.filter((_, i) => [0, 3, 5, 6, 7].includes(i)).forEach((e, i) => {
       const x = X(e.clock);
       s.addShape('ellipse', { x: x - 0.08, y: ay - 0.08, w: 0.16, h: 0.16, fill: { color: N.amber }, line: { color: N.bg, width: 1 } });
-      const up = i % 2 === 1;
-      s.addShape('line', { x, y: up ? ay - 0.06 : ay + 0.08, w: 0, h: 0.001, line: { color: N.bg, width: 0 } });
+      const up = [1, 3, 4].includes(i);
       text(s, [{ text: e.clock, options: { fontFace: F.mono, color: N.amber, breakLine: true } }, { text: e.label, options: { color: N.ink2 } }], {
         x: x - 0.8, y: up ? ay - 1.55 - 0.1 : ay + 0.2, w: 1.6, h: 0.95, fontSize: 11, align: 'center', valign: up ? 'bottom' : 'top',
       });
@@ -548,7 +556,7 @@ async function executive() {
     });
     text(s, FOOTNOTE, { x: M, y: 6.95, w: CW, h: 0.3, fontSize: 11, italic: true, color: N.ink3 });
     s.addNotes(
-      'Rollback approved at 02:49, recovery confirmed at 02:55. Forty-eight minutes from alert to fix, most of it spent finding the right people and the right facts. These numbers are illustrative; in a pilot we would use your own incident history.',
+      'The duty actuary approves a rerun at 04:55, and the file reaches the bank at 06:10, forty minutes after the cutoff. 48,600 premiums are collected a day late, with the letters, calls and lapse checks that follow. These numbers are illustrative; in a pilot we would use your own incident history.',
     );
   }
 
@@ -558,9 +566,9 @@ async function executive() {
     s.background = { data: night };
     await iconDisc(s, 'RotateCcw', W / 2 - 0.6, 0.95, 1.2, C.signal);
     text(s, 'Rewind.', { x: M, y: 2.35, w: CW, h: 1.3, fontFace: F.head, fontSize: 72, bold: true, color: N.ink, align: 'center' });
-    text(s, 'Same deploy. Same night. Same alert at 02:07.', { x: M, y: 3.75, w: CW, h: 0.6, fontSize: 26, color: N.ink2, align: 'center' });
+    text(s, 'Same release. Same night. Same alert at 02:07.', { x: M, y: 3.75, w: CW, h: 0.6, fontSize: 26, color: N.ink2, align: 'center' });
     text(s, 'This time a squad of AI agents is on call, and a person still decides.', { x: M, y: 4.45, w: CW, h: 0.55, fontSize: 20, bold: true, color: N.amber, align: 'center' });
-    s.addNotes("Now let's rewind to 02:07. Same bad deploy, same alert. This time a squad of AI agents takes the first shift, and a person still makes every production decision.");
+    s.addNotes("Now let's rewind to 02:07. Same bad tariff, same alert. This time a squad of AI agents takes the first shift, and a person still makes every production decision.");
   }
 
   // 10. Meet the squad
@@ -627,7 +635,7 @@ async function executive() {
       ['11-suspects', 'Suspects checked and ruled out'],
       ['03-evidence', 'Root cause, with a confidence score'],
       ['05-gate', 'A person approves the fix'],
-      ['06-recovery', 'Recovered, one pod at a time'],
+      ['06-recovery', 'Back on schedule, file accepted'],
     ];
     const fw = (CW - 2 * 0.3) / 3;
     const fh = (fw * 1080) / 1920;
@@ -654,9 +662,9 @@ async function executive() {
     const rx = M + sw + 0.4;
     const rw = W - M - rx;
     const threads = [
-      ['log-detective', '“First suspect: the database is overloaded.”', 'sentinel', 'orders-db at 22% CPU. Not the cause.'],
-      ['code-archaeologist', '“The Spring Boot upgrade is the usual suspect.”', 'code-archaeologist', 'Patch release, same HikariCP. Ruled out.'],
-      ['orchestrator', '“Why did it break at 02:04, not 01:55?”', 'orchestrator', 'Traffic is the trigger. The pool cut to 10 is the cause.'],
+      ['log-detective', '“First suspect: the policy database is overloaded.”', 'sentinel', 'policy-db at 18% CPU. Not the cause.'],
+      ['code-archaeologist', '“The PostgreSQL driver patch is the usual suspect.”', 'code-archaeologist', 'Patch release, no behaviour change. Ruled out.'],
+      ['orchestrator', '“Why tonight, when the tables shipped at 18:40?”', 'orchestrator', 'October is the trigger. The duplicate rate is the cause.'],
     ];
     const agentName = (id) => agentsFile.agents.find((a) => a.id === id)?.name ?? id;
     for (let i = 0; i < threads.length; i++) {
@@ -704,7 +712,7 @@ async function executive() {
     const sw = (CW - 0.5) / 2;
     const cols = [
       ['12-pr', 'GitPullRequestDraft', C.signal, 'The permanent fix goes through your pipeline', 'A draft pull request with tests that would have caught the bad release. The agent cannot merge; a person reviews.'],
-      ['14-inject', 'FileWarning', C.caution, 'Untrusted text is data, not orders', 'A log line that tries to instruct the agents is flagged and quarantined. Nothing runs.'],
+      ['14-inject', 'FileWarning', C.caution, 'Untrusted text is data, not orders', 'A policyholder note that tries to instruct the agents is flagged and quarantined. Nothing runs.'],
     ];
     for (let i = 0; i < cols.length; i++) {
       const [file, ic, hue, head, body] = cols[i];
@@ -749,47 +757,56 @@ async function executive() {
     s.background = { color: C.white };
     lightTitle(s, 'Same night, two timelines', PART4, { w: CW - 1.6 });
     illustrativeTag(s, W - M - 1.3, 0.8);
-    const lx = M + 2.0;
-    const lw = W - M - lx - 0.2;
-    const t0 = clockMin('02:00');
-    const t1 = clockMin('03:00');
+    const lx = M + 2.2;
+    const lw = W - M - lx - 0.3;
+    const t0 = clockMin(split.axis.from);
+    const t1 = clockMin(split.axis.to);
     const X = (c) => lx + ((clockMin(c) - t0) / (t1 - t0)) * lw;
+    const cutoff = '05:30';
+    s.addShape('line', { x: X(cutoff), y: 1.85, w: 0, h: 4.6, line: { color: C.caution, width: 1.5, dashType: 'dash' } });
+    text(s, 'Bank cutoff 05:30', { x: X(cutoff) - 1.7, y: 1.75, w: 1.6, h: 0.3, fontSize: 11, bold: true, color: C.caution, align: 'right' });
     const lanes = [
-      { name: 'Manual response', y: 3.0, color: C.ink3, end: '02:55', span: '48 min', entries: split.manual.filter((_, i) => [0, 2, 4, 6, 7].includes(i)) },
-      { name: 'Agent squad', y: 5.35, color: C.signal, end: '02:11', span: '4 min', entries: split.squad.filter((_, i) => [0, 1, 4].includes(i)) },
+      { name: 'Manual response', y: 3.25, color: C.ink3, end: '04:55', span: '2 h 48 min', entries: split.manual.filter((_, i) => [0, 3, 5, 6, 7].includes(i)) },
+      { name: 'Agent squad', y: 5.45, color: C.signal, end: '02:11', span: '4 min', entries: split.squad.filter((_, i) => [0, 4, 5].includes(i)) },
     ];
     for (const lane of lanes) {
-      text(s, lane.name, { x: M, y: lane.y - 0.22, w: 1.9, h: 0.45, fontSize: 16, bold: true, color: lane.color === C.signal ? C.signal : C.ink });
+      const squad = lane.color === C.signal;
+      text(s, lane.name, { x: M, y: lane.y - 0.42, w: 2.0, h: 0.4, fontSize: 16, bold: true, color: squad ? C.signal : C.ink });
+      text(s, lane.span, { x: M, y: lane.y - 0.02, w: 2.0, h: 0.5, fontFace: F.head, fontSize: 24, bold: true, color: squad ? C.signal : C.ink });
+      text(s, 'to mitigate', { x: M, y: lane.y + 0.45, w: 2.0, h: 0.3, fontSize: 11, color: C.ink3 });
       s.addShape('line', { x: lx, y: lane.y, w: lw, h: 0, line: { color: C.line, width: 1.5 } });
-      s.addShape('rect', { x: X('02:07'), y: lane.y - 0.14, w: X(lane.end) - X('02:07'), h: 0.28, fill: { color: lane.color }, line: { color: lane.color, width: 0 } });
-      text(s, lane.span, { x: X(lane.end) + 0.12, y: lane.y - 0.3, w: 1.8, h: 0.6, fontFace: F.head, fontSize: 28, bold: true, color: lane.color === C.signal ? C.signal : C.ink, valign: 'middle' });
-      if (lane.span === '4 min') {
+      s.addShape('rect', { x: X('02:07'), y: lane.y - 0.14, w: Math.max(X(lane.end) - X('02:07'), 0.12), h: 0.28, fill: { color: lane.color }, line: { color: lane.color, width: 0 } });
+      if (squad) {
         // The squad's milestones sit too close together to label on the axis.
+        const last = lane.entries.at(-1);
+        s.addShape('ellipse', { x: X(last.clock) - 0.09, y: lane.y - 0.09, w: 0.18, h: 0.18, fill: { color: C.ok }, line: { color: C.white, width: 1 } });
         text(s, lane.entries.map((e, i) => ({ text: `${e.clock.slice(0, 5)}  ${e.label}`, options: { breakLine: i < lane.entries.length - 1 } })), {
-          x: X(lane.end) + 1.6, y: lane.y + 0.2, w: 4.2, h: 0.8, fontSize: 11, valign: 'top', color: C.ink2,
+          x: X(last.clock) + 0.3, y: lane.y - 0.2, w: 3.6, h: 0.8, fontSize: 12, valign: 'top', color: C.ink2,
         });
         continue;
       }
       lane.entries.forEach((e, i) => {
         const x = X(e.clock);
         const up = i % 2 === 0;
-        text(s, [{ text: e.clock.slice(0, 5), options: { fontFace: F.mono, color: C.ink3, breakLine: true } }, { text: e.label, options: { color: C.ink2 } }], {
-          x: x - 0.75, y: up ? lane.y - 1.05 : lane.y + 0.22, w: 1.5, h: 0.8, fontSize: 10, align: 'center', valign: up ? 'bottom' : 'top',
+        const late = i === lane.entries.length - 1;
+        s.addShape('ellipse', { x: x - 0.07, y: lane.y - 0.07, w: 0.14, h: 0.14, fill: { color: late ? C.alert : C.ink2 }, line: { color: C.white, width: 1 } });
+        text(s, [{ text: e.clock.slice(0, 5), options: { fontFace: F.mono, color: late ? C.alert : C.ink3, breakLine: true } }, { text: e.label, options: { color: late ? C.alert : C.ink2 } }], {
+          x: x - 0.8, y: up ? lane.y - 1.05 : lane.y + 0.22, w: 1.6, h: 0.8, fontSize: 10, align: 'center', valign: up ? 'bottom' : 'top',
         });
       });
     }
-    for (const c of ['02:00', '02:15', '02:30', '02:45', '03:00']) {
-      text(s, c, { x: X(c) - 0.4, y: 6.55, w: 0.8, h: 0.28, fontFace: F.mono, fontSize: 11, color: C.ink3, align: 'center' });
+    for (const c of ['02:00', '03:00', '04:00', '05:00', '06:00']) {
+      text(s, c, { x: X(c) - 0.4, y: 6.5, w: 0.8, h: 0.28, fontFace: F.mono, fontSize: 11, color: C.ink3, align: 'center' });
     }
     text(s, FOOTNOTE, { x: M, y: 6.95, w: CW, h: 0.3, fontSize: 11, color: C.ink3 });
-    s.addNotes('Same alert, same fix. The squad has mitigated before the manual response has even opened a dashboard.');
+    s.addNotes('Same alert, same night. The squad has the run back on schedule before the manual response has opened the batch log, and the bank has the file before three. The manual night misses the cutoff.');
   }
 
   // 18. The outcome
   {
     const s = pres.addSlide();
     s.background = { color: C.white };
-    lightTitle(s, 'Minutes, not most of an hour', PART4, { w: CW - 1.6 });
+    lightTitle(s, 'Minutes, not most of the night', PART4, { w: CW - 1.6 });
     illustrativeTag(s, W - M - 1.3, 0.8);
     const rows = scenario.scorecard.filter((r) => ['Time to engage', 'Time to root cause', 'Time to mitigate'].includes(r.measure));
     const labels = rows.map((r) => r.measure);
@@ -813,11 +830,16 @@ async function executive() {
     );
     const x = M + 8.1 + 0.5;
     const w = W - M - x;
-    text(s, '6 → 1', { x, y: 1.9, w, h: 1.0, fontFace: F.head, fontSize: 56, bold: true, color: C.signal });
-    text(s, 'People woken up', { x, y: 2.9, w, h: 0.45, fontSize: 18, bold: true });
-    text(s, '30 s', { x, y: 3.7, w, h: 1.0, fontFace: F.head, fontSize: 56, bold: true, color: C.signal });
-    text(s, 'Human time: one approval', { x, y: 4.7, w, h: 0.45, fontSize: 18, bold: true });
-    text(s, 'In the live run these figures are measured from the run itself.', { x, y: 5.3, w, h: 0.8, fontSize: 13, color: C.ink2 });
+    const stats = [
+      ['5 → 1', 'People woken up'],
+      ['30 s', 'Human time: one approval'],
+      ['Before 05:30', 'Bank file accepted'],
+    ];
+    stats.forEach(([big, label], i) => {
+      const y = 1.75 + i * 1.5;
+      text(s, big, { x, y, w, h: 0.85, fontFace: F.head, fontSize: 40, bold: true, color: C.signal });
+      text(s, label, { x, y: y + 0.85, w, h: 0.4, fontSize: 18, bold: true });
+    });
     text(s, FOOTNOTE, { x: M, y: 6.75, w: CW, h: 0.3, fontSize: 12, color: C.ink3 });
     s.addNotes("These numbers are illustrative for this scenario. In the live demo the squad's figures come from the run you just watched. In a pilot we'd baseline your own incidents first.");
   }
@@ -830,11 +852,11 @@ async function executive() {
     // Left: the 2 AM workaround, in the night palette.
     const lw = 4.6;
     s.addShape('roundRect', { x: M, y: 1.75, w: lw, h: 4.9, rectRadius: 0.12, fill: { color: N.bg }, line: { color: N.bg, width: 0 } });
-    text(s, '02:36 · #inc-checkout', { x: M + 0.35, y: 2.0, w: lw - 0.7, h: 0.3, fontFace: F.mono, fontSize: 12, color: N.ink3 });
-    text(s, '“Pasted the stack trace into a public AI chatbot. It says add DB connections.”', {
+    text(s, '03:22 · #inc-premium-run', { x: M + 0.35, y: 2.0, w: lw - 0.7, h: 0.3, fontFace: F.mono, fontSize: 12, color: N.ink3 });
+    text(s, '“Pasted failing policy records into a public AI chatbot. It says raise the retry limit.”', {
       x: M + 0.35, y: 2.45, w: lw - 0.7, h: 1.5, fontSize: 18, bold: true, color: N.ink,
     });
-    const risks = ['Production logs, possibly with customer data, leave the company', 'The advice is wrong: the database was healthy', 'No record of what was shared, or what was done with the answer'];
+    const risks = ['Policyholder personal data leaves the company', 'The advice is wrong: the retries were the problem', 'No record of what was shared, or what was done with the answer'];
     risks.forEach((r, i) => {
       text(s, r, { x: M + 0.35, y: 4.15 + i * 0.75, w: lw - 0.7, h: 0.65, fontSize: 14, color: N.red, bullet: true });
     });
@@ -842,7 +864,7 @@ async function executive() {
     const rx = M + lw + 0.6;
     const rw = W - M - rx;
     const tiles = [
-      ['ShieldCheck', C.ok, 'Approved models only', 'Claude on Amazon Bedrock, in your own cloud account and region.'],
+      ['ShieldCheck', C.ok, 'Approved models only', 'Claude on Amazon Bedrock, in your own cloud account and EU region.'],
       ['UserRound', C.signal, 'A named job for every agent', 'Each agent has a role, granted tools, and nothing more.'],
       ['FileWarning', C.caution, 'Untrusted text stays data', 'Logs and tickets are evidence, never instructions.'],
       ['ScrollText', C.ink2, 'Everything on the record', 'Every call, check, and decision, chained and exportable.'],
@@ -857,10 +879,10 @@ async function executive() {
       text(s, head, { x: x + 0.25, y: y + 0.92, w: tw - 0.5, h: 0.36, fontSize: 16, bold: true });
       text(s, body, { x: x + 0.25, y: y + 1.26, w: tw - 0.5, h: 0.45, fontSize: 12, color: C.ink2 });
     }
-    text(s, 'People reach for AI at 2 AM either way. Make the governed path the faster one.', {
+    text(s, 'People reach for AI at 3 AM either way. Make the governed path the faster one.', {
       x: rx, y: 5.9, w: rw, h: 0.7, fontSize: 16, bold: true, color: C.signal,
     });
-    s.addNotes('People will use AI at two in the morning whether we plan for it or not. The answer is not a ban, it is a sanctioned path that is faster than the workaround.');
+    s.addNotes('People will use AI at three in the morning whether we plan for it or not. The answer is not a ban, it is a sanctioned path that is faster than the workaround.');
   }
 
   // 20. Where this sits in our AI journey
@@ -918,8 +940,8 @@ async function executive() {
     const items = [
       ['Incident triage (gated)', 0.8, 0.58],
       ['Code modernization', 0.9, 0.72],
-      ['RFP drafting', 0.52, 0.2],
-      ['Payments changes', 0.18, 0.86],
+      ['Claims letter drafting', 0.52, 0.2],
+      ['Tariff and pricing changes', 0.18, 0.86],
     ];
     items.forEach(([label, rx, ry]) => {
       const cx = gx + rx * gw;
@@ -1257,7 +1279,7 @@ async function technical() {
     title(s, 'Extending');
     text(s, 'Add a scenario in four steps', { x: M, y: 1.5, w: 6.5, h: 0.45, fontSize: 20, bold: true });
     const steps = [
-      'Copy packages/scenarios/incident-checkout',
+      'Copy packages/scenarios/premium-run',
       'Write the script in docs/SCENARIO-<name>.md',
       'Update agents, fixtures, policies, and validators',
       'Register it; open it with ?scenario=<name>',

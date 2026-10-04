@@ -12,24 +12,24 @@ test.describe('branches (SCENARIO §5)', () => {
     await toGate(page);
     await page.keyboard.press('x');
     await expect(page.getByTestId('gate-sheet')).toBeHidden();
-    await expect(page.getByTestId('option-card')).toContainText('Set the old pool key to 40 at runtime', { timeout: 20_000 });
+    await expect(page.getByTestId('option-card')).toContainText('Price TP20 at its September rate tonight', { timeout: 20_000 });
     await expect(page.getByTestId('checklist')).toContainText('P-08', { timeout: 20_000 });
     await waitForGate(page);
-    await expect(page.getByTestId('gate-sheet')).toContainText('Approve runtime config override?');
+    await expect(page.getByTestId('gate-sheet')).toContainText('Approve September rates for TP20 tonight?');
     expect((await snapshot(page)).clock).toMatch(/^02:\d{2}:\d{2}$/);
     await page.keyboard.press('a');
-    await expect(page.getByText('Pod 6 of 6 restarted with pool size 40')).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByText('48,600 of 48,600 premiums priced')).toBeVisible({ timeout: 30_000 });
     await expect(page.getByTestId('end-card')).toHaveAttribute('data-ending', 'A', { timeout: 40_000 });
     await page.getByTestId('tab-artifacts').click();
-    await expect(page.getByTestId('artifact-postmortem')).toContainText('A5 Remove runtime override', { timeout: 20_000 });
+    await expect(page.getByTestId('artifact-postmortem')).toContainText('A5 Remove the TP20 rate pin', { timeout: 20_000 });
     await page.getByTestId('tab-audit').click();
-    await expect(page.getByTestId('audit')).toContainText('Rollback declined by on-call engineer');
+    await expect(page.getByTestId('audit')).toContainText('Quarantine declined by on-call engineer');
     expect(errors).toEqual([]);
   });
 
   test('reject g1 → reject g2 ends with the squad handing over to humans', async ({ page }) => {
     await toGate(page, '&autoDecide=g1:rejected');
-    await expect(page.getByTestId('gate-sheet')).toContainText('Approve runtime config override?');
+    await expect(page.getByTestId('gate-sheet')).toContainText('Approve September rates for TP20 tonight?');
     await page.getByTestId('gate-reject').click();
     await expect(page.getByTestId('end-card')).toHaveAttribute('data-ending', 'B', { timeout: 30_000 });
     await expect(page.getByTestId('end-card')).toContainText('The squad stopped where people said stop.');
@@ -82,7 +82,7 @@ test.describe('chaos test (SCENARIO §5.2)', () => {
     await expect(page.getByTestId('gate-sheet')).toBeHidden();
     await expect(page.getByTestId('chaos-banner')).toBeVisible();
     await waitForGate(page);
-    await expect(page.getByTestId('gate-sheet')).toContainText('Approve production rollback?');
+    await expect(page.getByTestId('gate-sheet')).toContainText('Approve quarantine and resume?');
   });
 
   test('runs from the end card and returns to it', async ({ page }) => {
@@ -103,8 +103,8 @@ test.describe('overlays', () => {
     const split = page.getByTestId('split-view');
     await expect(split).toBeVisible();
     await expect(split).toContainText('Illustrative');
-    await expect(split).toContainText('Recovery confirmed');
-    await expect(split).toContainText('Postmortem drafted');
+    await expect(split).toContainText('File sent, after the cutoff');
+    await expect(split).toContainText('Bank accepts the file');
     await expect(split).toContainText('48 min');
     await page.keyboard.press('Escape');
     await expect(split).toBeHidden();
@@ -115,7 +115,7 @@ test.describe('overlays', () => {
     await page.locator('[data-agent="fixer"]').click();
     const insp = page.getByTestId('inspector');
     await expect(insp).toContainText('Proposes and, once approved, executes mitigations');
-    await expect(insp).toContainText('deploy.rollback');
+    await expect(insp).toContainText('batch.quarantine');
     await expect(insp).toContainText('Needs approval');
     await expect(insp).toContainText('db.alter (not granted)');
     await page.keyboard.press('Escape');
@@ -210,14 +210,14 @@ test.describe('realism layer (SCENARIO §11)', () => {
     await expect.poll(() => page.evaluate(() => window.__nightShift!.source.getSnapshot().playing), { timeout: 60_000 }).toBe(false);
     await expect(page.getByTestId('tool-error')).toContainText('trace store returned 503');
     await expect(page.getByTestId('suspect-card')).toHaveCount(2);
-    await expect(page.getByTestId('suspect-card').filter({ hasText: 'Spring Boot' })).toContainText('Ruled out');
+    await expect(page.getByTestId('suspect-card').filter({ hasText: 'PostgreSQL driver' })).toContainText('Ruled out');
     await page.getByTestId('tab-channel').click();
     await expect(page.getByTestId('channel-post')).toHaveCount(3);
     await expect(page.getByTestId('channel')).toContainText('Paging on-call and the agent squad.');
     // The approval sheet reads like a change request with a live waiting time.
     await page.goto('/?take=0&pace=1&speed=8&autoplay=1');
     await waitForGate(page);
-    await expect(page.getByTestId('gate-sheet')).toContainText('CHG-24817');
+    await expect(page.getByTestId('gate-sheet')).toContainText('CHG-31042');
     await expect(page.getByTestId('gate-waiting')).toHaveText(/waiting 0:0[1-9]/, { timeout: 5_000 });
     expect(errors).toEqual([]);
   });
@@ -323,7 +323,7 @@ test.describe('operations bar and run clock (DECISIONS D-074, D-075)', () => {
     await expect(page.getByTestId('end-card')).toBeVisible({ timeout: 60_000 });
     await expect(page.getByTestId('milestone-resolved')).toContainText(/02:\d{2}:\d{2}/);
     await expect(page.getByTestId('impact')).toHaveAttribute('data-over', 'true');
-    await expect(page.getByTestId('end-card')).toContainText(/Mitigated in \d+ min/);
+    await expect(page.getByTestId('end-card')).toContainText(/Back on schedule in \d+ min/);
     await expect(page.getByTestId('play')).toHaveText('Incident closed');
   });
 });
@@ -353,7 +353,7 @@ test.describe('governance (DECISIONS D-079)', () => {
     await page.goto('/?take=0&pace=1&speed=8&autoplay=1&autoDecide=g1:approved&pauseAt=a7.pr6');
     await expect.poll(async () => (await snapshot(page)).status, { timeout: 60_000 }).toBe('paused');
     await page.evaluate(() => window.__nightShift!.source.stepForward());
-    await expect(page.getByTestId('pr-card')).toContainText('Pull request #482');
+    await expect(page.getByTestId('pr-card')).toContainText('Pull request #317');
     await expect(page.getByTestId('checklist')).toContainText('P-09');
     await expect(page.getByTestId('checklist')).toContainText('P-10');
     await page.getByTestId('tab-artifacts').click();
@@ -363,9 +363,9 @@ test.describe('governance (DECISIONS D-079)', () => {
     await expect(page.getByTestId('audit-chain')).toHaveAttribute('data-verified', 'true');
     await expect(page.getByTestId('audit-stage').first()).toContainText('Act 7');
     await expect(page.getByTestId('audit')).toContainText('Act 3 · Diagnosis');
-    await expect(page.getByTestId('audit')).toContainText('Root cause concluded (confidence 0.92)');
+    await expect(page.getByTestId('audit')).toContainText('Root cause concluded (confidence 0.93)');
     const [download] = await Promise.all([page.waitForEvent('download'), page.getByTestId('audit-export').click()]);
-    expect(download.suggestedFilename()).toBe('night-shift-audit-incident-checkout-take0.json');
+    expect(download.suggestedFilename()).toBe('night-shift-audit-premium-run-take0.json');
     const doc = JSON.parse(await (await download.createReadStream()).toArray().then((c) => Buffer.concat(c).toString('utf8')));
     expect(doc.chain.verified).toBe(true);
     expect(doc.stages.length).toBeGreaterThanOrEqual(6);

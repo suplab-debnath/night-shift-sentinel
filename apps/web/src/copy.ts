@@ -68,7 +68,7 @@ export const copy = {
     you: 'You',
     humanSeat: 'Human seat',
     slo: (ms: number) => `SLO ${ms} ms`,
-    errors: (pct: string) => `${pct}% errors`,
+    errors: (pct: string, label = 'errors') => `${pct}% ${label}`,
     recommended: 'Recommended',
     reversible: 'Reversible',
     notReversible: 'Not reversible',

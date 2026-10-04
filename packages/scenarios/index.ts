@@ -1,21 +1,18 @@
 // Registered scenarios, validated at import time.
 import { parseAgents, parseScenario, type AgentDef, type AgentsFile, type Scenario } from '@night-shift/engine';
-import scenarioJson from './incident-checkout/scenario.json';
-import agentsJson from './incident-checkout/agents.json';
-import metrics from './incident-checkout/fixtures/metrics.json';
-import logs from './incident-checkout/fixtures/logs.json';
-import traces from './incident-checkout/fixtures/traces.json';
-import deploys from './incident-checkout/fixtures/deploys.json';
-import diff from './incident-checkout/fixtures/diff.json';
-import runbooks from './incident-checkout/fixtures/runbooks.json';
-import policies from './incident-checkout/fixtures/policies.json';
-import services from './incident-checkout/fixtures/services.json';
-import governance from './incident-checkout/fixtures/governance.json';
+import scenarioJson from './premium-run/scenario.json';
+import agentsJson from './premium-run/agents.json';
+import metrics from './premium-run/fixtures/metrics.json';
+import deploys from './premium-run/fixtures/deploys.json';
+import runbooks from './premium-run/fixtures/runbooks.json';
+import policies from './premium-run/fixtures/policies.json';
+import services from './premium-run/fixtures/services.json';
+import governance from './premium-run/fixtures/governance.json';
 import { FixturesSchema, type Fixtures } from './src/fixtures';
 
 export * from './src/fixtures';
 
-export const SCENARIO_IDS = ['incident-checkout'] as const;
+export const SCENARIO_IDS = ['premium-run'] as const;
 export type ScenarioId = (typeof SCENARIO_IDS)[number];
 
 export interface ScenarioBundle {
@@ -37,19 +34,16 @@ function bundle(id: ScenarioId, scenario: unknown, agents: unknown, fixtures: un
   };
 }
 
-export const incidentCheckout: ScenarioBundle = bundle('incident-checkout', scenarioJson, agentsJson, {
+export const premiumRun: ScenarioBundle = bundle('premium-run', scenarioJson, agentsJson, {
   metrics,
-  logs,
-  traces,
   deploys,
-  diff,
   runbooks,
   policies,
   services,
   governance,
 });
 
-const REGISTRY: Record<ScenarioId, ScenarioBundle> = { 'incident-checkout': incidentCheckout };
+const REGISTRY: Record<ScenarioId, ScenarioBundle> = { 'premium-run': premiumRun };
 
 export function getScenario(id: string): ScenarioBundle | undefined {
   return (REGISTRY as Record<string, ScenarioBundle>)[id];

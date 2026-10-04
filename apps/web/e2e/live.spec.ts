@@ -30,7 +30,7 @@ test('live-mock: the full run is driven by live turns through the same stage', a
   });
   expect(live).toEqual({ conclusion: 'live', artifacts: 2 });
   await page.getByTestId('tab-artifacts').click();
-  await expect(page.getByTestId('artifact-postmortem')).toContainText(/\d{2}:\d{2}:\d{2} rollback complete; errors stopped at \d{2}:\d{2}:\d{2}/);
+  await expect(page.getByTestId('artifact-postmortem')).toContainText(/\d{2}:\d{2}:\d{2} 812 records held; failures stopped at \d{2}:\d{2}:\d{2}/);
   expect(errors).toEqual([]);
 });
 
@@ -45,7 +45,7 @@ test('live-mock: invalid output and a timed-out turn fall back per beat, invisib
   await expect(page.getByText('scripted', { exact: true })).toHaveCount(0);
   expect(await sourceLine(page)).toBe('Live, mock model2 scripted lines · authored pace');
   // The fallback text is the canonical line; the audience sees no error.
-  await expect(page.getByTestId('stream')).toContainText('Active connections are pinned at 10 of 10 on every pod.');
+  await expect(page.getByTestId('stream')).toContainText('All 812 failures are Term Protect 20, ages 40 to 44.');
   expect(errors).toEqual([]);
 });
 

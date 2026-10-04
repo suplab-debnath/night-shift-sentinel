@@ -9,6 +9,7 @@ import styles from './GateSheet.module.css';
 
 export function GateSheet({ gate }: { gate: GateView }) {
   const source = useApp((s) => s.source);
+  const changeRefs = useApp((s) => s.bundle.scenario.display.changeRefs);
   const conclusion = useApp((s) => s.snap.state.evidence.conclusion);
   const checklists = useApp((s) => s.snap.state.checklists);
   const [open, setOpen] = useState(false);
@@ -56,7 +57,7 @@ export function GateSheet({ gate }: { gate: GateView }) {
       data-testid="gate-sheet"
     >
       <p className={styles.eyebrow}>
-        <span className="mono">{copy.gate.reference(gate.gateId)}</span>
+        <span className="mono">{changeRefs[gate.gateId] ?? copy.gate.reference(gate.gateId)}</span>
         <span>{copy.gate.kind}</span>
         <span>{copy.gate.paged}</span>
         <span className="mono" data-testid="gate-waiting">

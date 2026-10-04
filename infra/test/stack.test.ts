@@ -172,7 +172,7 @@ describe('bundled Lambda (esbuild, no Docker)', () => {
     const bundle = readdirSync(assembly.directory)
       .filter((d) => d.startsWith('asset.'))
       .map((d) => path.join(assembly.directory, d, 'index.js'))
-      .find((f) => existsSync(f) && readFileSync(f, 'utf8').includes('incident-checkout'))!;
+      .find((f) => existsSync(f) && readFileSync(f, 'utf8').includes('premium-run'))!;
     expect(bundle).toBeDefined();
     expect(readFileSync(bundle, 'utf8').length).toBeGreaterThan(100_000);
 
@@ -202,7 +202,7 @@ describe('bundled Lambda (esbuild, no Docker)', () => {
     const health = await call('GET', '/api/health');
     expect(health.status).toBe(200);
     expect(JSON.parse(health.body)).toMatchObject({ mode: 'live-mock', live: true });
-    const seg = await call('POST', '/api/segments', { scenarioId: 'incident-checkout', segment: 'main', decisions: [], context: '' });
+    const seg = await call('POST', '/api/segments', { scenarioId: 'premium-run', segment: 'main', decisions: [], context: '' });
     expect(seg.status).toBe(200);
     expect(seg.body).toContain('"frame":"segment.end"');
     expect((await call('POST', '/api/segments', { nope: 1 })).status).toBe(400);

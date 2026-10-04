@@ -1,5 +1,5 @@
 import type { Beat } from '@night-shift/engine';
-import { incidentCheckout } from '@night-shift/scenarios';
+import { premiumRun } from '@night-shift/scenarios';
 import { describe, expect, it } from 'vitest';
 import { testConfig } from '../test-helpers';
 import { runAgentTurn } from './agentTurn';
@@ -7,7 +7,7 @@ import { MockProvider } from './providers/mock';
 import { ProviderError, type LlmProvider, type ProviderDelta } from './providers/types';
 import { policyFor, toolHintFor } from './segments';
 
-const bundle = incidentCheckout;
+const bundle = premiumRun;
 const beat = (id: string): Beat => Object.values(bundle.scenario.segments).flatMap((s) => s.acts.flatMap((a) => a.beats)).find((b) => b.id === id)!;
 
 function scripted(deltas: ProviderDelta[][]): LlmProvider {
@@ -29,7 +29,7 @@ describe('agent turn', () => {
     expect(r.log.outcome).toBe('live');
     expect(r.log.toolCalls).toBe(1);
     expect(r.override.events.map((e) => `${e.kind}:${e.source}`)).toEqual(['metric.update:script', 'tool.call:live', 'tool.result:live', 'thought:live']);
-    expect(r.override.events.at(-1)).toMatchObject({ text: 'Active connections are pinned at 10 of 10 on every pod. 380 threads are waiting.' });
+    expect(r.override.events.at(-1)).toMatchObject({ text: 'All 812 failures are Term Protect 20, ages 40 to 44. Nothing else fails.' });
   });
 
   it('uses model text from a real-shaped provider and the right model per agent', async () => {
@@ -38,15 +38,15 @@ describe('agent turn', () => {
       name: 'bedrock',
       async *converseStream(req) {
         seen.push(req.modelId);
-        yield { type: 'text', text: 'v2.14.0 shipped at 01:55. ' };
-        yield { type: 'text', text: 'Errors began nine minutes later.' };
+        yield { type: 'text', text: 'v2026.10 shipped at 18:40. ' };
+        yield { type: 'text', text: 'The run started at 01:30.' };
         yield { type: 'usage', inputTokens: 10, outputTokens: 5 };
         yield { type: 'stop', reason: 'end_turn' };
       },
     };
     const r = await runAgentTurn({ bundle, beat: beat('a3.b07'), context: '', approvals: [], provider, config: cfg });
     expect(r.log).toMatchObject({ outcome: 'live', inputTokens: 10, outputTokens: 5 });
-    expect(r.override.events.find((e) => e.kind === 'thought')).toMatchObject({ text: 'v2.14.0 shipped at 01:55. Errors began nine minutes later.', source: 'live' });
+    expect(r.override.events.find((e) => e.kind === 'thought')).toMatchObject({ text: 'v2026.10 shipped at 18:40. The run started at 01:30.', source: 'live' });
     expect(seen).toEqual(['fast-model']);
     await runAgentTurn({ bundle, beat: beat('a3.b20'), context: '', approvals: [], provider, config: cfg });
     expect(seen.at(-1)).toBe('test-model');
@@ -67,7 +67,7 @@ describe('agent turn', () => {
       expect(r.log.outcome, reason).toBe('fallback');
       expect(r.log.fallbackReason, reason).toContain(reason);
       const thought = r.override.events.find((e) => e.kind === 'thought')!;
-      expect(thought).toMatchObject({ source: 'fallback', text: 'p99 latency on checkout-api is 4.8 seconds. The SLO is 800 milliseconds.' });
+      expect(thought).toMatchObject({ source: 'fallback', text: 'The premium run now projects to finish at 06:52. The bank cutoff is 05:30.' });
       expect(r.override.events.filter((e) => e.source === 'script').length).toBe(r.override.events.length - 1);
     }
     expect(new ProviderError('x', 'timeout').code).toBe('timeout');

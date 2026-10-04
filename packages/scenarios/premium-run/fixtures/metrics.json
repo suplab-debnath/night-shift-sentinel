@@ -1,0 +1,76 @@
+{
+  "series": [
+    {
+      "t": "01:40:00",
+      "projectedFinish": 130,
+      "failingPct": 0.0,
+      "recordsPerMin": 1250
+    },
+    {
+      "t": "01:44:00",
+      "projectedFinish": 131,
+      "failingPct": 0.0,
+      "recordsPerMin": 1248
+    },
+    {
+      "t": "01:48:00",
+      "projectedFinish": 129,
+      "failingPct": 0.0,
+      "recordsPerMin": 1252
+    },
+    {
+      "t": "01:52:00",
+      "projectedFinish": 132,
+      "failingPct": 0.2,
+      "recordsPerMin": 1240
+    },
+    {
+      "t": "01:54:00",
+      "projectedFinish": 196,
+      "failingPct": 0.9,
+      "recordsPerMin": 820
+    },
+    {
+      "t": "01:56:00",
+      "projectedFinish": 268,
+      "failingPct": 1.3,
+      "recordsPerMin": 540
+    },
+    {
+      "t": "01:58:00",
+      "projectedFinish": 318,
+      "failingPct": 1.5,
+      "recordsPerMin": 420
+    },
+    {
+      "t": "02:00:00",
+      "projectedFinish": 352,
+      "failingPct": 1.6,
+      "recordsPerMin": 360
+    },
+    {
+      "t": "02:02:00",
+      "projectedFinish": 377,
+      "failingPct": 1.6,
+      "recordsPerMin": 340
+    },
+    {
+      "t": "02:04:00",
+      "projectedFinish": 394,
+      "failingPct": 1.7,
+      "recordsPerMin": 322
+    },
+    {
+      "t": "02:06:00",
+      "projectedFinish": 406,
+      "failingPct": 1.7,
+      "recordsPerMin": 314
+    },
+    {
+      "t": "02:07:00",
+      "projectedFinish": 412,
+      "failingPct": 1.7,
+      "recordsPerMin": 310
+    }
+  ]
+}

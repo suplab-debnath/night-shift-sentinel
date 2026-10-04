@@ -12,6 +12,9 @@ export interface ActionRequest {
   approvals?: string[];
   /** code.change: checks that passed on the change (D-079). */
   checks?: string[];
+  records?: number;
+  product?: string;
+  rate?: string;
   /** tool.output: the text to inspect; defaults to the fixture sample for its source. */
   source?: string;
   content?: string;
@@ -78,11 +81,16 @@ function evaluateRule(rule: PolicyRule, req: ActionRequest, f: Fixtures, onMatch
     }
     case 'no-outage':
       if (!action) return { result: onMatch, reason: 'Unknown action' };
-      return action.outageSeconds > rule.maxOutageSeconds ? { result: onMatch, reason: action.note } : { result: 'pass', reason: action.note };
+      // Irreversible counts as harmful as an outage (D-081).
+      return action.outageSeconds > rule.maxOutageSeconds || !action.reversible ? { result: onMatch, reason: action.note } : { result: 'pass', reason: action.note };
     case 'override-expiry': {
       const h = hours(req.expires);
       return h !== null && h <= rule.maxHours ? { result: 'pass', reason: `${h} h expiry set` } : { result: onMatch, reason: 'Override has no expiry within limits' };
     }
+    case 'premium-change':
+      return action?.changesPremium
+        ? { result: onMatch, reason: `The ${rule.approver} must approve premium changes` }
+        : { result: 'pass', reason: 'No premium changes; held records stay unpriced' };
     case 'review-required':
       return { result: onMatch, reason: `Draft only. A reviewer from ${rule.reviewers} merges; the pipeline deploys.` };
     case 'checks-passed': {

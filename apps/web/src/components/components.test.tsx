@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
-import { incidentCheckout } from '@night-shift/scenarios';
+import { premiumRun } from '@night-shift/scenarios';
 import { compile } from '@night-shift/engine';
 import { afterEach, beforeAll, describe, expect, it } from 'vitest';
 import { presenterNote } from '../presenterNotes';
@@ -38,13 +38,13 @@ const UI: UiState = {
 };
 
 function setup(opts: { seek?: number; ui?: Partial<UiState>; decisions?: [] } = {}) {
-  const source = new ScriptedSource(incidentCheckout.scenario, { approver: 'Asha', seek: opts.seek ?? 0, raf: () => 1, caf: () => {} });
-  const store = createAppStore(source, incidentCheckout, { ...UI, ...opts.ui });
+  const source = new ScriptedSource(premiumRun.scenario, { approver: 'Asha', seek: opts.seek ?? 0, raf: () => 1, caf: () => {} });
+  const store = createAppStore(source, premiumRun, { ...UI, ...opts.ui });
   return { source, store };
 }
 
 // When the first gate opens on the canonical take.
-const GATE_T = compile(incidentCheckout.scenario).endT;
+const GATE_T = compile(premiumRun.scenario).endT;
 
 describe('GateSheet', () => {
   it('focuses the primary action, traps Tab, and ignores Esc', () => {
@@ -78,7 +78,7 @@ describe('GateSheet', () => {
       </StoreProvider>,
     );
     fireEvent.click(screen.getByRole('button', { name: /show evidence/i }));
-    expect(screen.getByTestId('checklist').textContent).toContain('P-05');
+    expect(screen.getByTestId('checklist').textContent).toContain('P-07');
     act(() => {
       fireEvent.click(screen.getByTestId('gate-reject'));
     });
@@ -98,7 +98,7 @@ describe('reduced motion', () => {
         <PacketLayer size={{ width: 1000, height: 600 }} />
       </StoreProvider>,
     );
-    expect(container.textContent).toContain('p99 latency on checkout-api is 4.8 seconds. The SLO is 800 milliseconds.');
+    expect(container.textContent).toContain('The premium run now projects to finish at 06:52. The bank cutoff is 05:30.');
     act(() => store.getState().source.seek(7300));
     expect(container.querySelectorAll('[data-testid="packet"]').length).toBe(1);
     expect(container.querySelectorAll('[data-testid="packet-trails"] path').length).toBe(0);
@@ -162,13 +162,13 @@ describe('shortcut dispatch', () => {
 
 describe('summary (scorecard and end card)', () => {
   const approve = { type: 'gate' as const, gateId: 'g1', decision: 'approved' as const, by: 'Asha' };
-  const END = compile(incidentCheckout.scenario, [approve]).endT;
-  const SCORE_T = compile(incidentCheckout.scenario, [approve]).events.find((e) => e.kind === 'scorecard.show')!.t;
+  const END = compile(premiumRun.scenario, [approve]).endT;
+  const SCORE_T = compile(premiumRun.scenario, [approve]).events.find((e) => e.kind === 'scorecard.show')!.t;
 
   function mount(t: number) {
-    const source = new ScriptedSource(incidentCheckout.scenario, { approver: 'Asha', decisions: [approve], raf: () => 1, caf: () => {} });
+    const source = new ScriptedSource(premiumRun.scenario, { approver: 'Asha', decisions: [approve], raf: () => 1, caf: () => {} });
     source.seek(t);
-    const store = createAppStore(source, incidentCheckout, UI);
+    const store = createAppStore(source, premiumRun, UI);
     render(
       <StoreProvider store={store}>
         <ScorecardSheet />

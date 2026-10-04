@@ -31,7 +31,7 @@ Captured from the offline build at 1920×1080, presenter mode on, via URL params
 | `03-evidence.png` | Act 3, root-cause card just formed |
 | `04-guardian.png` | Act 4, checklist complete |
 | `05-gate.png` | Gate g1 open |
-| `06-recovery.png` | Act 6, line green, pods 6 of 6 |
+| `06-recovery.png` | Act 6, run back on schedule, premiums priced |
 | `07-scorecard.png` | Act 7 scorecard |
 | `08-split.png` | Split view |
 | `09-chaos.png` | Chaos: Guardian blocked, permission toast visible |
@@ -49,16 +49,16 @@ A story in four parts, told as one night (DECISIONS D-076). Parts 1–2 are dark
 
 | # | Stamp / title | Visual |
 |---|---|---|
-| 1 | "When the pager rings at 2 AM" / "One bad deploy. Two ways through the night." | Night sky, moon, sleeping city |
+| 1 | "When the pager rings at 2 AM" / "One bad tariff. Two ways through the night." | Night sky, moon, sleeping city |
 | **Part 1 · We push the code** | | |
-| 2 | 01:55 "A small change ships. Every check is green." | Pipeline cards (commit, build, tests, deploy) and the Helm diff; "Nothing fails. Yet." |
-| 3 | 02:04 "Traffic doubles. Checkout starts failing." | Native line chart of fixture p99 01:58–02:07, promo and timeout chips, customer phone showing "Payment failed" |
+| 2 | 18:40 "A routine tariff update ships. Every check is green." | Pipeline cards (commit, build, validation, deploy `rating-tables v2026.10`) and the two duplicate `TP20.csv` rows; "Nothing fails. Yet." |
+| 3 | 01:52 "The nightly premium run starts failing." | Native line chart of fixture `projectedFinish` 01:40–02:07 against the 05:30 bank cutoff, run-start and first-failure chips, policyholder phone showing "Payment not collected" (if the file misses the cutoff) |
 | **Part 2 · The traditional night** | | |
 | 4 | 02:07 "The pager goes off." | Night sky, lock-screen phone with the page |
-| 5 | 02:19 "Twelve minutes before anyone looks at the data." | Three steps from `splitView.manual` |
-| 6 | 02:27 "The war room fills up." | Incident chat of eight messages, including the shadow-AI moment at 02:36 (logs pasted into a public chatbot); "Six people woken across six teams" |
-| 7 | 02:29–02:44 "Page, wait, check, hand off. Repeat." | Hand-off map: on-call in the centre, five people around |
-| 8 | 02:55 "Recovered. 48 minutes after the alert." | Timeline with the customer-impact bar; three manual stat tiles |
+| 5 | 02:25 "Eighteen minutes before anyone looks at the job." | Three steps from `splitView.manual` |
+| 6 | 02:41 "The war room fills up." | `#inc-premium-run` chat of eight messages, including the shadow-AI moment at 03:22 (policy records pasted into a public chatbot); "Five people woken, and finance waiting" |
+| 7 | 02:41–04:15 "Page, wait, check, hand off. Repeat." | Hand-off map: on-call in the centre, five people around |
+| 8 | 06:10 "The file goes out. Forty minutes too late." | Timeline 02:00–06:30 with the collection-at-risk bar and the 05:30 cutoff line; three manual stat tiles |
 | **Part 3 · The same night, with a squad** | | |
 | 9 | "Rewind." | Night sky; "This time a squad of AI agents is on call, and a person still decides." |
 | 10 | "Seven specialists and one human" | Cast tiles, human tile apart |
@@ -69,9 +69,9 @@ A story in four parts, told as one night (DECISIONS D-076). Parts 1–2 are dark
 | 15 | "Their fixes follow your engineering rules" | `12-pr` and `14-inject` |
 | 16 | "Every step leaves evidence" | Crop of `13-audit` and five audit properties |
 | **Part 4 · What changed** | | |
-| 17 | "Same night, two timelines" | Manual lane 48 min vs squad lane 4 min, Illustrative |
-| 18 | "Minutes, not most of an hour" | Native clustered bar chart (engage, root cause, mitigate); "6 → 1 People woken up", "30 s Human time" |
-| 19 | "The answer to shadow AI is a better sanctioned path" | The 02:36 chat line and its risks; four sanctioned-path tiles |
+| 17 | "Same night, two timelines" | Manual lane 2 h 48 min (file at 06:10) vs squad lane 4 min (file at 02:41), cutoff line, Illustrative |
+| 18 | "Minutes, not most of the night" | Native clustered bar chart (engage, root cause, mitigate); "5 → 1 People woken up", "30 s Human time", "Before 05:30 Bank file accepted" |
+| 19 | "The answer to shadow AI is a better sanctioned path" | The 03:22 chat line and its risks; four sanctioned-path tiles (EU region) |
 | 20 | "Where this sits in our AI journey" | Four stages, `{{PRESENTER: add 1–2 of our live use cases}}` |
 | 21 | "Where agents fit first" | 2×2 repeatability × risk |
 | 22 | "Proposed next step: a six-week pilot" | Four phases, "Proposal" tag, shadow mode line |

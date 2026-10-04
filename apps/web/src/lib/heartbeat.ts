@@ -22,9 +22,18 @@ const MAX_V = 6000;
 export const PREROLL = 0.08;
 export const MIN_AXIS_MS = 150_000;
 
-export function yFor(value: number, height: number, pad = 14): number {
-  const v = Math.min(MAX_V, Math.max(MIN_V, value));
-  const k = Math.log(v / MIN_V) / Math.log(MAX_V / MIN_V);
+/** Vertical scale of the line (D-081): log for latency, linear for a clock time. */
+export interface LineScale {
+  min: number;
+  max: number;
+  log: boolean;
+}
+
+export const LATENCY_SCALE: LineScale = { min: MIN_V, max: MAX_V, log: true };
+
+export function yFor(value: number, height: number, pad = 14, scale: LineScale = LATENCY_SCALE): number {
+  const v = Math.min(scale.max, Math.max(scale.min, value));
+  const k = scale.log ? Math.log(v / scale.min) / Math.log(scale.max / scale.min) : (v - scale.min) / (scale.max - scale.min);
   return height - pad - k * (height - pad * 2);
 }
 
@@ -66,12 +75,14 @@ export function buildHeartbeat(opts: {
   stepMs?: number;
   /** Extra noise time for the head (ambient drift while waiting on a gate). */
   headDriftMs?: number;
+  scale?: LineScale;
 }): HeartbeatGeometry {
   const { track, t, axis, width, height, sloMs } = opts;
   const step = opts.stepMs ?? 250;
   const x0 = width * PREROLL;
   const xAt = (tt: number) => x0 + (Math.min(tt, axis) / axis) * (width - x0 - 8);
-  const sloY = yFor(sloMs, height);
+  const scale = opts.scale ?? LATENCY_SCALE;
+  const sloY = yFor(sloMs, height, 14, scale);
 
   const pts: { x: number; y: number; v: number; tone: RunTone }[] = [];
   // Pre-incident baseline with a little seeded jitter.
@@ -79,7 +90,7 @@ export function buildHeartbeat(opts: {
   const baseline = track.initial;
   for (let x = 0; x < x0; x += 12) {
     const v = baseline + (rng() * 2 - 1) * 10;
-    pts.push({ x, y: yFor(v, height), v, tone: 'neutral' });
+    pts.push({ x, y: yFor(v, height, 14, scale), v, tone: 'neutral' });
   }
   let breached = false;
   for (let tt = 0; ; tt += step) {
@@ -88,7 +99,7 @@ export function buildHeartbeat(opts: {
     const v = noisyP99(raw, at, at >= t ? (opts.headDriftMs ?? 0) : 0);
     if (raw > sloMs) breached = true;
     const tone: RunTone = raw > sloMs ? 'alert' : breached ? 'ok' : 'neutral';
-    pts.push({ x: xAt(at), y: yFor(v, height), v, tone });
+    pts.push({ x: xAt(at), y: yFor(v, height, 14, scale), v, tone });
     if (at >= t) break;
   }
 

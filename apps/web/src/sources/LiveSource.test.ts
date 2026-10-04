@@ -1,12 +1,12 @@
 import { compile, type LiveFrame } from '@night-shift/engine';
-import { incidentCheckout } from '@night-shift/scenarios';
+import { premiumRun } from '@night-shift/scenarios';
 import { describe, expect, it, vi } from 'vitest';
 
 // When the first gate opens on the canonical take.
-const GATE_T = compile(incidentCheckout.scenario).endT;
+const GATE_T = compile(premiumRun.scenario).endT;
 import { LiveSource, liveBeatsOf, readFrames, scriptedFallback } from './LiveSource';
 
-const scenario = incidentCheckout.scenario;
+const scenario = premiumRun.scenario;
 const enc = new TextEncoder();
 
 /** A controllable SSE body. */
@@ -36,7 +36,7 @@ function harness(opts: { health?: 'ok' | 'down' | 'scripted' } = {}) {
   const src = new LiveSource(
     scenario,
     { approver: 'Asha', speed: 4, raf: (f) => ((cb = f), 1), caf: () => (cb = null) },
-    { apiBase: '/api', scenarioId: 'incident-checkout', fetchImpl, now: () => clock, passcode: 'pw' },
+    { apiBase: '/api', scenarioId: 'premium-run', fetchImpl, now: () => clock, passcode: 'pw' },
   );
   const frame = (dt: number) => {
     clock += dt;
@@ -89,7 +89,7 @@ describe('LiveSource', () => {
     expect(h.src.getSnapshot().mode).toBe('fallback');
     h.tick(10);
     const first = h.src.getSnapshot().state.stream.find((e) => e.type === 'thought');
-    expect(first).toMatchObject({ source: 'fallback', text: 'p99 latency on checkout-api is 4.8 seconds. The SLO is 800 milliseconds.' });
+    expect(first).toMatchObject({ source: 'fallback', text: 'The premium run now projects to finish at 06:52. The bank cutoff is 05:30.' });
   });
 
   it('plays scripted in fallback mode when the server is down or not live', async () => {
@@ -155,7 +155,7 @@ it('requests the continuation when a gate is auto-decided (regression)', async (
   const src = new LiveSource(
     scenario,
     { approver: 'A', seek: GATE_T, autoDecide: { g1: 'approved' }, raf: () => 1, caf: () => {} },
-    { apiBase: '', scenarioId: 'incident-checkout', fetchImpl },
+    { apiBase: '', scenarioId: 'premium-run', fetchImpl },
   );
   await src.connect();
   src.seek(GATE_T);

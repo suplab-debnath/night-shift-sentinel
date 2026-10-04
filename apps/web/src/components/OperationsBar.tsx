@@ -80,6 +80,7 @@ function MilestoneTrack() {
 /** Customer impact since the first errors, stopping when errors stop. */
 function ImpactCounter() {
   const impact = useApp((s) => s.bundle.scenario.impact);
+  const impactLabel = useApp((s) => s.bundle.scenario.display.impactLabel);
   const { timeline, t, clock, hold, speed } = useApp(
     useShallow((s) => ({ timeline: s.snap.timeline, t: s.snap.t, clock: s.snap.clock, hold: s.snap.clockHold, speed: s.snap.speed })),
   );
@@ -88,7 +89,7 @@ function ImpactCounter() {
   if (!v) return null;
   return (
     <div className={styles.impact} data-over={v.over || undefined} data-testid="impact">
-      <span className={styles.impactLabel}>{copy.ops.impact}</span>
+      <span className={styles.impactLabel}>{impactLabel}</span>
       <span className={`${styles.impactValue} mono`}>{mmss(v.sec)}</span>
     </div>
   );

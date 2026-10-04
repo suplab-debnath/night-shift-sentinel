@@ -1,10 +1,10 @@
 import { compile, initialStageState, reduce, type StageState } from '@night-shift/engine';
-import { incidentCheckout } from '@night-shift/scenarios';
+import { premiumRun } from '@night-shift/scenarios';
 import { describe, expect, it } from 'vitest';
 import { activeMoment, MOMENT_MS, stageTone } from './moments';
 import { beatOnPath } from './runclock';
 
-const { scenario } = incidentCheckout;
+const { scenario } = premiumRun;
 const tl = compile(scenario, [{ type: 'gate', gateId: 'g1', decision: 'approved', by: 'x' }]);
 const stateAt = (t: number): StageState =>
   tl.events.filter((e) => e.t <= t).reduce(reduce, initialStageState({ initialMetrics: scenario.initialMetrics, clock: scenario.clockStart }));
@@ -20,7 +20,7 @@ describe('stage moments (D-080)', () => {
     expect(shown.title).not.toContain('{{');
     expect(activeMoment(scenario.moments, scenario.milestones, tl, stateAt(rc + MOMENT_MS), rc + MOMENT_MS)).toBeNull();
     const mit = activeMoment(scenario.moments, scenario.milestones, tl, stateAt(at('mitigated') + 10), at('mitigated') + 10)!;
-    expect(mit.title).toMatch(/^Mitigated · errors stopped at \d{2}:\d{2}:\d{2}$/);
+    expect(mit.title).toMatch(/^Back on schedule · failures stopped at \d{2}:\d{2}:\d{2}$/);
   });
 
   it('stays out of the way of the gate, overlays, and the end card', () => {

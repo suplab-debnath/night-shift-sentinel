@@ -7,6 +7,7 @@ import styles from './PanelList.module.css';
 /** The incident channel: status posts, the pager, and people around the incident. */
 export function ChannelTab() {
   const posts = useApp((s) => s.snap.state.channel);
+  const channel = useApp((s) => s.bundle.scenario.display.channel);
   const end = useRef<HTMLLIElement>(null);
   useEffect(() => {
     end.current?.scrollIntoView?.({ block: 'end' });
@@ -14,8 +15,8 @@ export function ChannelTab() {
   if (posts.length === 0) return <p className={styles.empty}>{copy.panel.emptyChannel}</p>;
   return (
     <>
-      <p className={styles.channelName}>{copy.panel.channelName}</p>
-      <ol className={styles.list} aria-label={copy.panel.channelName} data-testid="channel">
+      <p className={styles.channelName}>{channel}</p>
+      <ol className={styles.list} aria-label={channel} data-testid="channel">
         {posts.map((p, i) => {
           const Icon = p.agent ? AGENT_ICON[p.agent] : null;
           return (

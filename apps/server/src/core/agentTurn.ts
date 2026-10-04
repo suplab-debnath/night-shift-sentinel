@@ -109,7 +109,7 @@ export async function runAgentTurn(input: TurnInput): Promise<TurnResult> {
       content: [{ text: `Task: ${live.goal}\n\nContext from the incident so far:\n${input.context || '(none)'}` }],
     },
   ];
-  const tools = toolSpecs(live.allowedTools);
+  const tools = toolSpecs(bundle, live.allowedTools);
   const liveEvents: OverrideEvent[] = [];
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), config.turnTimeoutMs);
@@ -176,7 +176,7 @@ export async function runAgentTurn(input: TurnInput): Promise<TurnResult> {
 
   const cleaned = text.trim().replace(/^["“]|["”]$/g, '');
   // Numbers may come from the fixtures, the facts given to the model, the timeline, the context, or the script.
-  const allowed = allowedNumbersFrom(JSON.stringify(bundle.fixtures), incidentFacts(bundle), input.context, target.text);
+  const allowed = allowedNumbersFrom(JSON.stringify(bundle.fixtures), JSON.stringify(bundle.scenario), incidentFacts(bundle), input.context, target.text);
   const verdict = validate({
     validator: live.validator,
     text: cleaned,
@@ -184,6 +184,8 @@ export async function runAgentTurn(input: TurnInput): Promise<TurnResult> {
     maxSentences: live.maxSentences,
     allowedNumbers: allowed,
     reference: target.text,
+    ...(live.checks ? { checks: live.checks } : {}),
+    ...(bundle.scenario.impact ? { impactFrom: bundle.scenario.impact.from.slice(0, 5) } : {}),
     ...(input.policy ? { policy: input.policy } : {}),
   });
   if (!verdict.ok) return fail(`validator: ${verdict.reason}`);

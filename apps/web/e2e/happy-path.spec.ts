@@ -6,7 +6,7 @@ test('happy path plays end to end: alert, diagnosis, gate, recovery, wrap-up', a
   await page.goto('/?take=0&pace=1&speed=8');
 
   // Title card at rest; nothing plays until the presenter presses play.
-  await expect(page.getByTestId('title-card')).toContainText('02:07. Checkout is slowing down.');
+  await expect(page.getByTestId('title-card')).toContainText('02:07. The premium run is falling behind.');
   await expect(page.getByTestId('clock')).toHaveText('02:07:00');
   // No mode badge on stage; the source shows only in the settings menu.
   await expect(page.getByTestId('mode')).toHaveCount(0);
@@ -17,7 +17,7 @@ test('happy path plays end to end: alert, diagnosis, gate, recovery, wrap-up', a
   await expect(page.getByTestId('severity')).toHaveText('SEV-2', { timeout: 10_000 });
 
   // Act 3: evidence board merges into the root cause.
-  await expect(page.getByTestId('root-cause')).toContainText('v2.14.0 cut the connection pool from 40 to 10.', { timeout: 30_000 });
+  await expect(page.getByTestId('root-cause')).toContainText('rating-tables v2026.10 has a duplicate TP20 rate; 812 premiums cannot be priced.', { timeout: 30_000 });
 
   // Act 4: options and policy checks.
   await expect(page.getByTestId('option-card')).toHaveCount(3, { timeout: 20_000 });
@@ -25,7 +25,7 @@ test('happy path plays end to end: alert, diagnosis, gate, recovery, wrap-up', a
 
   // Act 5: playback waits at the gate; the run clock keeps running (D-074).
   await waitForGate(page);
-  await expect(page.getByTestId('gate-sheet')).toContainText('Approve production rollback?');
+  await expect(page.getByTestId('gate-sheet')).toContainText('Approve quarantine and resume?');
   await expect(page.getByText('Awaiting approval')).toBeVisible();
   const atGate = await snapshot(page);
   expect(atGate.clock).toMatch(/^02:0\d:\d{2}$/);
@@ -38,28 +38,28 @@ test('happy path plays end to end: alert, diagnosis, gate, recovery, wrap-up', a
   await expect(page.getByTestId('gate-sheet')).toBeHidden();
 
   // Act 6: rollout and recovery.
-  await expect(page.getByText('Pod 6 of 6 on v2.13.2')).toBeVisible({ timeout: 30_000 });
+  await expect(page.getByText('47,788 of 47,788 premiums priced')).toBeVisible({ timeout: 30_000 });
   await expect(page.getByTestId('severity')).toHaveText('Mitigated', { timeout: 30_000 });
-  await expect(page.getByTestId('timelapse')).toHaveText('+5 min');
-  await expect(page.getByTestId('latency')).toHaveText(/^1[89]\d ms$/);
+  await expect(page.getByTestId('timelapse')).toHaveText('+30 min');
+  await expect(page.getByTestId('latency')).toHaveText(/^02:[34]\d$/);
 
   // Act 7: scorecard and end card.
   await expect(page.getByTestId('end-card')).toBeVisible({ timeout: 30_000 });
   // The headline is measured from the run (D-074).
-  await expect(page.getByTestId('end-card')).toContainText(/Mitigated in \d+ min( \d+ s)?\.A person approved every change\./);
+  await expect(page.getByTestId('end-card')).toContainText(/Back on schedule in \d+ min( \d+ s)?\.A person approved every change\./);
   await expect(page.getByTestId('scorecard')).toContainText('Illustrative');
   // The end card shows at scene.end; Act 7 then runs to its full length before the timeline ends.
   await expect.poll(async () => (await snapshot(page)).status, { timeout: 20_000 }).toBe('ended');
-  expect((await snapshot(page)).clock).toMatch(/^02:1\d:\d{2}$/);
+  expect((await snapshot(page)).clock).toMatch(/^02:4\d:\d{2}$/);
 
   // Panel tabs.
   await page.getByTestId('tab-artifacts').click();
-  await expect(page.getByTestId('artifact-postmortem')).toContainText(/\d{2}:\d{2}:\d{2} rollback approved by on-call engineer/);
-  await expect(page.getByTestId('artifact-status')).toContainText('Checkout incident — mitigated');
+  await expect(page.getByTestId('artifact-postmortem')).toContainText(/\d{2}:\d{2}:\d{2} quarantine approved by on-call engineer/);
+  await expect(page.getByTestId('artifact-status')).toContainText('Premium collection — on time');
   await page.getByTestId('tab-audit').click();
-  await expect(page.getByTestId('audit')).toContainText('Approved by On-call engineer: Approve production rollback?');
+  await expect(page.getByTestId('audit')).toContainText('Approved by On-call engineer: Approve quarantine and resume?');
   await page.getByTestId('tab-evidence').click();
-  await expect(page.getByTestId('panel-root-cause')).toContainText('0.92');
+  await expect(page.getByTestId('panel-root-cause')).toContainText('0.93');
 
   expect(errors).toEqual([]);
 });
@@ -90,7 +90,7 @@ test('layout holds at 1366×768 with no horizontal overflow', async ({ page }) =
 
 test('reduced motion renders whole lines and no packets trails', async ({ page }) => {
   await page.goto('/?take=0&pace=1&speed=8&autoplay=1&pauseAt=a1.b04&reducedMotion=1');
-  await expect(page.getByTestId('thought').first()).toHaveText(/p99 latency on checkout-api is 4.8 seconds. The SLO is 800 milliseconds./, {
+  await expect(page.getByTestId('thought').first()).toHaveText(/The premium run now projects to finish at 06:52. The bank cutoff is 05:30./, {
     timeout: 20_000,
   });
   expect(await page.evaluate(() => document.documentElement.dataset.reducedMotion)).toBe('true');

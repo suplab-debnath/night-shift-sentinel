@@ -2,7 +2,7 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { MotionConfig } from 'motion/react';
 import { useStore } from 'zustand';
-import { incidentCheckout } from '@night-shift/scenarios';
+import { premiumRun } from '@night-shift/scenarios';
 import { App } from './App';
 import { approverName, brand, freshTake, parseUrlOptions } from './config';
 import { LiveSource } from './sources/LiveSource';
@@ -29,16 +29,16 @@ const sourceOptions = {
 // the offline single file is always scripted (its CSP forbids network access anyway).
 const wantsLive = import.meta.env.MODE !== 'offline' && (import.meta.env.MODE === 'live' || url.mode === 'live');
 const source = wantsLive
-  ? new LiveSource(incidentCheckout.scenario, sourceOptions, {
+  ? new LiveSource(premiumRun.scenario, sourceOptions, {
       apiBase: './api',
-      scenarioId: incidentCheckout.id,
+      scenarioId: premiumRun.id,
       ...(url.passcode ? { passcode: url.passcode } : {}),
       ...(url.mockFail ? { mockFail: url.mockFail } : {}),
     })
-  : new ScriptedSource(incidentCheckout.scenario, sourceOptions);
+  : new ScriptedSource(premiumRun.scenario, sourceOptions);
 if (source instanceof LiveSource) void source.connect();
 
-const store = createAppStore(source, incidentCheckout, {
+const store = createAppStore(source, premiumRun, {
   tab: 'stream',
   reducedMotion: url.reducedMotion ?? prefersReduced,
   presenter: url.presenter,

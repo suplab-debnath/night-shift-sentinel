@@ -15,6 +15,10 @@ export interface ValidationInput {
   policy?: PolicyOutcome;
   /** The scripted text of the beat (the postmortem check reads its timeline). */
   reference?: string;
+  /** Content rules for the "facts" validator, from the scenario (D-081). */
+  checks?: { require: string[][]; forbid: string[] };
+  /** Start of the impact window ("01:52"), which a status update must state. */
+  impactFrom?: string;
 }
 
 export type ValidationResult = { ok: true } | { ok: false; reason: string };
@@ -50,22 +54,15 @@ export function allowedNumbersFrom(...sources: string[]): Set<string> {
 }
 
 const RULES: Record<string, (text: string, input: ValidationInput) => string | null> = {
-  'sentinel-detection': (t) =>
-    !has(t, '4.8') || !any(t, ['SLO', '800'])
-      ? 'must report 4.8 and the SLO'
-      : any(t, ['because', 'caused', 'due to', 'deploy', 'config', 'pool', 'release'])
-        ? 'must not claim a cause'
-        : null,
-  // Canon: "connection" and ("pool" or "Hikari"); "database" accepted so the scripted line passes (D-046).
-  'log-signature': (t) =>
-    has(t, 'database is down') ? 'must not claim the database is down' : !has(t, 'connection') || !any(t, ['pool', 'hikari', 'database']) ? 'must name the connection signature' : null,
-  'log-pool': (t) => (!/\b10\b/.test(t) ? 'must state the pool size of 10' : null),
-  'code-deploy': (t) => (!has(t, 'v2.14.0') || !has(t, '01:55') ? 'must cite v2.14.0 and 01:55' : null),
-  // Canon: ("renamed" or "key") and "10"; "default" accepted for the effect line (D-046).
-  'code-diff': (t) => (!any(t, ['renamed', 'key', 'default']) || !/\b10\b/.test(t) ? 'must name the key change and 10' : null),
-  'orchestrator-root-cause': (t) => (!has(t, 'v2.14.0') || !any(t, ['pool', 'connection']) ? 'must name v2.14.0 and the pool' : null),
-  'fixer-recommendation': (t) =>
-    !any(t, ['rollback', 'roll back']) ? 'must recommend the rollback' : has(t, 'max_connections') ? 'must not propose max_connections' : null,
+  // Scenario-defined content rules (D-081): each require-group needs one of its words; no forbidden word.
+  facts: (t, input) => {
+    const checks = input.checks;
+    if (!checks) return 'no content rules for this beat';
+    const missing = checks.require.find((group) => !any(t, group));
+    if (missing) return `must mention ${missing.join(' or ')}`;
+    const banned = checks.forbid.find((w) => has(t, w));
+    return banned ? `must not say "${banned}"` : null;
+  },
   'guardian-decision': (t, input) => {
     const verdict = input.policy?.verdict;
     if (!verdict) return 'no computed policy outcome';
@@ -75,9 +72,9 @@ const RULES: Record<string, (text: string, input: ValidationInput) => string | n
     if (verdict === 'needs-approval' && !any(t, ['human', 'approv'])) return 'must say a human approves';
     return null;
   },
-  // The impact window: from 02:04 until the run's own mitigation time (a token, D-074).
+  // The impact window: from its start until the run's own mitigation time (a token, D-074).
   'scribe-status': (t, input) => {
-    const needed = ['02:04', ...tokensIn(input.reference ?? '')];
+    const needed = [...(input.impactFrom ? [input.impactFrom] : []), ...tokensIn(input.reference ?? '')];
     const missing = needed.filter((s) => !has(t, s));
     return missing.length ? `must state the impact window (missing ${missing.join(', ')})` : null;
   },

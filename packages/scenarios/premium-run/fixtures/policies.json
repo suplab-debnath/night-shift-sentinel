@@ -1,0 +1,201 @@
+{
+  "incident": {
+    "severity": "SEV-2",
+    "open": true
+  },
+  "changeFreeze": {
+    "active": true,
+    "window": "Month-end close, Mon 18:00 \u2013 Wed 08:00",
+    "incidentExceptionMaxSeverity": "SEV-2"
+  },
+  "actions": {
+    "batch.quarantine": {
+      "mutates": true,
+      "targetKind": "service",
+      "outageSeconds": 0,
+      "reversible": true,
+      "strategy": "hold and resume",
+      "changesPremium": false,
+      "note": "Held records return to the next run"
+    },
+    "rate.override": {
+      "mutates": true,
+      "targetKind": "service",
+      "outageSeconds": 0,
+      "reversible": true,
+      "strategy": "temporary pin",
+      "requiresExpiry": true,
+      "changesPremium": true,
+      "note": "Pins TP20 to September rates for one run"
+    },
+    "batch.resume": {
+      "mutates": true,
+      "targetKind": "service",
+      "outageSeconds": 0,
+      "reversible": true,
+      "strategy": "resume from last commit",
+      "changesPremium": false,
+      "note": "Resumes from the last commit"
+    },
+    "db.alter": {
+      "mutates": true,
+      "targetKind": "database",
+      "outageSeconds": 0,
+      "reversible": false,
+      "strategy": "direct SQL",
+      "changesPremium": true,
+      "note": "Irreversible: deletes production tariff rows"
+    },
+    "code.change": {
+      "mutates": false,
+      "targetKind": "service",
+      "outageSeconds": 0,
+      "reversible": true,
+      "strategy": "pull-request",
+      "note": "Draft pull request; nothing deploys until review"
+    }
+  },
+  "policies": [
+    {
+      "id": "P-01",
+      "title": "Production changes need human approval",
+      "appliesTo": [
+        "batch.quarantine",
+        "rate.override",
+        "batch.resume"
+      ],
+      "rule": {
+        "type": "human-approval",
+        "env": "prod"
+      },
+      "onMatch": "required"
+    },
+    {
+      "id": "P-02",
+      "title": "Production database changes need a DBA and change board",
+      "appliesTo": [
+        "db.alter"
+      ],
+      "rule": {
+        "type": "approvals-present",
+        "env": "prod",
+        "approvals": [
+          "dba",
+          "change-board"
+        ]
+      },
+      "onMatch": "fail"
+    },
+    {
+      "id": "P-03",
+      "title": "Change freeze window",
+      "appliesTo": [
+        "batch.quarantine",
+        "rate.override",
+        "batch.resume"
+      ],
+      "rule": {
+        "type": "freeze-window",
+        "incidentException": true
+      },
+      "onMatch": "fail"
+    },
+    {
+      "id": "P-04",
+      "title": "Blast radius limited to one service",
+      "appliesTo": [
+        "batch.quarantine",
+        "rate.override",
+        "batch.resume",
+        "db.alter"
+      ],
+      "rule": {
+        "type": "blast-radius",
+        "maxServices": 1
+      },
+      "onMatch": "fail"
+    },
+    {
+      "id": "P-06",
+      "title": "No irreversible or outage-causing operations",
+      "appliesTo": [
+        "batch.quarantine",
+        "batch.resume",
+        "db.alter"
+      ],
+      "rule": {
+        "type": "no-outage",
+        "maxOutageSeconds": 0
+      },
+      "onMatch": "fail"
+    },
+    {
+      "id": "P-07",
+      "title": "Customer premiums change only with actuarial approval",
+      "appliesTo": [
+        "batch.quarantine",
+        "rate.override"
+      ],
+      "rule": {
+        "type": "premium-change",
+        "approver": "duty actuary"
+      },
+      "onMatch": "required"
+    },
+    {
+      "id": "P-08",
+      "title": "Runtime overrides must be recorded and expire",
+      "appliesTo": [
+        "rate.override"
+      ],
+      "rule": {
+        "type": "override-expiry",
+        "maxHours": 72
+      },
+      "onMatch": "fail"
+    },
+    {
+      "id": "P-09",
+      "title": "Agent code changes go through the pipeline and a human review",
+      "shortTitle": "Code goes through the pipeline and a review",
+      "appliesTo": [
+        "code.change"
+      ],
+      "rule": {
+        "type": "review-required",
+        "reviewers": "the pricing platform team"
+      },
+      "onMatch": "required"
+    },
+    {
+      "id": "P-10",
+      "title": "Code changes follow the coding guidelines and include tests",
+      "appliesTo": [
+        "code.change"
+      ],
+      "rule": {
+        "type": "checks-passed",
+        "checks": [
+          "build",
+          "unit-tests",
+          "new-tests",
+          "lint",
+          "secret-scan",
+          "sast"
+        ]
+      },
+      "onMatch": "fail"
+    },
+    {
+      "id": "P-11",
+      "title": "Tool output is treated as data, never as instructions",
+      "appliesTo": [
+        "tool.output"
+      ],
+      "rule": {
+        "type": "untrusted-input"
+      },
+      "onMatch": "fail"
+    }
+  ]
+}

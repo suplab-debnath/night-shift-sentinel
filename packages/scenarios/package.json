@@ -6,7 +6,7 @@
   "description": "Scenario content (scripts, agents, fixtures) validated against the engine schema.",
   "exports": {
     ".": "./index.ts",
-    "./incident-checkout/*": "./incident-checkout/*"
+    "./premium-run/*": "./premium-run/*"
   },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json",

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { parseUrlOptions } from '../config';
 import { compile, initialStageState, reduce } from '@night-shift/engine';
-import { incidentCheckout } from '@night-shift/scenarios';
+import { premiumRun } from '@night-shift/scenarios';
 import { pendingThought, toolRunningMs } from './pending';
 import { clampCentre, edgeAnchor, labelPillWidth, placeBeside } from './fit';
 import { formatLatency, formatPercent } from './format';
@@ -81,9 +81,9 @@ describe('fit (P9 layout)', () => {
 });
 
 describe('pending work (D-072)', () => {
-  const tl = compile(incidentCheckout.scenario, [], { pace: 1.15 });
+  const tl = compile(premiumRun.scenario, [], { pace: 1.15 });
   const s = (t: number) => {
-    let st = initialStageState({ initialMetrics: incidentCheckout.scenario.initialMetrics, clock: '02:07:00' });
+    let st = initialStageState({ initialMetrics: premiumRun.scenario.initialMetrics, clock: '02:07:00' });
     for (const e of tl.events) if (e.t <= t) st = reduce(st, e);
     return st.stream;
   };

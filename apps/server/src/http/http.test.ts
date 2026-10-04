@@ -5,7 +5,7 @@ import { testConfig } from '../test-helpers';
 import { createProvider } from './core';
 import { buildServer } from './fastify';
 
-const body = (over: Record<string, unknown> = {}) => ({ scenarioId: 'incident-checkout', segment: 'main', decisions: [], context: '', ...over });
+const body = (over: Record<string, unknown> = {}) => ({ scenarioId: 'premium-run', segment: 'main', decisions: [], context: '', ...over });
 
 function frames(payload: string) {
   return payload

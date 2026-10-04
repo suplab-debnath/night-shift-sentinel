@@ -27,24 +27,24 @@ This is the demo on its own. For the full talk (the story deck with the demo in 
 
 | Time | On screen | Say (suggested) |
 |---|---|---|
-| 0:00 | Title card | "It's 2:07 in the morning. Checkout at an online retailer is slowing down. Nobody's awake. Let's see who is." |
-| 0:15 | Act 1 alert | "Sentinel watches the numbers. Latency is six times over target. It's not a blip, so it raises a SEV-2." |
-| 0:30 | Act 2 fan-out | "The Orchestrator asks three questions at once: what's failing, what changed, how far it spreads." |
-| 0:50 | Act 3 | "Watch them think. Each agent pauses before it speaks, and tool calls run until the answer comes back. Log Detective suspects the database; Sentinel checks and rules it out. Code Archaeologist suspects the Spring Boot upgrade, reads the diff, and rules that out too. A trace call even fails and gets retried." |
-| 2:00 | Trigger vs cause | "Before it accepts the answer, the Orchestrator asks why it broke at 02:04 and not at the 01:55 deploy. Traffic doubled at 02:03: that's the trigger. The smaller pool is the cause." |
-| 2:20 | Root cause card | "Three independent clues agree. Root cause in under two minutes of incident time, with a confidence score, not a guess." |
-| 2:35 | Act 4 | "Fixer proposes options with time, risk, and reversibility. Guardian checks the recommended one against policy. Everything passes, except one rule: a human must approve production changes." |
-| 3:00 | Gate | Hand over the tablet or turn to the client: "You're the on-call engineer. Your call. The clock is still running." The time they take shows up in the scorecard as human time. |
-| 3:15 | Act 6 | "Rolling back one pod at a time. Watch the line." (pause) "Back under target." |
-| 3:45 | Act 7 | "Scribe writes two things: a plain update for stakeholders and a blameless postmortem for engineers. Owners are proposed, not assigned." |
-| 4:10 | Scorecard | "Illustrative, but the shape is real: minutes instead of most of an hour, and thirty seconds of human time." |
-| 4:30 | Split view (`S`) | "Here's the same night done by hand." |
-| 4:10 | Pull request (Act 7) | "The real fix is code, so it goes through the pipeline. Tests included; the agent cannot merge." |
-| 5:00 | Chaos (`C`) | "Now the part people ask about. What if an agent gets it wrong?" … "Blocked twice: by policy, and because the tool isn't even granted." |
-| 5:30 | Poisoned log (`L`) and Audit tab | "Text in a log can never call a tool." Then the Audit tab: evidence by stage, chain verified, export. |
+| 0:00 | Title card | "It's 2:07 in the morning. A European life insurer's nightly premium run is falling behind. The bank closes intake at 05:30. Nobody's awake. Let's see who is." |
+| 0:15 | Act 1 alert | "Sentinel watches the run. Projected finish 06:52, cutoff 05:30, and items failing. It's not a blip, so it raises a SEV-2." |
+| 0:30 | Act 2 fan-out | "The Orchestrator asks three questions at once: what's failing, what changed, what's at risk." |
+| 0:50 | Act 3 | "Watch them think. Log Detective suspects the policy database; Sentinel checks and rules it out. Code Archaeologist suspects the database driver upgrade, reads the diff, and rules that out too. A trace call even fails and gets retried." |
+| 2:00 | Trigger vs cause | "Before it accepts the answer, the Orchestrator asks why tonight, when the tariff shipped at 18:40. Tonight is the first run with October due dates: that's the trigger. The duplicate rate row is the cause." |
+| 2:20 | Root cause card | "Three independent clues agree, with a confidence score, not a guess." |
+| 2:35 | Act 4 | "Fixer proposes holding just the 812 affected policies so everyone else is collected on time. Guardian checks it, including the rule that only an actuary can change premiums. A human must approve." |
+| 3:00 | Gate | Hand over the tablet or turn to the client: "You're the on-call engineer. Your call. The clock is still running." |
+| 3:15 | Act 6 | "The run resumes. Watch projected finish drop back under the cutoff." (pause) "The bank accepts the file." |
+| 3:45 | Pull request (Act 7) | "The real fix is a check in the tariff pipeline. Tests included; the agent cannot merge." |
+| 4:00 | Act 7 | "Scribe writes a plain update for finance and a blameless postmortem. Owners are proposed, not assigned." |
+| 4:10 | Scorecard | "Illustrative, but the shape is real: the bank file on time instead of a day late." |
+| 4:30 | Split view (`S`) | "Here's the same night done by hand: the file misses the cutoff." |
+| 5:00 | Chaos (`C`) | "What if an agent gets it wrong?" … "Deleting tariff rows in production: blocked by policy, and the tool isn't even granted." |
+| 5:30 | Poisoned log (`L`) and Audit tab | "A policyholder note tries to give the agents orders. Text in a log can never call a tool." Then the Audit tab: evidence by stage, chain verified, export. |
 | 6:00 | End card | "Where would you want a squad like this first?" Close it (`Esc` or ✕) to show the finished stage; "Show summary" brings it back. |
 
-If the client clicks **Reject**: "Good. Let's see what happens." After the alternative: "If you reject again, it stops and escalates. It stops where people say stop."
+If the client clicks **Reject**: "Good. Let's see what happens." The alternative prices the 812 at September rates for one night, which the duty actuary must co-sign. After the alternative: "If you reject again, it stops and escalates. It stops where people say stop."
 
 ## 4. Recovery playbook
 

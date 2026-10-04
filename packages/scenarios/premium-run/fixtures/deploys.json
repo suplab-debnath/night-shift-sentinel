@@ -1,0 +1,60 @@
+{
+  "now": "02:07:40",
+  "deploys": [
+    {
+      "service": "rating-tables",
+      "version": "v2026.10",
+      "previous": "v2026.09",
+      "at": "18:40",
+      "by": "pipeline",
+      "pipelineRun": 6120,
+      "checks": "passed",
+      "schemaMigration": false,
+      "changes": [
+        "October tariff refresh",
+        "New product code FLEX-UL2",
+        "PostgreSQL driver 42.7.3 \u2192 42.7.4"
+      ]
+    },
+    {
+      "service": "premium-collection",
+      "version": "v5.8.1",
+      "previous": "v5.8.0",
+      "at": "3 days ago",
+      "by": "pipeline",
+      "checks": "passed",
+      "schemaMigration": false,
+      "changes": [
+        "Chunk size tuning"
+      ]
+    },
+    {
+      "service": "broker-api",
+      "version": "v3.2.0",
+      "previous": "v3.1.9",
+      "at": "11:05",
+      "by": "pipeline",
+      "checks": "passed",
+      "schemaMigration": false,
+      "changes": [
+        "Quote endpoint fields"
+      ]
+    }
+  ],
+  "history": {
+    "rating-tables": [
+      {
+        "version": "v2026.10",
+        "at": "18:40",
+        "status": "current",
+        "checks": "passed"
+      },
+      {
+        "version": "v2026.09",
+        "ranDays": 30,
+        "status": "previous",
+        "checks": "passed"
+      }
+    ]
+  }
+}

@@ -4,74 +4,9 @@ import { z } from 'zod';
 
 const hms = z.string().regex(/^\d{2}:\d{2}(:\d{2})?$/);
 
+/** A metric series for decks and live facts (D-081): one row per time, named numeric columns. */
 export const MetricsFixtureSchema = z.object({
-  service: z.string(),
-  interval: z.string(),
-  slo: z.object({ p99Ms: z.number(), errorRatePct: z.number() }),
-  normal: z.object({ p99Ms: z.number(), errorRatePct: z.number(), poolActivePerPod: z.number(), poolMaxPerPod: z.number() }),
-  peak: z.object({ p99Ms: z.number(), errorRatePct: z.number(), errorBudgetBurn: z.number() }),
-  events: z.record(z.string(), hms),
-  series: z
-    .array(
-      z.object({
-        t: hms,
-        p99Ms: z.number(),
-        errorRatePct: z.number(),
-        requestsPerMin: z.number(),
-        poolActivePerPod: z.number(),
-        poolMaxPerPod: z.number(),
-        poolPendingTotal: z.number(),
-        dbCpuPct: z.number(),
-        dbConnections: z.number(),
-      }),
-    )
-    .min(10),
-  podsAt: z.object({
-    t: hms,
-    metric: z.string(),
-    pods: z.array(z.object({ name: z.string(), version: z.string(), poolMax: z.number(), poolActive: z.number(), pending: z.number() })),
-    pendingTotal: z.number(),
-  }),
-  podsAfter: z.object({
-    t: hms,
-    pods: z.array(z.object({ name: z.string(), version: z.string(), poolMax: z.number(), poolActive: z.number(), pending: z.number() })),
-  }),
-  dependencies: z.object({ t: hms, services: z.array(z.record(z.string(), z.union([z.string(), z.number()]))) }),
-});
-
-export const LogsFixtureSchema = z.object({
-  service: z.string(),
-  stats: z.object({
-    window: z.object({ from: hms, to: hms }),
-    errorCount: z.number().int(),
-    signature: z.string(),
-    signatureCount: z.number().int(),
-    signatureShare: z.number(),
-    otherErrors: z.array(z.object({ message: z.string(), count: z.number().int() })),
-  }),
-  lines: z
-    .array(z.object({ t: hms, level: z.enum(['DEBUG', 'INFO', 'WARN', 'ERROR']), pod: z.string(), logger: z.string(), message: z.string() }))
-    .min(40),
-});
-
-export const TracesFixtureSchema = z.object({
-  service: z.string(),
-  sampledAt: hms,
-  trace: z.object({
-    traceId: z.string(),
-    root: z.object({ name: z.string(), service: z.string(), durationMs: z.number(), status: z.enum(['ok', 'error']) }),
-    spans: z.array(
-      z.object({
-        name: z.string(),
-        service: z.string(),
-        depth: z.number().int(),
-        durationMs: z.number(),
-        status: z.enum(['ok', 'error']),
-        note: z.string().optional(),
-      }),
-    ),
-  }),
-  dependencies: z.array(z.object({ service: z.string(), status: z.enum(['healthy', 'degraded', 'down']) }).passthrough()),
+  series: z.array(z.object({ t: hms }).catchall(z.number())).min(1),
 });
 
 export const DeploysFixtureSchema = z.object({
@@ -103,22 +38,6 @@ export const DeploysFixtureSchema = z.object({
   ),
 });
 
-export const DiffFixtureSchema = z.object({
-  service: z.string(),
-  from: z.string(),
-  to: z.string(),
-  path: z.string(),
-  files: z.array(z.object({ file: z.string(), unified: z.string() })).min(1),
-  analysis: z.object({
-    renamedKey: z.object({ from: z.string(), to: z.string() }),
-    applicationBinds: z.string(),
-    effectivePoolSize: z.number(),
-    hikariDefaultPoolSize: z.number(),
-    productionNeedsPerPod: z.number(),
-  }),
-  dependencies: z.array(z.object({ name: z.string(), from: z.string(), to: z.string() })).optional(),
-});
-
 export const RunbooksFixtureSchema = z.object({
   runbooks: z.array(
     z.object({
@@ -148,6 +67,8 @@ export const PolicyRuleSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('review-required'), reviewers: z.string().min(1) }),
   z.object({ type: z.literal('checks-passed'), checks: z.array(z.string()).min(1) }),
   z.object({ type: z.literal('untrusted-input') }),
+  // A named role must approve when the action changes what customers pay (D-081).
+  z.object({ type: z.literal('premium-change'), approver: z.string().min(1) }),
 ]);
 
 export const PoliciesFixtureSchema = z.object({
@@ -162,6 +83,8 @@ export const PoliciesFixtureSchema = z.object({
       reversible: z.boolean(),
       strategy: z.string(),
       requiresExpiry: z.boolean().optional(),
+      /** The action changes what a customer pays (insurance premium rules). */
+      changesPremium: z.boolean().optional(),
       /** Reason text the policy engine uses for the outage check. */
       note: z.string(),
     }),
@@ -213,10 +136,7 @@ export const GovernanceFixtureSchema = z.object({
 
 export const FixturesSchema = z.object({
   metrics: MetricsFixtureSchema,
-  logs: LogsFixtureSchema,
-  traces: TracesFixtureSchema,
   deploys: DeploysFixtureSchema,
-  diff: DiffFixtureSchema,
   runbooks: RunbooksFixtureSchema,
   policies: PoliciesFixtureSchema,
   services: ServicesFixtureSchema,

@@ -1,4 +1,4 @@
-import { incidentCheckout } from '@night-shift/scenarios';
+import { premiumRun } from '@night-shift/scenarios';
 import { describe, expect, it } from 'vitest';
 import { ScriptedSource } from './ScriptedSource';
 
@@ -25,7 +25,7 @@ function manualRaf() {
 describe('ScriptedSource', () => {
   it('drives the player from animation frames and clamps long frames', () => {
     const r = manualRaf();
-    const src = new ScriptedSource(incidentCheckout.scenario, { approver: 'Asha', raf: r.raf, caf: r.caf });
+    const src = new ScriptedSource(premiumRun.scenario, { approver: 'Asha', raf: r.raf, caf: r.caf });
     src.start();
     src.play();
     r.frame(16); // first frame only sets the baseline
@@ -41,7 +41,7 @@ describe('ScriptedSource', () => {
 
   it('auto-decides gates, honours pauseAt, and notifies subscribers', async () => {
     const r = manualRaf();
-    const src = new ScriptedSource(incidentCheckout.scenario, {
+    const src = new ScriptedSource(premiumRun.scenario, {
       approver: 'Asha',
       speed: 16,
       autoplay: true,
@@ -59,7 +59,7 @@ describe('ScriptedSource', () => {
     expect(calls).toBeGreaterThan(0);
     off();
 
-    const p = new ScriptedSource(incidentCheckout.scenario, { approver: 'Asha', speed: 16, autoplay: true, pauseAt: 'a3.b20', raf: r.raf, caf: r.caf });
+    const p = new ScriptedSource(premiumRun.scenario, { approver: 'Asha', speed: 16, autoplay: true, pauseAt: 'a3.b20', raf: r.raf, caf: r.caf });
     p.start();
     for (let i = 0; i < 400 && p.getSnapshot().playing; i++) r.frame(100);
     expect(p.getSnapshot().state.evidence.conclusion).not.toBeNull();
@@ -67,7 +67,7 @@ describe('ScriptedSource', () => {
   });
 
   it('exposes controls', () => {
-    const src = new ScriptedSource(incidentCheckout.scenario, { approver: 'Asha', seek: 30000, raf: () => 1, caf: () => {} });
+    const src = new ScriptedSource(premiumRun.scenario, { approver: 'Asha', seek: 30000, raf: () => 1, caf: () => {} });
     expect(src.getSnapshot().t).toBe(30000);
     src.stepForward();
     expect(src.getSnapshot().t).toBeGreaterThan(30000);
@@ -94,7 +94,7 @@ describe('ScriptedSource run clock (D-074, D-075)', () => {
 
   it('counts the time a person takes at the gate', () => {
     const w = wallClock();
-    const src = new ScriptedSource(incidentCheckout.scenario, { approver: 'Asha', now: w.now, raf: () => 1, caf: () => {} });
+    const src = new ScriptedSource(premiumRun.scenario, { approver: 'Asha', now: w.now, raf: () => 1, caf: () => {} });
     src.seek(src.getSnapshot().timeline.endT);
     expect(src.getSnapshot().clockHold).toEqual({ kind: 'gate', since: 1000 });
     w.advance(42_000);
@@ -106,7 +106,7 @@ describe('ScriptedSource run clock (D-074, D-075)', () => {
 
   it('pauses the squad with the clock running, and freezes without it', () => {
     const w = wallClock();
-    const src = new ScriptedSource(incidentCheckout.scenario, { approver: 'Asha', now: w.now, raf: () => 1, caf: () => {} });
+    const src = new ScriptedSource(premiumRun.scenario, { approver: 'Asha', now: w.now, raf: () => 1, caf: () => {} });
     src.toggleSquad(); // start
     expect(src.getSnapshot().playing).toBe(true);
     src.seek(5000);
