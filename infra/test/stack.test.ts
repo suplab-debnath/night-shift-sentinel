@@ -19,7 +19,7 @@ writeFileSync(path.join(webDist, 'index.html'), '<!doctype html><title>Night Shi
 
 function synth(config: NightShiftConfig = {}) {
   const app = new cdk.App({ outdir: mkdtempSync(path.join(tmpdir(), 'ns-cdk-')) });
-  const stack = new NightShiftStack(app, 'Test', { config: { webDist, ...config }, env: { account: '111122223333', region: 'eu-west-1' } });
+  const stack = new NightShiftStack(app, 'Test', { config: { webDist, ...config }, env: { account: '111122223333', region: 'us-east-1' } });
   return { app, stack, template: Template.fromStack(stack) };
 }
 
@@ -34,7 +34,7 @@ function statements(template: Template): Statement[] {
 const full: NightShiftConfig = {
   modelId: 'eu.example-model-id',
   fastModelId: 'example-fast-model-id',
-  profileRegions: ['eu-west-1', 'eu-central-1'],
+  profileRegions: ['us-east-1', 'eu-central-1'],
   guardrailId: 'gr123',
   guardrailVersion: '3',
   passcodeParam: '/night-shift/passcode',
@@ -146,20 +146,20 @@ describe('NightShiftStack', () => {
 });
 
 describe('bedrockModelArns', () => {
-  const base = { partition: 'aws', region: 'eu-west-1', account: '111122223333' };
+  const base = { partition: 'aws', region: 'us-east-1', account: '111122223333' };
   it('handles foundation models, inference profiles, and ARNs', () => {
     expect(bedrockModelArns({ ...base, modelId: 'vendor.model-v1:0' })).toEqual({
       kind: 'foundation-model',
       anyRegion: false,
-      resources: ['arn:aws:bedrock:eu-west-1::foundation-model/vendor.model-v1:0'],
+      resources: ['arn:aws:bedrock:us-east-1::foundation-model/vendor.model-v1:0'],
     });
-    expect(bedrockModelArns({ ...base, modelId: 'eu.vendor.model-v1:0', profileRegions: ['eu-west-1', 'eu-west-3'] }).resources).toEqual([
-      'arn:aws:bedrock:eu-west-1:111122223333:inference-profile/eu.vendor.model-v1:0',
-      'arn:aws:bedrock:eu-west-1::foundation-model/vendor.model-v1:0',
+    expect(bedrockModelArns({ ...base, modelId: 'eu.vendor.model-v1:0', profileRegions: ['us-east-1', 'eu-west-3'] }).resources).toEqual([
+      'arn:aws:bedrock:us-east-1:111122223333:inference-profile/eu.vendor.model-v1:0',
+      'arn:aws:bedrock:us-east-1::foundation-model/vendor.model-v1:0',
       'arn:aws:bedrock:eu-west-3::foundation-model/vendor.model-v1:0',
     ]);
     expect(bedrockModelArns({ ...base, modelId: 'global.vendor.m' })).toMatchObject({ anyRegion: true });
-    expect(bedrockModelArns({ ...base, modelId: 'arn:aws:bedrock:eu-west-1:1:application-inference-profile/x' }).kind).toBe('arn');
+    expect(bedrockModelArns({ ...base, modelId: 'arn:aws:bedrock:us-east-1:1:application-inference-profile/x' }).kind).toBe('arn');
   });
 });
 

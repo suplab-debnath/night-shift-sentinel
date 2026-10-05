@@ -13,3 +13,5 @@ playwright-report/
 .env.*
 !.env.example
 .DS_Store
+build/lambda/index.js
+build/lambda.zip

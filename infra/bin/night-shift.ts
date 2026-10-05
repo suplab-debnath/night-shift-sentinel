@@ -1,5 +1,5 @@
 // CDK app entry. Configuration via context, e.g.:
-//   npm run cdk:deploy -- -c region=eu-west-1 -c modelId=<your model or inference profile id>
+//   npm run cdk:deploy -- -c region=us-east-1 -c modelId=<your model or inference profile id>
 import * as cdk from 'aws-cdk-lib';
 import { NightShiftStack, type NightShiftConfig } from '../lib/night-shift-stack';
 

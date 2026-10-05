@@ -8,14 +8,14 @@ on a response-streaming Lambda (Node.js 22, arm64) behind a Function URL that on
 1. AWS credentials for the target account (profile or SSO), e.g. `export AWS_PROFILE=...`.
 2. In the Bedrock console, enable access to the Claude model you will use, in the region you deploy to.
    For an EU client prefer an EU region and an EU inference profile.
-3. Bootstrap once per account and region (CloudFormation only): `npx cdk bootstrap -c region=eu-west-1` from `infra/`.
+3. Bootstrap once per account and region (CloudFormation only): `npx cdk bootstrap -c region=us-east-1` from `infra/`.
 4. Optional passcode for the hosted API:
    `aws ssm put-parameter --name /night-shift/passcode --type SecureString --value '<passcode>'`
 
 ## Deploy
 ```bash
-npm run cdk:synth -- -c region=eu-west-1 -c modelId=<model or inference profile id>
-npm run cdk:deploy -- -c region=eu-west-1 -c modelId=<model or inference profile id>
+npm run cdk:synth -- -c region=us-east-1 -c modelId=<model or inference profile id>
+npm run cdk:deploy -- -c region=us-east-1 -c modelId=<model or inference profile id>
 ```
 The output `SiteUrl` is the demo. Live mode starts automatically there; without `modelId` the API runs
 scripted and the stage plays scripted.
@@ -58,4 +58,4 @@ the Bedrock permissions under "Least privilege", add a Function URL with auth `A
 `RESPONSE_STREAM`, and route CloudFront `/api/*` to it with a Lambda OAC.
 
 ## Tear down
-`npx cdk destroy -c region=eu-west-1` from `infra/`. The bucket only holds the rebuildable web build and is emptied automatically.
+`npx cdk destroy -c region=us-east-1` from `infra/`. The bucket only holds the rebuildable web build and is emptied automatically.

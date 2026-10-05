@@ -16,9 +16,9 @@ function frames(payload: string) {
 
 describe('HTTP API', () => {
   it('reports health without exposing identifiers', async () => {
-    const app = buildServer(testConfig({ mode: 'live-bedrock', modelId: 'anthropic.some-long-model-id-v1', region: 'eu-west-1' }), { provider: null });
+    const app = buildServer(testConfig({ mode: 'live-bedrock', modelId: 'anthropic.some-long-model-id-v1', region: 'us-east-1' }), { provider: null });
     const res = await app.inject({ method: 'GET', url: '/api/health' });
-    expect(res.json()).toMatchObject({ mode: 'live-bedrock', live: true, stallMs: 4000, bedrock: { configured: true, region: 'eu-west-1', model: 'anth…d-v1' } });
+    expect(res.json()).toMatchObject({ mode: 'live-bedrock', live: true, stallMs: 4000, bedrock: { configured: true, region: 'us-east-1', model: 'anth…d-v1' } });
     expect(res.body).not.toContain('some-long-model');
   });
 
@@ -75,6 +75,6 @@ describe('config', () => {
     expect(maskId('short')).toBe('****');
     expect(createProvider(testConfig({ mode: 'scripted' }))).toBeNull();
     expect(createProvider(testConfig({ mode: 'live-mock' }))?.name).toBe('mock');
-    expect(createProvider(testConfig({ mode: 'live-bedrock', region: 'eu-west-1' }))?.name).toBe('bedrock');
+    expect(createProvider(testConfig({ mode: 'live-bedrock', region: 'us-east-1' }))?.name).toBe('bedrock');
   });
 });

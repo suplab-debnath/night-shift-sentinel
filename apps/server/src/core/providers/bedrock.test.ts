@@ -63,7 +63,7 @@ describe('Bedrock provider (mocked SDK, no AWS calls)', () => {
         { metadata: { usage: { inputTokens: 12, outputTokens: 7, totalTokens: 19 }, metrics: { latencyMs: 5 } } },
       ]),
     });
-    const out = await drain(new BedrockProvider({ client: new BedrockRuntimeClient({ region: 'eu-west-1' }) }).converseStream(req()));
+    const out = await drain(new BedrockProvider({ client: new BedrockRuntimeClient({ region: 'us-east-1' }) }).converseStream(req()));
     expect(out).toEqual([
       { type: 'text', text: 'Hello ' },
       { type: 'text', text: 'there.' },
@@ -76,7 +76,7 @@ describe('Bedrock provider (mocked SDK, no AWS calls)', () => {
   });
 
   it('maps failures to ProviderError without leaking details', async () => {
-    const p = new BedrockProvider({ client: new BedrockRuntimeClient({ region: 'eu-west-1' }) });
+    const p = new BedrockProvider({ client: new BedrockRuntimeClient({ region: 'us-east-1' }) });
     bedrock.on(ConverseStreamCommand).rejects(Object.assign(new Error('AccessDenied: secret details'), { name: 'AccessDeniedException' }));
     await expect(drain(p.converseStream(req()))).rejects.toMatchObject({ code: 'provider', message: 'AccessDeniedException' });
 
@@ -99,6 +99,6 @@ describe('Bedrock provider (mocked SDK, no AWS calls)', () => {
     abort.abort();
     bedrock.on(ConverseStreamCommand).rejects(new Error('aborted'));
     await expect(drain(p.converseStream(req({ signal: abort.signal })))).rejects.toMatchObject({ code: 'aborted' });
-    expect(new BedrockProvider({ region: 'eu-west-1' }).name).toBe('bedrock');
+    expect(new BedrockProvider({ region: 'us-east-1' }).name).toBe('bedrock');
   });
 });
